@@ -343,7 +343,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
               onMonthChange={setDisplayMonth}
               className="rounded-[8px] transition-all duration-300 ease-in-out"
               classNames={{
-                day_selected: "bg-white text-black hover:bg-white hover:text-black focus:bg-white focus:text-black rounded-full",
+                day_selected: "bg-white !text-black hover:bg-white hover:!text-black focus:bg-white focus:!text-black !rounded-full",
               }}
             />
 
