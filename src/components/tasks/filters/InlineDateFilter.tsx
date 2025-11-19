@@ -114,11 +114,11 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
               className="rounded-[8px]"
               classNames={{
                 day_today: "!bg-accent/20 !text-white",
-                // Force solid white on ALL selected days
-                day_selected: "!bg-white !text-black",
+                // Single date selection gets full rounded borders
+                day_selected: "!bg-white !text-black !rounded-full",
                 day_range_start: "!bg-white !text-black rounded-l-full",
                 day_range_end: "!bg-white !text-black rounded-r-full",
-                // This is the key: middle days must be solid white + no rounding
+                // Middle days must be solid white + no rounding
                 day_range_middle: "!bg-white !text-black !rounded-none",
               }}
             />
