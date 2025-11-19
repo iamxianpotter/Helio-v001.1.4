@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { IconToggle } from '@/components/ui/icon-toggle';
+import InlineDateFilter from './filters/InlineDateFilter';
 import InlinePriorityFilter from './filters/InlinePriorityFilter';
 import InlineLabelFilter from './filters/InlineLabelFilter';
 
@@ -159,6 +160,22 @@ const TasksHeader = ({
                         Find Tasks by date, priority, or label.
                       </p>
                       <CollapsibleContent className="space-y-4">
+                        {/* Date Filter */}
+                        <InlineDateFilter
+                          isActive={filterSettings.date}
+                          selectedDate={filterValues.date}
+                          onToggle={(checked) => {
+                            const newSettings = { ...filterSettings, date: checked };
+                            setFilterSettings?.(newSettings);
+                            localStorage.setItem('kario-filter-settings', JSON.stringify(newSettings));
+                          }}
+                          onSelect={(date) => {
+                            const newValues = { ...filterValues, date };
+                            setFilterValues?.(newValues);
+                            localStorage.setItem('kario-filter-values', JSON.stringify(newValues));
+                          }}
+                        />
+
                         {/* Priority Filter */}
                         <InlinePriorityFilter
                           isActive={filterSettings.priority}
