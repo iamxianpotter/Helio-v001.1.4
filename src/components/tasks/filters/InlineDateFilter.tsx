@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import React, { useState, useEffect } from 'react';
+import { type DateRange } from 'react-day-picker';
 import { Calendar, X } from 'lucide-react';
-import { format, addMonths, isAfter, startOfDay } from "date-fns";
-import { DayPicker, DateRange } from "react-day-picker";
-import { cn } from "@/lib/utils";
-import { IconToggle } from "@/components/ui/icon-toggle";
+import { Button } from '@/components/ui/button';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { IconToggle } from '@/components/ui/icon-toggle';
+import { format, isWithinInterval, addMonths } from 'date-fns';
 
 interface InlineDateFilterProps {
   isActive: boolean;
@@ -18,31 +17,68 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
   isActive,
   selectedDate,
   onToggle,
-  onSelect,
+  onSelect
 }) => {
-  const [open, setOpen] = useState(false);
-  
-  const parseSelectedDate = (): DateRange | undefined => {
-    if (!selectedDate) return undefined;
-    const dates = selectedDate.split(',');
-    if (dates.length === 2) {
-      return { from: new Date(dates[0]), to: new Date(dates[1]) };
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+
+  useEffect(() => {
+    if (selectedDate) {
+      const parts = selectedDate.split(',').map(d => {
+        const parsed = new Date(d.trim());
+        parsed.setHours(0, 0, 0, 0);
+        return parsed;
+      });
+
+      if (parts.length === 1) {
+        setDateRange({ from: parts[0], to: parts[0] });
+      } else if (parts.length === 2) {
+        const sorted = parts.sort((a, b) => a.getTime() - b.getTime());
+        setDateRange({ from: sorted[0], to: sorted[1] });
+      }
+    } else {
+      setDateRange(undefined);
     }
-    const single = new Date(dates[0]);
-    return { from: single, to: single };
+  }, [selectedDate]);
+
+  const handleToggle = (checked: boolean) => {
+    onToggle(checked);
   };
 
-  const [dateRange, setDateRange] = useState<DateRange | undefined>(parseSelectedDate());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const oneMonthAhead = addMonths(today, 1);
+
+  const isDateInRange = (date: Date): boolean => {
+    return isWithinInterval(date, { start: today, end: oneMonthAhead });
+  };
 
   const handleDateSelect = (range: DateRange | undefined) => {
-    setDateRange(range);
-    if (range?.from) {
-      if (range.to && range.from.getTime() !== range.to.getTime()) {
-        const dateString = `${format(range.from, "yyyy-MM-dd")},${format(range.to, "yyyy-MM-dd")}`;
-        onSelect(dateString);
-      } else {
-        onSelect(format(range.from, "yyyy-MM-dd"));
-      }
+    if (!range?.from) {
+      setDateRange(undefined);
+      onSelect('');
+      return;
+    }
+
+    const from = new Date(range.from);
+    from.setHours(0, 0, 0, 0);
+
+    if (!isDateInRange(from)) return;
+
+    if (!range.to) {
+      setDateRange({ from, to: from });
+      onSelect(format(from, 'yyyy-MM-dd'));
+    } else {
+      const to = new Date(range.to);
+      to.setHours(0, 0, 0, 0);
+
+      if (!isDateInRange(to)) return;
+
+      const sorted = from.getTime() <= to.getTime()
+        ? { from, to }
+        : { from: to, to: from };
+
+      setDateRange(sorted);
+      onSelect(`${format(sorted.from, 'yyyy-MM-dd')},${format(sorted.to, 'yyyy-MM-dd')}`);
     }
   };
 
@@ -51,125 +87,63 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
     onSelect('');
   };
 
-  const formatDisplayDate = () => {
-    if (!selectedDate) return "Select Date";
-    const dates = selectedDate.split(',');
-    if (dates.length === 2) {
-      return `${format(new Date(dates[0]), "MMM dd")} - ${format(new Date(dates[1]), "MMM dd")}`;
-    }
-    return format(new Date(dates[0]), "MMM dd, yyyy");
-  };
+  const dateRangeText = dateRange?.from && dateRange?.to
+    ? `${format(dateRange.from, 'MMM dd')} - ${format(dateRange.to, 'MMM dd')}`
+    : '';
 
-  const tomorrow = addMonths(startOfDay(new Date()), 0);
-  const oneMonthFromNow = addMonths(tomorrow, 1);
-
-  const isSingleDay = dateRange?.from && dateRange?.to && 
+  // Check if it's a single date selection (from and to are the same)
+  const isSingleDate = dateRange?.from && dateRange?.to && 
     dateRange.from.getTime() === dateRange.to.getTime();
 
   return (
-    <div className="flex items-start gap-3">
-      <IconToggle
-        checked={isActive}
-        onCheckedChange={onToggle}
-        icon={Calendar}
-        className="mt-1"
-      />
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center gap-2">
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="ghost"
-                size="sm"
-                disabled={!isActive}
-                className={cn(
-                  "text-gray-400 hover:text-white hover:border hover:border-border hover:bg-muted px-3 py-1 h-8 whitespace-nowrap transition-all duration-200 border border-transparent",
-                  selectedDate && isActive && "text-white border-border bg-muted"
-                )}
-              >
-                <Calendar className="h-4 w-4 mr-2" />
-                {formatDisplayDate()}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent
-              className="w-auto p-0 bg-background border border-border rounded-xl overflow-hidden"
-              align="start"
-              side="bottom"
-              sideOffset={8}
-              data-nested={true}
-            >
-              <div className="p-4">
-                <DayPicker
-                  mode="range"
-                  selected={dateRange}
-                  onSelect={handleDateSelect}
-                  disabled={(date) => isAfter(date, oneMonthFromNow) || isAfter(startOfDay(new Date()), date)}
-                  className="pointer-events-auto"
-                  classNames={{
-                    months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
-                    month: "space-y-4",
-                    caption: "flex justify-center pt-1 relative items-center mb-4",
-                    caption_label: "text-sm font-medium text-foreground",
-                    nav: "space-x-1 flex items-center",
-                    nav_button: "h-7 w-7 bg-transparent p-0 text-foreground/70 hover:text-foreground",
-                    nav_button_previous: "absolute left-1",
-                    nav_button_next: "absolute right-1",
-                    table: "w-full border-collapse",
-                    head_row: "flex mb-2",
-                    head_cell: "text-muted-foreground rounded-md w-9 font-normal text-xs",
-                    row: "flex w-full",
-                    cell: cn(
-                      "relative p-0 text-center text-sm focus-within:relative focus-within:z-20",
-                      "h-9 w-9"
-                    ),
-                    day: cn(
-                      "h-9 w-9 p-0 font-normal text-foreground hover:bg-accent hover:text-accent-foreground",
-                      "inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm transition-colors",
-                      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                      "disabled:pointer-events-none disabled:opacity-50"
-                    ),
-                    day_selected: cn(
-                      "!bg-white !text-black font-medium",
-                      "hover:!bg-white hover:!text-black focus:!bg-white focus:!text-black"
-                    ),
-                    day_today: "bg-accent text-accent-foreground font-semibold",
-                    day_outside: "text-muted-foreground opacity-50",
-                    day_disabled: "text-muted-foreground opacity-50",
-                    day_range_middle: cn(
-                      "!bg-white !text-black !rounded-none",
-                      "hover:!bg-white hover:!text-black"
-                    ),
-                    day_range_start: isSingleDay 
-                      ? "!rounded-full !bg-white !text-black"
-                      : "!rounded-l-full !rounded-r-none !bg-white !text-black",
-                    day_range_end: isSingleDay
-                      ? "!rounded-full !bg-white !text-black"
-                      : "!rounded-r-full !rounded-l-none !bg-white !text-black",
-                    day_hidden: "invisible",
-                  }}
-                />
-              </div>
-
-              {selectedDate && (
-                <div className="p-3 border-t border-border">
-                  <Button
-                    onClick={clearDate}
-                    variant="ghost"
-                    size="sm"
-                    className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 border border-border rounded-lg text-xs"
-                  >
-                    <X className="h-3 w-3 mr-1" />
-                    Clear Selection
-                  </Button>
-                </div>
-              )}
-            </PopoverContent>
-          </Popover>
-        </div>
-        <p className="text-xs text-gray-500">
-          Filter tasks by due date
-        </p>
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-gray-300 text-sm">Date</span>
+        <IconToggle
+          icon={Calendar}
+          checked={isActive}
+          onCheckedChange={handleToggle}
+        />
       </div>
+
+      {isActive && (
+        <div className="bg-[#252525] border border-[#414141] rounded-[12px] p-3 space-y-2">
+          <div className="flex justify-center">
+            <CalendarComponent
+              mode="range"
+              defaultMonth={dateRange?.from}
+              selected={dateRange}
+              onSelect={handleDateSelect}
+              disabled={(date) => !isDateInRange(date)}
+              className="rounded-[8px]"
+              classNames={{
+                day_today: "!bg-accent/20 !text-white",
+                day_selected: "!bg-white !text-black",
+                // Single date gets full rounding, range gets proper edge rounding
+                day_range_start: isSingleDate ? "!bg-white !text-black !rounded-full" : "!bg-white !text-black !rounded-l-full !rounded-r-none",
+                day_range_end: isSingleDate ? "!bg-white !text-black !rounded-full" : "!bg-white !text-black !rounded-r-full !rounded-l-none",
+                day_range_middle: "!bg-white !text-black !rounded-none",
+              }}
+            />
+          </div>
+
+          <div className="text-xs text-gray-400 text-center">
+            {dateRangeText ? dateRangeText : 'Select a date range'}
+          </div>
+
+          {dateRange?.from && dateRange?.to && (
+            <Button
+              onClick={clearDate}
+              variant="ghost"
+              size="sm"
+              className="w-full text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-[#414141] rounded-[8px] text-xs"
+            >
+              <X className="h-3 w-3 mr-1" />
+              Clear
+            </Button>
+          )}
+        </div>
+      )}
     </div>
   );
 };
