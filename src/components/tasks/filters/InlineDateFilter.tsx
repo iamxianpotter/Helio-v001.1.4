@@ -85,13 +85,10 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
                   size="sm"
                   className={cn(
                     'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200',
-                    selectedDate === preset && 'bg-[#2e2e2e] text-white'
+                    selectedDate === preset && 'bg-white text-black hover:bg-white/90'
                   )}
                 >
                   {preset}
-                  {selectedDate === preset && (
-                    <span className="ml-1 text-green-400">✓</span>
-                  )}
                 </Button>
               ))}
             </div>
