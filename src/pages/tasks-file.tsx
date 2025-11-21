@@ -360,18 +360,24 @@ const Tasks = () => {
       );
     }
 
-    if (sortSettings.completionStatus) {
+    // Sorting - combine both if needed
+    if (sortSettings.completionStatus || sortSettings.creationDate) {
       filtered.sort((a, b) => {
-        if (a.completed === b.completed) return 0;
-        return a.completed ? 1 : -1;
-      });
-    }
-
-    if (sortSettings.creationDate) {
-      filtered.sort((a, b) => {
-        const dateA = new Date(a.creationDate).getTime();
-        const dateB = new Date(b.creationDate).getTime();
-        return dateB - dateA;
+        // First sort by completion status if enabled
+        if (sortSettings.completionStatus) {
+          if (a.completed !== b.completed) {
+            return a.completed ? 1 : -1;
+          }
+        }
+        
+        // Then sort by creation date if enabled (within the same completion status group)
+        if (sortSettings.creationDate) {
+          const dateA = parseDate(a.creationDate).getTime();
+          const dateB = parseDate(b.creationDate).getTime();
+          return dateB - dateA;
+        }
+        
+        return 0;
       });
     }
 
