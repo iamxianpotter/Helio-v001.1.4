@@ -290,31 +290,51 @@ const Tasks = () => {
   const applyFiltersAndSort = (tasksToFilter: Task[]): Task[] => {
     let filtered = [...tasksToFilter];
 
-    if (filterSettings.date && filterValues.date) {
-      const dateParts = filterValues.date.split(',').map((d: string) => d.trim());
-
-      if (dateParts.length === 1) {
-        const selectedDate = new Date(dateParts[0]);
-        selectedDate.setHours(0, 0, 0, 0);
-        filtered = filtered.filter(task => {
-          if (!task.dueDate) return false;
-          const taskDate = new Date(task.dueDate);
-          taskDate.setHours(0, 0, 0, 0);
-          return taskDate.getTime() === selectedDate.getTime();
-        });
-      } else if (dateParts.length === 2) {
-        const startDate = new Date(dateParts[0]);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(dateParts[1]);
-        endDate.setHours(23, 59, 59, 999);
-
-        filtered = filtered.filter(task => {
-          if (!task.dueDate) return false;
-          const taskDate = new Date(task.dueDate);
-          taskDate.setHours(0, 0, 0, 0);
-          return taskDate.getTime() >= startDate.getTime() && taskDate.getTime() <= endDate.getTime();
-        });
-      }
+    // Date filtering with presets
+    if (filterSettings.date && filterValues.date && filterValues.date !== 'All' && filterValues.date !== '') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      filtered = filtered.filter(task => {
+        if (!task.dueDate) return false;
+        const taskDate = new Date(task.dueDate);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        switch (filterValues.date) {
+          case 'Today': {
+            return taskDate.getTime() === today.getTime();
+          }
+          case 'This week': {
+            const startOfWeek = new Date(today);
+            const dayOfWeek = today.getDay();
+            startOfWeek.setDate(today.getDate() - dayOfWeek);
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            endOfWeek.setHours(23, 59, 59, 999);
+            return taskDate.getTime() >= startOfWeek.getTime() && taskDate.getTime() <= endOfWeek.getTime();
+          }
+          case 'Next 7 days': {
+            const next7Days = new Date(today);
+            next7Days.setDate(today.getDate() + 7);
+            next7Days.setHours(23, 59, 59, 999);
+            return taskDate.getTime() >= today.getTime() && taskDate.getTime() <= next7Days.getTime();
+          }
+          case 'This month': {
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            endOfMonth.setHours(23, 59, 59, 999);
+            return taskDate.getTime() >= startOfMonth.getTime() && taskDate.getTime() <= endOfMonth.getTime();
+          }
+          case 'Next 30 days': {
+            const next30Days = new Date(today);
+            next30Days.setDate(today.getDate() + 30);
+            next30Days.setHours(23, 59, 59, 999);
+            return taskDate.getTime() >= today.getTime() && taskDate.getTime() <= next30Days.getTime();
+          }
+          default:
+            return true;
+        }
+      });
     }
 
     if (filterSettings.priority && filterValues.priorities && filterValues.priorities.length > 0) {

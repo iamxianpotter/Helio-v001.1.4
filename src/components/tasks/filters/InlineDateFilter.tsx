@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Calendar, X } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { IconToggle } from '@/components/ui/icon-toggle';
 import { cn } from '@/lib/utils';
@@ -17,8 +17,6 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
   onToggle,
   onSelect
 }) => {
-  const [searchInput, setSearchInput] = useState('');
-
   const datePresets = [
     'All',
     'Today',
@@ -27,14 +25,6 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
     'This month',
     'Next 30 days',
   ];
-
-  const filteredPresets = useMemo(() => {
-    if (!searchInput.trim()) return datePresets;
-    const search = searchInput.toLowerCase();
-    return datePresets.filter(preset => 
-      preset.toLowerCase().includes(search)
-    );
-  }, [searchInput]);
 
   const handleToggle = (checked: boolean) => {
     onToggle(checked);
@@ -65,17 +55,9 @@ const InlineDateFilter: React.FC<InlineDateFilterProps> = ({
 
       {isActive && (
         <div className="bg-[#252525] border border-[#414141] rounded-[12px] p-3 space-y-3">
-          <input
-            type="text"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Search date presets..."
-            className="w-full bg-transparent text-white text-sm px-0 py-2 outline-none placeholder-gray-500 border-none"
-          />
-
           <div className="flex-1 overflow-auto max-h-[250px]">
             <div className="grid grid-cols-2 gap-2">
-              {filteredPresets.map((preset) => (
+              {datePresets.map((preset) => (
                 <Button
                   key={preset}
                   onClick={() => togglePreset(preset)}
