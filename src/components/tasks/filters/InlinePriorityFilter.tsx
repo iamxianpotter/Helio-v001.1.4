@@ -166,7 +166,7 @@ const InlinePriorityFilter: React.FC<InlinePriorityFilterProps> = ({
             size="sm"
             className="w-full text-gray-400 hover:text-white hover:bg-[#2e2e2e] border border-[#414141] rounded-[8px] text-xs font-normal"
           >
-            Clear
+            No priorities
           </Button>
         </div>
       )}
