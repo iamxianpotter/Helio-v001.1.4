@@ -95,55 +95,65 @@ const InlineLabelFilter: React.FC<InlineLabelFilterProps> = ({
             className="w-full bg-transparent text-white text-sm px-0 py-2 outline-none placeholder-gray-500 border-none"
           />
 
-          <div className="flex-1 overflow-auto space-y-2 max-h-[250px]">
+          <div className="flex-1 overflow-auto max-h-[250px]">
             {availableLabels.length > 0 && filteredCustom.length > 0 && (
               <>
-                <div className="text-xs text-gray-500 mb-2">Custom Labels</div>
-                {filteredCustom.map((label) => (
-                  <Button
-                    key={label.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLabel(label.name)}
-                    className={cn(
-                      'w-full justify-start text-left bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200',
-                      selectedLabels.includes(label.name) && 'bg-[#2e2e2e] text-white'
-                    )}
-                  >
-                    <Tag className={cn('h-4 w-4 mr-2', label.color)} />
-                    {label.name}
-                    {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="text-xs text-gray-400 mb-2 px-1">Custom Labels</div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {filteredCustom.map((label) => (
+                    <Button
+                      key={label.name}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleLabel(label.name)}
+                      className={cn(
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        selectedLabels.includes(label.name) && 'bg-white text-black hover:bg-white hover:text-black'
+                      )}
+                    >
+                      <Tag 
+                        className={cn(
+                          'h-3 w-3 mr-1.5 flex-shrink-0 transition-all duration-200',
+                          label.color,
+                          selectedLabels.includes(label.name) && 'drop-shadow-[0_0_6px_currentColor]'
+                        )} 
+                      />
+                      {label.name}
+                    </Button>
+                  ))}
+                </div>
               </>
             )}
 
             {filteredPreset.length > 0 && (
               <>
                 {availableLabels.length > 0 && filteredCustom.length > 0 && (
-                  <div className="border-t border-[#414141] my-2"></div>
+                  <div className="border-t border-[#414141] mb-3"></div>
                 )}
-                <div className="text-xs text-gray-500 mb-2">Preset Labels</div>
-                {filteredPreset.map((label) => (
-                  <Button
-                    key={label.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLabel(label.name)}
-                    className={cn(
-                      'w-full justify-start text-left bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200',
-                      selectedLabels.includes(label.name) && 'bg-[#2e2e2e] text-white'
-                    )}
-                  >
-                    <Tag className={cn('h-4 w-4 mr-2', label.color)} />
-                    {label.name}
-                    {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="text-xs text-gray-400 mb-2 px-1">Preset Labels</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredPreset.map((label) => (
+                    <Button
+                      key={label.name}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleLabel(label.name)}
+                      className={cn(
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        selectedLabels.includes(label.name) && 'bg-white text-black hover:bg-white hover:text-black'
+                      )}
+                    >
+                      <Tag 
+                        className={cn(
+                          'h-3 w-3 mr-1.5 flex-shrink-0 transition-all duration-200',
+                          label.color,
+                          selectedLabels.includes(label.name) && 'drop-shadow-[0_0_6px_currentColor]'
+                        )} 
+                      />
+                      {label.name}
+                    </Button>
+                  ))}
+                </div>
               </>
             )}
 
@@ -154,17 +164,14 @@ const InlineLabelFilter: React.FC<InlineLabelFilterProps> = ({
             )}
           </div>
 
-          {selectedLabels.length > 0 && (
-            <Button
-              onClick={clearAll}
-              variant="ghost"
-              size="sm"
-              className="w-full text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-[#414141] rounded-[8px] text-xs"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Clear
-            </Button>
-          )}
+          <Button
+            onClick={clearAll}
+            variant="ghost"
+            size="sm"
+            className="w-full text-gray-400 hover:text-white hover:bg-[#2e2e2e] border border-[#414141] rounded-[8px] text-xs font-normal"
+          >
+            No labels
+          </Button>
         </div>
       )}
     </div>
