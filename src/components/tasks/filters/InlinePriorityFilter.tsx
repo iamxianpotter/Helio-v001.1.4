@@ -91,55 +91,65 @@ const InlinePriorityFilter: React.FC<InlinePriorityFilterProps> = ({
             className="w-full bg-transparent text-white text-sm px-0 py-2 outline-none placeholder-gray-500 border-none"
           />
 
-          <div className="flex-1 overflow-auto space-y-2 max-h-[250px]">
+          <div className="flex-1 overflow-auto max-h-[250px]">
             {customPriorities.length > 0 && filteredCustom.length > 0 && (
               <>
-                <div className="text-xs text-gray-500 mb-2">Custom</div>
-                {filteredCustom.map((priority) => (
-                  <Button
-                    key={priority.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => togglePriority(priority.name)}
-                    className={cn(
-                      'w-full justify-start text-left bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200',
-                      selectedPriorities.includes(priority.name) && 'bg-[#2e2e2e] text-white'
-                    )}
-                  >
-                    <Flag className={cn('w-3 h-3 mr-2 flex-shrink-0', priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
-                    {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="text-xs text-gray-400 mb-2 px-1">Custom</div>
+                <div className="grid grid-cols-2 gap-2 mb-3">
+                  {filteredCustom.map((priority) => (
+                    <Button
+                      key={priority.name}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePriority(priority.name)}
+                      className={cn(
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        selectedPriorities.includes(priority.name) && 'bg-white text-black hover:bg-white hover:text-black'
+                      )}
+                    >
+                      <Flag 
+                        className={cn(
+                          'w-3 h-3 mr-1.5 flex-shrink-0 transition-all duration-200',
+                          priority.color,
+                          selectedPriorities.includes(priority.name) && 'drop-shadow-[0_0_6px_currentColor]'
+                        )} 
+                      />
+                      {priority.name}
+                    </Button>
+                  ))}
+                </div>
               </>
             )}
 
             {filteredPreset.length > 0 && (
               <>
                 {customPriorities.length > 0 && filteredCustom.length > 0 && (
-                  <div className="border-t border-[#414141] my-2"></div>
+                  <div className="border-t border-[#414141] mb-3"></div>
                 )}
-                <div className="text-xs text-gray-500 mb-2">Default</div>
-                {filteredPreset.map((priority) => (
-                  <Button
-                    key={priority.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => togglePriority(priority.name)}
-                    className={cn(
-                      'w-full justify-start text-left bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200',
-                      selectedPriorities.includes(priority.name) && 'bg-[#2e2e2e] text-white'
-                    )}
-                  >
-                    <Flag className={cn('w-3 h-3 mr-2 flex-shrink-0', priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
-                    {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="text-xs text-gray-400 mb-2 px-1">Default</div>
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredPreset.map((priority) => (
+                    <Button
+                      key={priority.name}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => togglePriority(priority.name)}
+                      className={cn(
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        selectedPriorities.includes(priority.name) && 'bg-white text-black hover:bg-white hover:text-black'
+                      )}
+                    >
+                      <Flag 
+                        className={cn(
+                          'w-3 h-3 mr-1.5 flex-shrink-0 transition-all duration-200',
+                          priority.color,
+                          selectedPriorities.includes(priority.name) && 'drop-shadow-[0_0_6px_currentColor]'
+                        )} 
+                      />
+                      {priority.name}
+                    </Button>
+                  ))}
+                </div>
               </>
             )}
 
@@ -150,17 +160,14 @@ const InlinePriorityFilter: React.FC<InlinePriorityFilterProps> = ({
             )}
           </div>
 
-          {selectedPriorities.length > 0 && (
-            <Button
-              onClick={clearAll}
-              variant="ghost"
-              size="sm"
-              className="w-full text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-[#414141] rounded-[8px] text-xs"
-            >
-              <X className="h-3 w-3 mr-1" />
-              Clear
-            </Button>
-          )}
+          <Button
+            onClick={clearAll}
+            variant="ghost"
+            size="sm"
+            className="w-full text-gray-400 hover:text-white hover:bg-[#2e2e2e] border border-[#414141] rounded-[8px] text-xs font-normal"
+          >
+            Clear
+          </Button>
         </div>
       )}
     </div>
