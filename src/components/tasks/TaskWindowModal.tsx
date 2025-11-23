@@ -43,7 +43,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-[#1f1f1f] rounded-[20px] w-[500px] min-h-[800px] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95">
+      <div className="bg-[#1f1f1f] rounded-[20px] w-full max-w-[500px] h-auto max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95">
         {/* Close Button */}
         <div className="flex justify-end p-4">
           <button
@@ -56,6 +56,11 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
 
         {/* Task Details Section */}
         <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-6">
+          {/* Task Title */}
+          <div>
+            <h1 className="text-2xl font-bold text-white">{task.title}</h1>
+          </div>
+
           {/* Description */}
           {task.description && (
             <div>
@@ -86,14 +91,13 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
               {/* Priority */}
               {(() => {
                 const style = getPriorityStyle(task.priority);
+                const flagColorClass = style.text;
                 return (
                   <div className="flex items-start gap-3">
-                    <Flag className="h-4 w-4 text-gray-400 flex-shrink-0 mt-1" />
+                    <Flag className={`h-4 w-4 ${flagColorClass} flex-shrink-0 mt-1`} />
                     <div>
                       <p className="text-xs text-gray-500">Priority</p>
-                      <span className={`inline-block px-3 py-1.5 rounded-full text-xs font-medium ${style.bg} ${style.text}`}>
-                        {task.priority}
-                      </span>
+                      <p className="text-white text-sm">{task.priority}</p>
                     </div>
                   </div>
                 );
