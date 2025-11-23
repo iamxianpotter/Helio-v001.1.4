@@ -17,10 +17,10 @@ interface DateSelectorProps {
 const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onTimeSelect, selectedRepeat = '', onRepeatSelect }) => {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(
-    selectedDate ? format(selectedDate, "MMM dd, yyyy") : ""
+    selectedDate && isValid(selectedDate) ? format(selectedDate, "MMM dd, yyyy") : ""
   );
   const [activeButton, setActiveButton] = useState<string | null>(null);
-  const [displayMonth, setDisplayMonth] = useState<Date>(selectedDate || new Date());
+  const [displayMonth, setDisplayMonth] = useState<Date>(selectedDate && isValid(selectedDate) ? selectedDate : new Date());
   const [parsedDate, setParsedDate] = useState<Date | null>(null);
   const [timePopoverOpen, setTimePopoverOpen] = useState(false);
   const [selectedTime, setSelectedTime] = useState<string>("");
@@ -247,7 +247,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
           )}
         >
           <CalendarIcon className="h-4 w-4 mr-2" />
-          {selectedDate ? format(selectedDate, "MMM dd") : "Date"}
+          {selectedDate && isValid(selectedDate) ? format(selectedDate, "MMM dd") : "Date"}
         </Button>
       </PopoverTrigger>
       <PopoverContent
