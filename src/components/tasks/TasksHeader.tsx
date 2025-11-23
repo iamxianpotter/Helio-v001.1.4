@@ -255,11 +255,11 @@ const TasksHeader = ({
           </div>
         </div>
         
-        {/* Task Indicators */}
-        <div className="flex items-center gap-6 mt-7">
+        {/* Task Indicators - Now perfectly equal spacing */}
+        <div className="flex items-center justify-between mt-7 flex-1 max-w-md">
           <div 
             onClick={() => setCurrentTaskView('total')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300 flex-1"
           >
             <span className={`font-orbitron text-2xl font-bold text-white ${
               currentTaskView === 'total' ? 'border-b-2 border-white' : ''
@@ -272,7 +272,7 @@ const TasksHeader = ({
           </div>
           <div 
             onClick={() => setCurrentTaskView('drafts')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300 flex-1"
           >
             <span className={`font-orbitron text-2xl font-bold ${
               currentTaskView === 'drafts' ? 'border-b-2' : ''
@@ -285,7 +285,7 @@ const TasksHeader = ({
           </div>
           <div 
             onClick={() => setCurrentTaskView('pending')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300 flex-1"
           >
             <span className={`font-orbitron text-2xl font-bold ${
               currentTaskView === 'pending' ? 'border-b-2' : ''
@@ -298,7 +298,7 @@ const TasksHeader = ({
           </div>
           <div 
             onClick={() => setCurrentTaskView('completed')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300 flex-1"
           >
             <span className={`font-orbitron text-2xl font-bold ${
               currentTaskView === 'completed' ? 'border-b-2' : ''
@@ -311,7 +311,7 @@ const TasksHeader = ({
           </div>
           <div 
             onClick={() => setCurrentTaskView('deleted')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300 flex-1"
           >
             <span className={`font-orbitron text-2xl font-bold ${
               currentTaskView === 'deleted' ? 'border-b-2' : ''
