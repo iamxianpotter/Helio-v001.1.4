@@ -258,19 +258,6 @@ const TasksHeader = ({
         {/* Task Indicators */}
         <div className="flex items-center gap-6 mt-7">
           <div 
-            onClick={() => setCurrentTaskView('drafts')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
-          >
-            <span className={`font-orbitron text-2xl font-bold text-blue-400 ${
-              currentTaskView === 'drafts' ? 'border-b-2 border-blue-400' : ''
-            }`}>
-              {draftTasks}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Drafts
-            </span>
-          </div>
-          <div 
             onClick={() => setCurrentTaskView('total')}
             className="flex flex-col items-center group cursor-pointer transition-all duration-300"
           >
@@ -284,25 +271,25 @@ const TasksHeader = ({
             </span>
           </div>
           <div 
-            onClick={() => setCurrentTaskView('completed')}
+            onClick={() => setCurrentTaskView('drafts')}
             className="flex flex-col items-center group cursor-pointer transition-all duration-300"
           >
-            <span className={`font-orbitron text-2xl font-bold text-green-400 ${
-              currentTaskView === 'completed' ? 'border-b-2 border-green-400' : ''
-            }`}>
-              {completedTasks}
+            <span className={`font-orbitron text-2xl font-bold ${
+              currentTaskView === 'drafts' ? 'border-b-2' : ''
+            }`} style={{ color: '#C4B5FD', borderColor: currentTaskView === 'drafts' ? '#C4B5FD' : 'transparent' }}>
+              {draftTasks}
             </span>
             <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Completed
+              Drafts
             </span>
           </div>
           <div 
             onClick={() => setCurrentTaskView('pending')}
             className="flex flex-col items-center group cursor-pointer transition-all duration-300"
           >
-            <span className={`font-orbitron text-2xl font-bold text-yellow-400 ${
-              currentTaskView === 'pending' ? 'border-b-2 border-yellow-400' : ''
-            }`}>
+            <span className={`font-orbitron text-2xl font-bold ${
+              currentTaskView === 'pending' ? 'border-b-2' : ''
+            }`} style={{ color: '#f59e0b', borderColor: currentTaskView === 'pending' ? '#f59e0b' : 'transparent' }}>
               {pendingTasks}
             </span>
             <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -310,12 +297,25 @@ const TasksHeader = ({
             </span>
           </div>
           <div 
+            onClick={() => setCurrentTaskView('completed')}
+            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+          >
+            <span className={`font-orbitron text-2xl font-bold ${
+              currentTaskView === 'completed' ? 'border-b-2' : ''
+            }`} style={{ color: '#10B981', borderColor: currentTaskView === 'completed' ? '#10B981' : 'transparent' }}>
+              {completedTasks}
+            </span>
+            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              Completed
+            </span>
+          </div>
+          <div 
             onClick={() => setCurrentTaskView('deleted')}
             className="flex flex-col items-center group cursor-pointer transition-all duration-300"
           >
-            <span className={`font-orbitron text-2xl font-bold text-red-400 ${
-              currentTaskView === 'deleted' ? 'border-b-2 border-red-400' : ''
-            }`}>
+            <span className={`font-orbitron text-2xl font-bold ${
+              currentTaskView === 'deleted' ? 'border-b-2' : ''
+            }`} style={{ color: '#F87171', borderColor: currentTaskView === 'deleted' ? '#F87171' : 'transparent' }}>
               {deletedTasks}
             </span>
             <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
