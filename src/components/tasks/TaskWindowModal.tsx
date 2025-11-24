@@ -3,12 +3,20 @@ import { X, Calendar, Flag, Bell, Repeat, Tag, Plus, Check, Trash2, ChevronRight
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import TaskCreationForm from './TaskCreationForm';
 
 interface Subtask {
   id: string;
   title: string;
   completed: boolean;
   creationDate: string;
+  dueDate?: string;
+  time?: string;
+  priority: string;
+  description: string;
+  reminder?: string;
+  labels?: string[];
+  repeat?: string;
 }
 
 interface Task {
@@ -45,6 +53,14 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [newSubtaskDescription, setNewSubtaskDescription] = useState('');
+  const [newSubtaskDate, setNewSubtaskDate] = useState<Date | undefined>();
+  const [newSubtaskTime, setNewSubtaskTime] = useState('');
+  const [newSubtaskPriority, setNewSubtaskPriority] = useState('Priority 3');
+  const [newSubtaskReminder, setNewSubtaskReminder] = useState<string | undefined>();
+  const [newSubtaskLabels, setNewSubtaskLabels] = useState<string[]>([]);
+  const [newSubtaskRepeat, setNewSubtaskRepeat] = useState('');
+  const [isAddingSubtask, setIsAddingSubtask] = useState(false);
   const [localTask, setLocalTask] = useState<Task | null>(task);
 
   useEffect(() => {
@@ -74,10 +90,25 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
         title: newSubtaskTitle.trim(),
         completed: false,
         creationDate: new Date().toLocaleDateString(),
+        dueDate: newSubtaskDate ? newSubtaskDate.toLocaleDateString() : undefined,
+        time: newSubtaskTime || undefined,
+        priority: newSubtaskPriority,
+        description: newSubtaskDescription.trim(),
+        reminder: newSubtaskReminder,
+        labels: newSubtaskLabels,
+        repeat: newSubtaskRepeat || undefined,
       };
       const updatedSubtasks = [...subtasks, newSubtask];
       setSubtasks(updatedSubtasks);
       setNewSubtaskTitle('');
+      setNewSubtaskDescription('');
+      setNewSubtaskDate(undefined);
+      setNewSubtaskTime('');
+      setNewSubtaskPriority('Priority 3');
+      setNewSubtaskReminder(undefined);
+      setNewSubtaskLabels([]);
+      setNewSubtaskRepeat('');
+      setIsAddingSubtask(false);
 
       const updatedTask = { ...localTask, subtasks: updatedSubtasks };
       setLocalTask(updatedTask);
@@ -90,6 +121,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
         localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
       }
     }
+  };
+
+  const handleCancelSubtaskCreation = () => {
+    setIsAddingSubtask(false);
+    setNewSubtaskTitle('');
+    setNewSubtaskDescription('');
+    setNewSubtaskDate(undefined);
+    setNewSubtaskTime('');
+    setNewSubtaskPriority('Priority 3');
+    setNewSubtaskReminder(undefined);
+    setNewSubtaskLabels([]);
+    setNewSubtaskRepeat('');
   };
 
   const handleToggleSubtask = (subtaskId: string) => {
@@ -259,7 +302,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
             {subtasks.length > 0 && (
               <div className="space-y-2">
                 {subtasks.map((subtask) => (
-                  <div key={subtask.id} className="flex items-center gap-3 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors">
+                  <div key={subtask.id} className="flex items-center gap-3 p-3 hover:bg-[#2a2a2a] rounded-lg transition-colors border border-transparent hover:border-[#414141]">
                     <button
                       onClick={() => handleToggleSubtask(subtask.id)}
                       className="flex-shrink-0"
@@ -270,9 +313,34 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                         <div className="h-4 w-4 border border-gray-400 rounded" />
                       )}
                     </button>
-                    <span className={`text-sm flex-1 ${subtask.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
-                      {subtask.title}
-                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className={`text-sm ${subtask.completed ? 'text-gray-500 line-through' : 'text-white'}`}>
+                        {subtask.title}
+                      </p>
+                      {subtask.description && (
+                        <p className="text-xs text-gray-500 mt-1">{subtask.description}</p>
+                      )}
+                      {(subtask.dueDate || subtask.priority !== 'Priority 3' || (subtask.labels && subtask.labels.length > 0)) && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {subtask.dueDate && (
+                            <span className="text-xs bg-[#252527] border border-[#414141] px-2 py-1 rounded text-gray-300 flex items-center gap-1">
+                              <Calendar className="h-3 w-3" />
+                              {subtask.dueDate}
+                            </span>
+                          )}
+                          <span className={`text-xs px-2 py-1 rounded ${getPriorityStyle(subtask.priority).bg}`}>
+                            <Flag className={`h-3 w-3 inline mr-1 ${getPriorityStyle(subtask.priority).text}`} />
+                            <span className={getPriorityStyle(subtask.priority).text}>{subtask.priority}</span>
+                          </span>
+                          {subtask.labels && subtask.labels.map((label, idx) => (
+                            <span key={idx} className="text-xs bg-[#252527] border border-[#414141] px-2 py-1 rounded text-gray-300 flex items-center gap-1">
+                              <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
+                              {label}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                     <button
                       onClick={() => handleDeleteSubtask(subtask.id)}
                       className="flex-shrink-0 p-1 hover:bg-red-500/10 rounded transition-colors"
@@ -284,27 +352,44 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
               </div>
             )}
 
-            {/* Add Subtask Input */}
-            <div className="flex gap-2">
-              <Input
-                type="text"
-                placeholder="Add a subtask..."
-                value={newSubtaskTitle}
-                onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === 'Enter') {
-                    handleAddSubtask();
-                  }
-                }}
-                className="bg-[#252527] border border-[#414141] text-white placeholder-gray-500 text-sm h-8"
-              />
+            {/* Add Subtask Button or Form */}
+            {!isAddingSubtask && (
               <button
-                onClick={handleAddSubtask}
-                className="flex-shrink-0 p-2 hover:bg-[#2a2a2a] rounded-lg transition-colors"
+                onClick={() => setIsAddingSubtask(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
               >
-                <Plus className="h-4 w-4 text-gray-400 hover:text-white" />
+                <Plus className="h-4 w-4" />
+                Add a subtask
               </button>
-            </div>
+            )}
+
+            {/* Add Subtask Form */}
+            {isAddingSubtask && (
+              <TaskCreationForm
+                title={newSubtaskTitle}
+                onTitleChange={setNewSubtaskTitle}
+                description={newSubtaskDescription}
+                onDescriptionChange={setNewSubtaskDescription}
+                selectedDate={newSubtaskDate}
+                onDateSelect={setNewSubtaskDate}
+                selectedTime={newSubtaskTime}
+                onTimeSelect={setNewSubtaskTime}
+                selectedPriority={newSubtaskPriority}
+                onPrioritySelect={setNewSubtaskPriority}
+                selectedReminder={newSubtaskReminder}
+                onReminderSelect={setNewSubtaskReminder}
+                selectedLabels={newSubtaskLabels}
+                onLabelsSelect={setNewSubtaskLabels}
+                selectedRepeat={newSubtaskRepeat}
+                onRepeatSelect={setNewSubtaskRepeat}
+                onCancel={handleCancelSubtaskCreation}
+                onSaveDraft={handleAddSubtask}
+                onSave={handleAddSubtask}
+                showDraftButton={false}
+                autoFocus={true}
+                mode="create"
+              />
+            )}
           </div>
         </div>
 
