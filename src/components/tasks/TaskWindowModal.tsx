@@ -126,7 +126,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-[#1f1f1f] rounded-[20px] w-[500px] h-auto max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95">
+      <div className="bg-[#1f1f1f] rounded-[20px] w-[500px] max-w-full h-auto max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95">
         {/* Close Button */}
         <div className="flex justify-end p-4">
           <button
