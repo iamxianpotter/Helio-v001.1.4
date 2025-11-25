@@ -259,7 +259,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
           </TooltipProvider>
         )}
 
-        {(() => {
+        {task.priority && (() => {
           const style = getPriorityStyle(task.priority);
           return (
             <TooltipProvider delayDuration={100}>
