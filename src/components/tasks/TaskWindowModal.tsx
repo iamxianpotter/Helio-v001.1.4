@@ -498,10 +498,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
           </div>
         </div>
 
-        {/* Empty Section for Future Features */}
-        <div className="p-6 bg-[#161618] min-h-[100px] flex items-center justify-center text-gray-500 text-sm">
-          <p>Additional features coming soon</p>
-        </div>
       </div>
 
       {/* Context Menu for Subtasks */}

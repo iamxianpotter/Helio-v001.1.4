@@ -38,6 +38,14 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
   const [repeatInputValue, setRepeatInputValue] = useState("");
   const [parsedRepeat, setParsedRepeat] = useState<string | null>(null);
 
+  const isDateDisabled = (date: Date) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const checkDate = new Date(date);
+    checkDate.setHours(0, 0, 0, 0);
+    return checkDate < today;
+  };
+
   const getRandomTimeMessage = (time: string) => {
     const messages = [
       `oh, at ${time}? nice :)`,
@@ -76,8 +84,8 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
   };
 
   const handleCalendarSelect = (date: Date | undefined) => {
-    setTempSelectedDate(date);
-    if (date) {
+    if (date && !isDateDisabled(date)) {
+      setTempSelectedDate(date);
       setShowDateConfirmation(true);
     }
     setActiveButton(null);
@@ -340,13 +348,23 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
               selected={tempSelectedDate}
               onSelect={handleCalendarSelect}
               month={displayMonth}
-              onMonthChange={setDisplayMonth}
+              onMonthChange={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const checkDate = new Date(date.getFullYear(), date.getMonth(), 1);
+                checkDate.setHours(0, 0, 0, 0);
+                if (checkDate >= today) {
+                  setDisplayMonth(date);
+                }
+              }}
+              disabled={isDateDisabled}
               className="rounded-[8px] transition-all duration-300 ease-in-out"
               classNames={{
                 cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
                 day_selected:
                   "!bg-white !text-black hover:!bg-white hover:!text-black focus:!bg-white focus:!text-black !rounded-md",
                 day_today: "!bg-accent/20 !text-black !rounded-md",
+                day_disabled: "!text-gray-600 !opacity-40 cursor-not-allowed",
               }}
             />
 
