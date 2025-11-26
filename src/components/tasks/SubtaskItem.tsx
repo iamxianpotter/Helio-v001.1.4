@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2, Plus, ChevronDown } from 'lucide-react';
+import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2, Plus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -209,6 +209,27 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
           <div className="flex items-center gap-1 ml-auto">
             {!isDeleteConfirming ? (
               <>
+                {hasSubtasks && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleSubtasks?.(subtask.id);
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <ChevronRight className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">{isExpanded ? 'Collapse' : 'Expand'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -396,19 +417,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
       {/* Nested Subtasks */}
       {hasSubtasks && (
-        <div className="mt-2 ml-6">
-          <button
-            onClick={() => onToggleSubtasks?.(subtask.id)}
-            className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors mb-2"
-          >
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
-            />
-            <span>{subtask.subtasks!.length} sub-task{subtask.subtasks!.length !== 1 ? 's' : ''}</span>
-          </button>
-
+        <div className="mt-4 ml-6">
           {isExpanded && (
             <div className="space-y-2 border-l border-[#414141] pl-4 ml-2">
               {subtask.subtasks!.map((subsubtask) => (
