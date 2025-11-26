@@ -57,7 +57,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [newSubtaskDescription, setNewSubtaskDescription] = useState('');
   const [newSubtaskDate, setNewSubtaskDate] = useState<Date | undefined>();
   const [newSubtaskTime, setNewSubtaskTime] = useState('');
-  const [newSubtaskPriority, setNewSubtaskPriority] = useState('Priority 3');
+  const [newSubtaskPriority, setNewSubtaskPriority] = useState('');
   const [newSubtaskReminder, setNewSubtaskReminder] = useState<string | undefined>();
   const [newSubtaskLabels, setNewSubtaskLabels] = useState<string[]>([]);
   const [newSubtaskRepeat, setNewSubtaskRepeat] = useState('');
@@ -70,7 +70,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [editSubtaskDescription, setEditSubtaskDescription] = useState('');
   const [editSubtaskDate, setEditSubtaskDate] = useState<Date | undefined>();
   const [editSubtaskTime, setEditSubtaskTime] = useState('');
-  const [editSubtaskPriority, setEditSubtaskPriority] = useState('Priority 3');
+  const [editSubtaskPriority, setEditSubtaskPriority] = useState('');
   const [editSubtaskReminder, setEditSubtaskReminder] = useState<string | undefined>();
   const [editSubtaskLabels, setEditSubtaskLabels] = useState<string[]>([]);
   const [editSubtaskRepeat, setEditSubtaskRepeat] = useState('');
@@ -127,7 +127,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       setNewSubtaskDescription('');
       setNewSubtaskDate(undefined);
       setNewSubtaskTime('');
-      setNewSubtaskPriority('Priority 3');
+      setNewSubtaskPriority('');
       setNewSubtaskReminder(undefined);
       setNewSubtaskLabels([]);
       setNewSubtaskRepeat('');
@@ -262,7 +262,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       setEditingSubtaskId(null);
       setEditSubtaskTitle('');
       setEditSubtaskDescription('');
-      setEditSubtaskPriority('Priority 3');
+      setEditSubtaskPriority('');
       setEditSubtaskDate(undefined);
       setEditSubtaskTime('');
       setEditSubtaskReminder(undefined);

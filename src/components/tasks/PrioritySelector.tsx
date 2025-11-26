@@ -181,7 +181,7 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
           size="sm"
           className={cn(
             "text-gray-400 hover:text-white hover:border hover:border-[#252232] hover:bg-[#1e1e1f] hover:rounded-[8px] px-3 py-1 h-8 whitespace-nowrap transition-all duration-200 border border-transparent",
-            selectedPriority !== 'Priority 3' && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
+            selectedPriority && selectedPriority !== 'Priority 3' && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
           )}
         >
           <Flag className={cn("h-4 w-4 mr-2", getPriorityColor(selectedPriority))} />
