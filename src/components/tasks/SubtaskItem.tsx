@@ -209,6 +209,32 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
           <div className="flex items-center gap-1 ml-auto">
             {!isDeleteConfirming ? (
               <>
+                {hasSubtasks && (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleSubtasks?.(subtask.id);
+                          }}
+                          className="flex items-center gap-1.5 px-2 py-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all text-xs"
+                        >
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform duration-200 ${
+                              isExpanded ? 'rotate-180' : ''
+                            }`}
+                          />
+                          <span className="font-medium">{subtask.subtasks!.length}</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">{isExpanded ? 'Collapse' : 'Expand'} subtasks</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>
