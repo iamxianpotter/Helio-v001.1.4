@@ -25,6 +25,13 @@ interface SubtaskItemProps {
   getPriorityStyle: (priorityName: string) => { bg: string; text: string };
   expandedLabelsSubtaskId: string | null;
   onToggleLabels: (subtaskId: string) => void;
+  onDragStart?: (e: React.DragEvent, subtaskId: string) => void;
+  onDragOver?: (e: React.DragEvent, subtaskId: string) => void;
+  onDragLeave?: () => void;
+  onDrop?: (e: React.DragEvent, subtaskId: string) => void;
+  onDragEnd?: () => void;
+  draggedSubtaskId?: string | null;
+  dragOverSubtaskId?: string | null;
 }
 
 const SubtaskItem: React.FC<SubtaskItemProps> = ({
@@ -37,9 +44,89 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
   getPriorityStyle,
   expandedLabelsSubtaskId,
   onToggleLabels,
+  onDragStart,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  onDragEnd,
+  draggedSubtaskId,
+  dragOverSubtaskId,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+
+  const getPriorityCheckboxColor = (priority: string) => {
+    const priorityStyle = getPriorityStyle(priority);
+    if (priority.startsWith('Priority ')) {
+      const level = parseInt(priority.replace('Priority ', ''));
+      const colorMap = {
+        1: 'border-red-500 hover:border-red-400',
+        2: 'border-orange-500 hover:border-orange-400',
+        3: 'border-yellow-500 hover:border-yellow-400',
+        4: 'border-green-500 hover:border-green-400',
+        5: 'border-blue-500 hover:border-blue-400',
+        6: 'border-purple-500 hover:border-purple-400',
+      };
+      return colorMap[level as keyof typeof colorMap] || 'border-gray-400 hover:border-gray-300';
+    }
+    const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
+    if (customPrioritiesJson) {
+      const customPriorities = JSON.parse(customPrioritiesJson);
+      const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
+      if (customPriority) {
+        const colorTextClass = customPriority.color;
+        const colorMap: { [key: string]: string } = {
+          'text-red-500': 'border-red-500 hover:border-red-400',
+          'text-orange-500': 'border-orange-500 hover:border-orange-400',
+          'text-yellow-500': 'border-yellow-500 hover:border-yellow-400',
+          'text-green-500': 'border-green-500 hover:border-green-400',
+          'text-blue-500': 'border-blue-500 hover:border-blue-400',
+          'text-cyan-500': 'border-cyan-500 hover:border-cyan-400',
+          'text-emerald-500': 'border-emerald-500 hover:border-emerald-400',
+          'text-teal-500': 'border-teal-500 hover:border-teal-400',
+          'text-sky-500': 'border-sky-500 hover:border-sky-400',
+          'text-amber-500': 'border-amber-500 hover:border-amber-400',
+          'text-lime-500': 'border-lime-500 hover:border-lime-400',
+          'text-pink-500': 'border-pink-500 hover:border-pink-400',
+          'text-rose-500': 'border-rose-500 hover:border-rose-400',
+          'text-fuchsia-500': 'border-fuchsia-500 hover:border-fuchsia-400',
+          'text-slate-400': 'border-slate-400 hover:border-slate-300',
+          'text-gray-400': 'border-gray-400 hover:border-gray-300',
+          'text-zinc-400': 'border-zinc-400 hover:border-zinc-300',
+          'text-stone-400': 'border-stone-400 hover:border-stone-300',
+          'text-red-600': 'border-red-600 hover:border-red-500',
+          'text-orange-600': 'border-orange-600 hover:border-orange-500',
+          'text-lime-600': 'border-lime-600 hover:border-lime-500',
+          'text-emerald-600': 'border-emerald-600 hover:border-emerald-500',
+          'text-indigo-500': 'border-indigo-500 hover:border-indigo-400',
+          'text-violet-500': 'border-violet-500 hover:border-violet-400',
+        };
+        return colorMap[colorTextClass] || 'border-gray-400 hover:border-gray-300';
+      }
+    }
+    const colorClassFromStyle = priorityStyle.text;
+    const colorMap: { [key: string]: string } = {
+      'text-red-500': 'border-red-500 hover:border-red-400',
+      'text-orange-500': 'border-orange-500 hover:border-orange-400',
+      'text-yellow-500': 'border-yellow-500 hover:border-yellow-400',
+      'text-green-500': 'border-green-500 hover:border-green-400',
+      'text-blue-500': 'border-blue-500 hover:border-blue-400',
+      'text-cyan-500': 'border-cyan-500 hover:border-cyan-400',
+      'text-emerald-500': 'border-emerald-500 hover:border-emerald-400',
+      'text-teal-500': 'border-teal-500 hover:border-teal-400',
+      'text-sky-500': 'border-sky-500 hover:border-sky-400',
+      'text-amber-500': 'border-amber-500 hover:border-amber-400',
+      'text-lime-500': 'border-lime-500 hover:border-lime-400',
+      'text-pink-500': 'border-pink-500 hover:border-pink-400',
+      'text-rose-500': 'border-rose-500 hover:border-rose-400',
+      'text-fuchsia-500': 'border-fuchsia-500 hover:border-fuchsia-400',
+      'text-slate-400': 'border-slate-400 hover:border-slate-300',
+      'text-gray-400': 'border-gray-400 hover:border-gray-300',
+      'text-zinc-400': 'border-zinc-400 hover:border-zinc-300',
+      'text-stone-400': 'border-stone-400 hover:border-stone-300',
+    };
+    return colorMap[colorClassFromStyle] || 'border-gray-400 hover:border-gray-300';
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -58,20 +145,31 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
   return (
     <div
-      className="rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative"
+      className={`rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative ${
+        draggedSubtaskId === subtask.id ? 'opacity-50' : ''
+      } ${
+        dragOverSubtaskId === subtask.id ? 'border border-blue-500' : ''
+      }`}
       onContextMenu={(e) => onContextMenu(e, subtask.id)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
         setIsDeleteConfirming(false);
       }}
+      draggable
+      onDragStart={(e) => onDragStart?.(e, subtask.id)}
+      onDragOver={(e) => onDragOver?.(e, subtask.id)}
+      onDragLeave={onDragLeave}
+      onDrop={(e) => onDrop?.(e, subtask.id)}
+      onDragEnd={onDragEnd}
+      style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab' }}
     >
       <div className="flex items-center gap-2 mb-2">
         <div
           className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
             subtask.completed
               ? 'bg-white border-white'
-              : 'border-gray-400 hover:border-gray-300'
+              : getPriorityCheckboxColor(subtask.priority)
           }`}
           onClick={(e) => {
             e.stopPropagation();

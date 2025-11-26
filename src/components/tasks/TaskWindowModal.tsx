@@ -74,6 +74,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [editSubtaskReminder, setEditSubtaskReminder] = useState<string | undefined>();
   const [editSubtaskLabels, setEditSubtaskLabels] = useState<string[]>([]);
   const [editSubtaskRepeat, setEditSubtaskRepeat] = useState('');
+  const [draggedSubtaskId, setDraggedSubtaskId] = useState<string | null>(null);
+  const [dragOverSubtaskId, setDragOverSubtaskId] = useState<string | null>(null);
 
   useEffect(() => {
     setLocalTask(task);
@@ -281,6 +283,60 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setEditSubtaskRepeat('');
   };
 
+  const handleSubtaskDragStart = (e: React.DragEvent, subtaskId: string) => {
+    setDraggedSubtaskId(subtaskId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSubtaskDragOver = (e: React.DragEvent, subtaskId: string) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverSubtaskId(subtaskId);
+  };
+
+  const handleSubtaskDragLeave = () => {
+    setDragOverSubtaskId(null);
+  };
+
+  const handleSubtaskDrop = (e: React.DragEvent, targetSubtaskId: string) => {
+    e.preventDefault();
+
+    if (!draggedSubtaskId || draggedSubtaskId === targetSubtaskId) {
+      setDraggedSubtaskId(null);
+      setDragOverSubtaskId(null);
+      return;
+    }
+
+    const draggedIndex = subtasks.findIndex(st => st.id === draggedSubtaskId);
+    const targetIndex = subtasks.findIndex(st => st.id === targetSubtaskId);
+
+    if (draggedIndex !== -1 && targetIndex !== -1) {
+      const newSubtasks = [...subtasks];
+      const [removed] = newSubtasks.splice(draggedIndex, 1);
+      newSubtasks.splice(targetIndex, 0, removed);
+
+      setSubtasks(newSubtasks);
+      const updatedTask = { ...localTask!, subtasks: newSubtasks };
+      setLocalTask(updatedTask);
+      if (onTaskUpdate) onTaskUpdate(updatedTask);
+
+      const savedTasks = localStorage.getItem('kario-tasks');
+      if (savedTasks) {
+        const tasks = JSON.parse(savedTasks);
+        const updatedTasks = tasks.map((t: Task) => t.id === localTask!.id ? updatedTask : t);
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      }
+    }
+
+    setDraggedSubtaskId(null);
+    setDragOverSubtaskId(null);
+  };
+
+  const handleSubtaskDragEnd = () => {
+    setDraggedSubtaskId(null);
+    setDragOverSubtaskId(null);
+  };
+
   return (
     <div
       className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
@@ -453,6 +509,13 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                       getPriorityStyle={getPriorityStyle}
                       expandedLabelsSubtaskId={expandedLabelsSubtaskId}
                       onToggleLabels={(subtaskId) => setExpandedLabelsSubtaskId(expandedLabelsSubtaskId === subtaskId ? null : subtaskId)}
+                      onDragStart={handleSubtaskDragStart}
+                      onDragOver={handleSubtaskDragOver}
+                      onDragLeave={handleSubtaskDragLeave}
+                      onDrop={handleSubtaskDrop}
+                      onDragEnd={handleSubtaskDragEnd}
+                      draggedSubtaskId={draggedSubtaskId}
+                      dragOverSubtaskId={dragOverSubtaskId}
                     />
                   )
                 ))}
