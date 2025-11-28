@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2, Plus, ChevronDown } from 'lucide-react';
+import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
 
 interface Subtask {
   id: string;
@@ -15,7 +13,6 @@ interface Subtask {
   reminder?: string;
   labels?: string[];
   repeat?: string;
-  subtasks?: Subtask[];
 }
 
 interface SubtaskItemProps {
@@ -35,10 +32,6 @@ interface SubtaskItemProps {
   onDragEnd?: () => void;
   draggedSubtaskId?: string | null;
   dragOverSubtaskId?: string | null;
-  onAddSubsubtask?: (parentSubtaskId: string) => void;
-  onToggleSubtasks?: (subtaskId: string) => void;
-  expandedSubtasksIds?: Set<string>;
-  depth?: number;
 }
 
 const SubtaskItem: React.FC<SubtaskItemProps> = ({
@@ -58,15 +51,9 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
   onDragEnd,
   draggedSubtaskId,
   dragOverSubtaskId,
-  onAddSubsubtask,
-  onToggleSubtasks,
-  expandedSubtasksIds = new Set(),
-  depth = 0,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
-  const hasSubtasks = subtask.subtasks && subtask.subtasks.length > 0;
-  const isExpanded = expandedSubtasksIds.has(subtask.id);
 
   const getPriorityCheckboxColor = (priority: string) => {
     const priorityStyle = getPriorityStyle(priority);
@@ -394,59 +381,6 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         )}
       </div>
 
-      {/* Nested Subtasks */}
-      {hasSubtasks && (
-        <div className="mt-2 ml-6">
-          <button
-            onClick={() => onToggleSubtasks?.(subtask.id)}
-            className="flex items-center gap-2 text-xs text-gray-400 hover:text-white transition-colors mb-2"
-          >
-            <ChevronDown
-              className={`h-4 w-4 transition-transform duration-200 ${
-                isExpanded ? 'rotate-180' : ''
-              }`}
-            />
-            <span>{subtask.subtasks!.length} sub-task{subtask.subtasks!.length !== 1 ? 's' : ''}</span>
-          </button>
-
-          {isExpanded && (
-            <div className="space-y-2 border-l border-[#414141] pl-4 ml-2">
-              {subtask.subtasks!.map((subsubtask) => (
-                <SubtaskItem
-                  key={subsubtask.id}
-                  subtask={subsubtask}
-                  onToggle={onToggle}
-                  onEdit={onEdit}
-                  onDelete={onDelete}
-                  onContextMenu={onContextMenu}
-                  getLabelColor={getLabelColor}
-                  getPriorityStyle={getPriorityStyle}
-                  expandedLabelsSubtaskId={expandedLabelsSubtaskId}
-                  onToggleLabels={onToggleLabels}
-                  onDragStart={onDragStart}
-                  onDragOver={onDragOver}
-                  onDragLeave={onDragLeave}
-                  onDrop={onDrop}
-                  onDragEnd={onDragEnd}
-                  draggedSubtaskId={draggedSubtaskId}
-                  dragOverSubtaskId={dragOverSubtaskId}
-                  onAddSubsubtask={onAddSubsubtask}
-                  onToggleSubtasks={onToggleSubtasks}
-                  expandedSubtasksIds={expandedSubtasksIds}
-                  depth={depth + 1}
-                />
-              ))}
-              <button
-                onClick={() => onAddSubsubtask?.(subtask.id)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
-              >
-                <Plus className="h-4 w-4" />
-                Add a subtask
-              </button>
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

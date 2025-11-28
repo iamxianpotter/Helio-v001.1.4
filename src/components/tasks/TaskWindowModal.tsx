@@ -18,7 +18,6 @@ interface Subtask {
   reminder?: string;
   labels?: string[];
   repeat?: string;
-  subtasks?: Subtask[];
 }
 
 interface Task {
@@ -85,7 +84,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [editSubtaskRepeat, setEditSubtaskRepeat] = useState('');
   const [draggedSubtaskId, setDraggedSubtaskId] = useState<string | null>(null);
   const [dragOverSubtaskId, setDragOverSubtaskId] = useState<string | null>(null);
-  const [expandedSubtasksIds, setExpandedSubtasksIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     setLocalTask(task);
@@ -347,57 +345,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setDragOverSubtaskId(null);
   };
 
-  const handleToggleSubtasks = (subtaskId: string) => {
-    const newSet = new Set(expandedSubtasksIds);
-    if (newSet.has(subtaskId)) {
-      newSet.delete(subtaskId);
-    } else {
-      newSet.add(subtaskId);
-    }
-    setExpandedSubtasksIds(newSet);
-  };
-
-  const handleAddSubsubtask = (parentSubtaskId: string) => {
-    const addSubsubtaskRecursive = (items: Subtask[]): Subtask[] => {
-      return items.map(item => {
-        if (item.id === parentSubtaskId) {
-          const newSubsubtask: Subtask = {
-            id: Date.now().toString(),
-            title: '',
-            completed: false,
-            creationDate: new Date().toLocaleDateString(),
-            priority: 'Priority 3',
-            description: '',
-          };
-          return {
-            ...item,
-            subtasks: [...(item.subtasks || []), newSubsubtask],
-          };
-        }
-        return {
-          ...item,
-          subtasks: item.subtasks ? addSubsubtaskRecursive(item.subtasks) : undefined,
-        };
-      });
-    };
-
-    const updatedSubtasks = addSubsubtaskRecursive(subtasks);
-    setSubtasks(updatedSubtasks);
-
-    const updatedTask = { ...localTask!, subtasks: updatedSubtasks };
-    setLocalTask(updatedTask);
-    if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-    const savedTasks = localStorage.getItem('kario-tasks');
-    if (savedTasks) {
-      const tasks = JSON.parse(savedTasks);
-      const updatedTasks = tasks.map((t: Task) => t.id === localTask!.id ? updatedTask : t);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-    }
-
-    // Expand parent to show new subtask
-    setExpandedSubtasksIds(new Set([...expandedSubtasksIds, parentSubtaskId]));
-  };
 
   const canNavigateUp = currentTaskIndex > 0;
   const canNavigateDown = currentTaskIndex < allTasks.length - 1;
@@ -622,9 +569,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                       onDragEnd={handleSubtaskDragEnd}
                       draggedSubtaskId={draggedSubtaskId}
                       dragOverSubtaskId={dragOverSubtaskId}
-                      onAddSubsubtask={handleAddSubsubtask}
-                      onToggleSubtasks={handleToggleSubtasks}
-                      expandedSubtasksIds={expandedSubtasksIds}
                     />
                   )
                 ))}
