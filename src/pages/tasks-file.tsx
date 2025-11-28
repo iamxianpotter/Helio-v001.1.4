@@ -101,6 +101,8 @@ const Tasks = () => {
     return saved ? JSON.parse(saved) : { date: '', priorities: [], labels: [] };
   });
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
+  const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
+  const [parentTaskId, setParentTaskId] = useState('');
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -314,6 +316,8 @@ const Tasks = () => {
 
   const handleCloseModal = () => {
     setSelectedTaskForModal(null);
+    setIsSubtaskOpened(false);
+    setParentTaskId('');
   };
 
   const handleEditTask = (taskId: string) => {
@@ -400,7 +404,7 @@ const Tasks = () => {
     setContextMenu(null);
   };
 
-  const handleOpenSubtaskAsTask = (subtask: any) => {
+  const handleOpenSubtaskAsTask = (subtask: any, parentId?: string) => {
     const subtaskAsTask: Task = {
       id: subtask.id,
       title: subtask.title,
@@ -416,6 +420,8 @@ const Tasks = () => {
       subtasks: subtask.subtasks
     };
     setSelectedTaskForModal(subtaskAsTask);
+    setIsSubtaskOpened(true);
+    setParentTaskId(parentId || '');
   };
 
   const handleNavigateTask = (direction: 'up' | 'down') => {
@@ -1111,15 +1117,50 @@ const Tasks = () => {
         getLabelColor={getLabelColor}
         getPriorityStyle={getPriorityStyle}
         onTaskUpdate={(updatedTask) => {
-          const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
-          setTasks(updatedTasks);
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+          if (isSubtaskOpened && parentTaskId) {
+            const updatedTasks = tasks.map(t => {
+              if (t.id === parentTaskId) {
+                const updateSubtaskInTask = (task: Task, updated: Task): Task => {
+                  const updateRecursively = (subtasks: any[] = []): any[] => {
+                    return subtasks.map(st =>
+                      st.id === updated.id
+                        ? {
+                            ...st,
+                            title: updated.title,
+                            description: updated.description,
+                            completed: updated.completed,
+                            dueDate: updated.dueDate,
+                            time: updated.time,
+                            priority: updated.priority,
+                            reminder: updated.reminder,
+                            labels: updated.labels,
+                            repeat: updated.repeat,
+                            subtasks: updated.subtasks
+                          }
+                        : { ...st, subtasks: st.subtasks ? updateRecursively(st.subtasks) : undefined }
+                    );
+                  };
+                  return { ...task, subtasks: updateRecursively(task.subtasks) };
+                };
+                return updateSubtaskInTask(t, updatedTask);
+              }
+              return t;
+            });
+            setTasks(updatedTasks);
+            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+          } else {
+            const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+            setTasks(updatedTasks);
+            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+          }
         }}
         onNavigate={handleNavigateTask}
         allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
         currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
         sectionName="Tasks Made By Kairo"
-        onOpenSubtaskAsTask={handleOpenSubtaskAsTask}
+        onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
+        isSubtaskOpened={isSubtaskOpened}
+        parentTaskId={parentTaskId}
       />
     </div>
   );

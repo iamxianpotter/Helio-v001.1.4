@@ -48,6 +48,8 @@ interface TaskWindowModalProps {
   currentTaskIndex?: number;
   sectionName?: string;
   onOpenSubtaskAsTask?: (subtask: any) => void;
+  isSubtaskOpened?: boolean;
+  parentTaskId?: string;
 }
 
 const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
@@ -61,6 +63,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   currentTaskIndex = -1,
   sectionName = 'Tasks Made By Kairo',
   onOpenSubtaskAsTask,
+  isSubtaskOpened = false,
+  parentTaskId = '',
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
@@ -105,6 +109,29 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
   }, []);
+
+  const updateSubtaskInTask = (task: Task, updatedSubtask: Task): Task => {
+    const updateRecursively = (subtasks: Subtask[] = []): Subtask[] => {
+      return subtasks.map(st =>
+        st.id === updatedSubtask.id
+          ? {
+              ...st,
+              title: updatedSubtask.title,
+              description: updatedSubtask.description,
+              completed: updatedSubtask.completed,
+              dueDate: updatedSubtask.dueDate,
+              time: updatedSubtask.time,
+              priority: updatedSubtask.priority,
+              reminder: updatedSubtask.reminder,
+              labels: updatedSubtask.labels,
+              repeat: updatedSubtask.repeat,
+              subtasks: updatedSubtask.subtasks as Subtask[] | undefined
+            }
+          : { ...st, subtasks: st.subtasks ? updateRecursively(st.subtasks) : undefined }
+      );
+    };
+    return { ...task, subtasks: updateRecursively(task.subtasks) };
+  };
 
   if (!localTask) return null;
 
@@ -153,8 +180,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const savedTasks = localStorage.getItem('kario-tasks');
       if (savedTasks) {
         const tasks = JSON.parse(savedTasks);
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        if (isSubtaskOpened && parentTaskId) {
+          const updatedTasks = tasks.map((t: Task) => {
+            if (t.id === parentTaskId) {
+              return updateSubtaskInTask(t, updatedTask);
+            }
+            return t;
+          });
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        } else {
+          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        }
       }
     }
   };
@@ -190,8 +227,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     const savedTasks = localStorage.getItem('kario-tasks');
     if (savedTasks) {
       const tasks = JSON.parse(savedTasks);
-      const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      if (isSubtaskOpened && parentTaskId) {
+        const updatedTasks = tasks.map((t: Task) => {
+          if (t.id === parentTaskId) {
+            return updateSubtaskInTask(t, updatedTask);
+          }
+          return t;
+        });
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      } else {
+        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      }
     }
   };
 
@@ -215,8 +262,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     const savedTasks = localStorage.getItem('kario-tasks');
     if (savedTasks) {
       const tasks = JSON.parse(savedTasks);
-      const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      if (isSubtaskOpened && parentTaskId) {
+        const updatedTasks = tasks.map((t: Task) => {
+          if (t.id === parentTaskId) {
+            return updateSubtaskInTask(t, updatedTask);
+          }
+          return t;
+        });
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      } else {
+        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      }
     }
     setContextMenu(null);
   };
@@ -283,8 +340,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const savedTasks = localStorage.getItem('kario-tasks');
       if (savedTasks) {
         const tasks = JSON.parse(savedTasks);
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        if (isSubtaskOpened && parentTaskId) {
+          const updatedTasks = tasks.map((t: Task) => {
+            if (t.id === parentTaskId) {
+              return updateSubtaskInTask(t, updatedTask);
+            }
+            return t;
+          });
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        } else {
+          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        }
       }
 
       setEditingSubtaskId(null);
@@ -351,8 +418,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const savedTasks = localStorage.getItem('kario-tasks');
       if (savedTasks) {
         const tasks = JSON.parse(savedTasks);
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask!.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        if (isSubtaskOpened && parentTaskId) {
+          const updatedTasks = tasks.map((t: Task) => {
+            if (t.id === parentTaskId) {
+              return updateSubtaskInTask(t, updatedTask);
+            }
+            return t;
+          });
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        } else {
+          const updatedTasks = tasks.map((t: Task) => t.id === localTask!.id ? updatedTask : t);
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        }
       }
     }
 
@@ -438,8 +515,18 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const savedTasks = localStorage.getItem('kario-tasks');
       if (savedTasks) {
         const tasks = JSON.parse(savedTasks);
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        if (isSubtaskOpened && parentTaskId) {
+          const updatedTasks = tasks.map((t: Task) => {
+            if (t.id === parentTaskId) {
+              return updateSubtaskInTask(t, updatedTask);
+            }
+            return t;
+          });
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        } else {
+          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        }
       }
 
       setNewSubtaskTitle('');
