@@ -400,6 +400,24 @@ const Tasks = () => {
     setContextMenu(null);
   };
 
+  const handleOpenSubtaskAsTask = (subtask: any) => {
+    const subtaskAsTask: Task = {
+      id: subtask.id,
+      title: subtask.title,
+      completed: subtask.completed,
+      creationDate: subtask.creationDate,
+      dueDate: subtask.dueDate,
+      time: subtask.time,
+      priority: subtask.priority,
+      description: subtask.description,
+      reminder: subtask.reminder,
+      labels: subtask.labels,
+      repeat: subtask.repeat,
+      subtasks: subtask.subtasks
+    };
+    setSelectedTaskForModal(subtaskAsTask);
+  };
+
   const handleNavigateTask = (direction: 'up' | 'down') => {
     if (!selectedTaskForModal) return;
 
@@ -1101,6 +1119,7 @@ const Tasks = () => {
         allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
         currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
         sectionName="Tasks Made By Kairo"
+        onOpenSubtaskAsTask={handleOpenSubtaskAsTask}
       />
     </div>
   );

@@ -47,6 +47,7 @@ interface TaskWindowModalProps {
   allTasks?: Task[];
   currentTaskIndex?: number;
   sectionName?: string;
+  onOpenSubtaskAsTask?: (subtask: any) => void;
 }
 
 const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
@@ -59,6 +60,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   allTasks = [],
   currentTaskIndex = -1,
   sectionName = 'Tasks Made By Kairo',
+  onOpenSubtaskAsTask,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
@@ -376,9 +378,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
 
   const handleOpenNestedSubtask = (subtaskId: string) => {
     const subtask = findSubtaskRecursively(subtasks, subtaskId);
-    if (subtask) {
-      setOpenedNestedSubtask(subtask);
-      setParentSubtaskStack([...parentSubtaskStack, subtask]);
+    if (subtask && onOpenSubtaskAsTask) {
+      onOpenSubtaskAsTask(subtask);
     }
   };
 
