@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2, ChevronDown, Plus } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface Subtask {
@@ -13,6 +13,7 @@ interface Subtask {
   reminder?: string;
   labels?: string[];
   repeat?: string;
+  subtasks?: Subtask[];
 }
 
 interface SubtaskItemProps {
@@ -32,6 +33,11 @@ interface SubtaskItemProps {
   onDragEnd?: () => void;
   draggedSubtaskId?: string | null;
   dragOverSubtaskId?: string | null;
+  onOpen?: (subtaskId: string) => void;
+  onAddNestedSubtask?: (parentSubtaskId: string) => void;
+  onUpdateNestedSubtask?: (parentSubtaskId: string, updatedSubtask: Subtask) => void;
+  onDeleteNestedSubtask?: (parentSubtaskId: string, nestedSubtaskId: string) => void;
+  depth?: number;
 }
 
 const SubtaskItem: React.FC<SubtaskItemProps> = ({
@@ -51,9 +57,16 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
   onDragEnd,
   draggedSubtaskId,
   dragOverSubtaskId,
+  onOpen,
+  onAddNestedSubtask,
+  onUpdateNestedSubtask,
+  onDeleteNestedSubtask,
+  depth = 0,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+  const [isNestedExpanded, setIsNestedExpanded] = useState(false);
+  const hasNestedSubtasks = subtask.subtasks && subtask.subtasks.length > 0;
 
   const getPriorityCheckboxColor = (priority: string) => {
     const priorityStyle = getPriorityStyle(priority);
@@ -144,103 +157,152 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
   };
 
   return (
-    <div
-      className={`rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative ${
-        draggedSubtaskId === subtask.id ? 'opacity-50' : ''
-      } ${
-        dragOverSubtaskId === subtask.id ? 'border border-blue-500' : ''
-      }`}
-      onContextMenu={(e) => onContextMenu(e, subtask.id)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        setIsDeleteConfirming(false);
-      }}
-      draggable
-      onDragStart={(e) => onDragStart?.(e, subtask.id)}
-      onDragOver={(e) => onDragOver?.(e, subtask.id)}
-      onDragLeave={onDragLeave}
-      onDrop={(e) => onDrop?.(e, subtask.id)}
-      onDragEnd={onDragEnd}
-      style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab' }}
-    >
-      <div className="flex items-center gap-2 mb-2">
-        <div
-          className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
-            subtask.completed
-              ? 'bg-white border-white'
-              : getPriorityCheckboxColor(subtask.priority)
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggle(subtask.id);
-          }}
-        />
-        <TooltipProvider delayDuration={100}>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <h3 className={`text-base font-semibold flex-1 truncate ${
-                subtask.completed ? 'text-gray-400 line-through' : 'text-white'
-              }`}>
-                {subtask.title}
-              </h3>
-            </TooltipTrigger>
-            <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-              <p className="max-w-sm">{subtask.title}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+    <div>
+      <div
+        className={`rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative ${
+          draggedSubtaskId === subtask.id ? 'opacity-50' : ''
+        } ${
+          dragOverSubtaskId === subtask.id ? 'border border-blue-500' : ''
+        }`}
+        onContextMenu={(e) => onContextMenu(e, subtask.id)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setIsDeleteConfirming(false);
+        }}
+        draggable
+        onDragStart={(e) => onDragStart?.(e, subtask.id)}
+        onDragOver={(e) => onDragOver?.(e, subtask.id)}
+        onDragLeave={onDragLeave}
+        onDrop={(e) => onDrop?.(e, subtask.id)}
+        onDragEnd={onDragEnd}
+        style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          {hasNestedSubtasks && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsNestedExpanded(!isNestedExpanded);
+              }}
+              className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+            >
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${isNestedExpanded ? 'rotate-0' : '-rotate-90'}`}
+              />
+            </button>
+          )}
+          <div
+            className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
+              subtask.completed
+                ? 'bg-white border-white'
+                : getPriorityCheckboxColor(subtask.priority)
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(subtask.id);
+            }}
+          />
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className={`text-base font-semibold flex-1 truncate ${
+                  subtask.completed ? 'text-gray-400 line-through' : 'text-white'
+                }`}>
+                  {subtask.title}
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                <p className="max-w-sm">{subtask.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        {/* Action buttons on hover */}
-        {isHovered && (
-          <div className="flex items-center gap-1 ml-auto">
-            {!isDeleteConfirming ? (
-              <>
-                <TooltipProvider delayDuration={100}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(subtask.id);
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                      <p className="text-xs">Edit</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+          {hasNestedSubtasks && (
+            <TooltipProvider delayDuration={100}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span className="text-xs text-gray-400 bg-[#252527] px-2 py-1 rounded-full flex-shrink-0">
+                    {subtask.subtasks!.length}
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                  <p className="text-xs">{subtask.subtasks!.length} nested task{subtask.subtasks!.length !== 1 ? 's' : ''}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          )}
 
-                <TooltipProvider delayDuration={100}>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={handleDeleteClick}
-                        className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                      <p className="text-xs">Delete</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </>
-            ) : (
-              <button
-                onClick={handleConfirmDelete}
-                className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
-              >
-                Confirm Delete
-              </button>
-            )}
-          </div>
-        )}
+          {/* Action buttons on hover */}
+          {isHovered && (
+            <div className="flex items-center gap-1 ml-auto">
+              {!isDeleteConfirming ? (
+                <>
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpen?.(subtask.id);
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Open</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(subtask.id);
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Edit</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleDeleteClick}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Delete</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              ) : (
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
+                >
+                  Confirm Delete
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {subtask.description && (
@@ -381,6 +443,36 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         )}
       </div>
 
+      {isNestedExpanded && hasNestedSubtasks && (
+        <div className="mt-2 space-y-1">
+          {subtask.subtasks!.map((nestedSubtask) => (
+            <SubtaskItem
+              key={nestedSubtask.id}
+              subtask={nestedSubtask}
+              onToggle={onToggle}
+              onEdit={onEdit}
+              onDelete={onDelete}
+              onContextMenu={onContextMenu}
+              getLabelColor={getLabelColor}
+              getPriorityStyle={getPriorityStyle}
+              expandedLabelsSubtaskId={expandedLabelsSubtaskId}
+              onToggleLabels={onToggleLabels}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onDragEnd={onDragEnd}
+              draggedSubtaskId={draggedSubtaskId}
+              dragOverSubtaskId={dragOverSubtaskId}
+              onOpen={onOpen}
+              onAddNestedSubtask={onAddNestedSubtask}
+              onUpdateNestedSubtask={onUpdateNestedSubtask}
+              onDeleteNestedSubtask={onDeleteNestedSubtask}
+              depth={depth + 1}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };

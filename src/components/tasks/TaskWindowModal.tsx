@@ -18,6 +18,7 @@ interface Subtask {
   reminder?: string;
   labels?: string[];
   repeat?: string;
+  subtasks?: Subtask[];
 }
 
 interface Task {
@@ -84,6 +85,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [editSubtaskRepeat, setEditSubtaskRepeat] = useState('');
   const [draggedSubtaskId, setDraggedSubtaskId] = useState<string | null>(null);
   const [dragOverSubtaskId, setDragOverSubtaskId] = useState<string | null>(null);
+  const [openedNestedSubtask, setOpenedNestedSubtask] = useState<Subtask | null>(null);
+  const [parentSubtaskStack, setParentSubtaskStack] = useState<Subtask[]>([]);
 
   useEffect(() => {
     setLocalTask(task);
@@ -166,10 +169,16 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setNewSubtaskRepeat('');
   };
 
-  const handleToggleSubtask = (subtaskId: string) => {
-    const updatedSubtasks = subtasks.map(st =>
-      st.id === subtaskId ? { ...st, completed: !st.completed } : st
+  const toggleSubtaskRecursively = (subtasks: Subtask[], subtaskId: string): Subtask[] => {
+    return subtasks.map(st =>
+      st.id === subtaskId
+        ? { ...st, completed: !st.completed }
+        : { ...st, subtasks: st.subtasks ? toggleSubtaskRecursively(st.subtasks, subtaskId) : undefined }
     );
+  };
+
+  const handleToggleSubtask = (subtaskId: string) => {
+    let updatedSubtasks = toggleSubtaskRecursively(subtasks, subtaskId);
     setSubtasks(updatedSubtasks);
 
     const updatedTask = { ...localTask, subtasks: updatedSubtasks };
@@ -184,8 +193,17 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     }
   };
 
+  const deleteSubtaskRecursively = (subtasks: Subtask[], subtaskId: string): Subtask[] => {
+    return subtasks
+      .filter(st => st.id !== subtaskId)
+      .map(st => ({
+        ...st,
+        subtasks: st.subtasks ? deleteSubtaskRecursively(st.subtasks, subtaskId) : undefined
+      }));
+  };
+
   const handleDeleteSubtask = (subtaskId: string) => {
-    const updatedSubtasks = subtasks.filter(st => st.id !== subtaskId);
+    const updatedSubtasks = deleteSubtaskRecursively(subtasks, subtaskId);
     setSubtasks(updatedSubtasks);
 
     const updatedTask = { ...localTask, subtasks: updatedSubtasks };
@@ -345,6 +363,95 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setDragOverSubtaskId(null);
   };
 
+  const findSubtaskRecursively = (subtasks: Subtask[], subtaskId: string): Subtask | null => {
+    for (const st of subtasks) {
+      if (st.id === subtaskId) return st;
+      if (st.subtasks) {
+        const found = findSubtaskRecursively(st.subtasks, subtaskId);
+        if (found) return found;
+      }
+    }
+    return null;
+  };
+
+  const handleOpenNestedSubtask = (subtaskId: string) => {
+    const subtask = findSubtaskRecursively(subtasks, subtaskId);
+    if (subtask) {
+      setOpenedNestedSubtask(subtask);
+      setParentSubtaskStack([...parentSubtaskStack, subtask]);
+    }
+  };
+
+  const handleCloseNestedSubtask = () => {
+    if (parentSubtaskStack.length > 1) {
+      const newStack = parentSubtaskStack.slice(0, -1);
+      setParentSubtaskStack(newStack);
+      setOpenedNestedSubtask(newStack[newStack.length - 1]);
+    } else {
+      setOpenedNestedSubtask(null);
+      setParentSubtaskStack([]);
+    }
+  };
+
+  const updateSubtaskRecursively = (subtasks: Subtask[], subtaskId: string, updater: (st: Subtask) => Subtask): Subtask[] => {
+    return subtasks.map(st => {
+      if (st.id === subtaskId) {
+        return updater(st);
+      }
+      if (st.subtasks) {
+        return { ...st, subtasks: updateSubtaskRecursively(st.subtasks, subtaskId, updater) };
+      }
+      return st;
+    });
+  };
+
+  const handleAddNestedSubtask = () => {
+    if (openedNestedSubtask && newSubtaskTitle.trim()) {
+      const newNestedSubtask: Subtask = {
+        id: Date.now().toString(),
+        title: newSubtaskTitle.trim(),
+        completed: false,
+        creationDate: new Date().toLocaleDateString(),
+        dueDate: newSubtaskDate ? newSubtaskDate.toLocaleDateString() : undefined,
+        time: newSubtaskTime || undefined,
+        priority: newSubtaskPriority,
+        description: newSubtaskDescription.trim(),
+        reminder: newSubtaskReminder,
+        labels: newSubtaskLabels,
+        repeat: newSubtaskRepeat || undefined,
+        subtasks: [],
+      };
+
+      const updatedSubtasks = updateSubtaskRecursively(subtasks, openedNestedSubtask.id, (st) => ({
+        ...st,
+        subtasks: [...(st.subtasks || []), newNestedSubtask],
+      }));
+
+      setSubtasks(updatedSubtasks);
+      setOpenedNestedSubtask({ ...openedNestedSubtask, subtasks: [...(openedNestedSubtask.subtasks || []), newNestedSubtask] });
+
+      const updatedTask = { ...localTask, subtasks: updatedSubtasks };
+      setLocalTask(updatedTask);
+      if (onTaskUpdate) onTaskUpdate(updatedTask);
+
+      const savedTasks = localStorage.getItem('kario-tasks');
+      if (savedTasks) {
+        const tasks = JSON.parse(savedTasks);
+        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      }
+
+      setNewSubtaskTitle('');
+      setNewSubtaskDescription('');
+      setNewSubtaskDate(undefined);
+      setNewSubtaskTime('');
+      setNewSubtaskPriority('Priority 3');
+      setNewSubtaskReminder(undefined);
+      setNewSubtaskLabels([]);
+      setNewSubtaskRepeat('');
+      setIsAddingSubtask(false);
+    }
+  };
 
   const canNavigateUp = currentTaskIndex > 0;
   const canNavigateDown = currentTaskIndex < allTasks.length - 1;
@@ -517,7 +624,124 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
             </Collapsible>
           )}
 
+          {/* Nested Subtask View */}
+          {openedNestedSubtask && (
+            <div className="border border-[#414141] rounded-lg p-4 bg-[#252527]">
+              <div className="flex items-center justify-between mb-4">
+                <button
+                  onClick={handleCloseNestedSubtask}
+                  className="text-gray-400 hover:text-white transition-colors flex items-center gap-2"
+                >
+                  <ChevronRight className="h-4 w-4 rotate-180" />
+                  <span className="text-sm">Back</span>
+                </button>
+                <h2 className="text-lg font-semibold text-white">{openedNestedSubtask.title}</h2>
+                <div className="w-12" />
+              </div>
+
+              {openedNestedSubtask.description && (
+                <p className="text-sm text-gray-300 mb-3">{openedNestedSubtask.description}</p>
+              )}
+
+              <div className="space-y-3">
+                <h4 className="text-xs font-semibold text-gray-400">Nested Tasks</h4>
+
+                {openedNestedSubtask.subtasks && openedNestedSubtask.subtasks.length > 0 && (
+                  <div className="space-y-2">
+                    {openedNestedSubtask.subtasks.map((nestedSubtask) => (
+                      editingSubtaskId === nestedSubtask.id ? (
+                        <TaskCreationForm
+                          key={nestedSubtask.id}
+                          title={editSubtaskTitle}
+                          onTitleChange={setEditSubtaskTitle}
+                          description={editSubtaskDescription}
+                          onDescriptionChange={setEditSubtaskDescription}
+                          selectedDate={editSubtaskDate}
+                          onDateSelect={setEditSubtaskDate}
+                          selectedTime={editSubtaskTime}
+                          onTimeSelect={setEditSubtaskTime}
+                          selectedPriority={editSubtaskPriority}
+                          onPrioritySelect={setEditSubtaskPriority}
+                          selectedReminder={editSubtaskReminder}
+                          onReminderSelect={setEditSubtaskReminder}
+                          selectedLabels={editSubtaskLabels}
+                          onLabelsSelect={setEditSubtaskLabels}
+                          selectedRepeat={editSubtaskRepeat}
+                          onRepeatSelect={setEditSubtaskRepeat}
+                          onCancel={handleCancelSubtaskEdit}
+                          onSaveDraft={handleSaveSubtaskEdit}
+                          onSave={handleSaveSubtaskEdit}
+                          showDraftButton={false}
+                          mode="edit"
+                        />
+                      ) : (
+                        <SubtaskItem
+                          key={nestedSubtask.id}
+                          subtask={nestedSubtask}
+                          onToggle={handleToggleSubtask}
+                          onEdit={handleEditSubtask}
+                          onDelete={handleDeleteSubtask}
+                          onContextMenu={handleContextMenuSubtask}
+                          getLabelColor={getLabelColor}
+                          getPriorityStyle={getPriorityStyle}
+                          expandedLabelsSubtaskId={expandedLabelsSubtaskId}
+                          onToggleLabels={(subtaskId) => setExpandedLabelsSubtaskId(expandedLabelsSubtaskId === subtaskId ? null : subtaskId)}
+                          onDragStart={handleSubtaskDragStart}
+                          onDragOver={handleSubtaskDragOver}
+                          onDragLeave={handleSubtaskDragLeave}
+                          onDrop={handleSubtaskDrop}
+                          onDragEnd={handleSubtaskDragEnd}
+                          draggedSubtaskId={draggedSubtaskId}
+                          dragOverSubtaskId={dragOverSubtaskId}
+                          onOpen={handleOpenNestedSubtask}
+                        />
+                      )
+                    ))}
+                  </div>
+                )}
+
+                {!isAddingSubtask && (
+                  <button
+                    onClick={() => setIsAddingSubtask(true)}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add nested task
+                  </button>
+                )}
+
+                {isAddingSubtask && (
+                  <TaskCreationForm
+                    title={newSubtaskTitle}
+                    onTitleChange={setNewSubtaskTitle}
+                    description={newSubtaskDescription}
+                    onDescriptionChange={setNewSubtaskDescription}
+                    selectedDate={newSubtaskDate}
+                    onDateSelect={setNewSubtaskDate}
+                    selectedTime={newSubtaskTime}
+                    onTimeSelect={setNewSubtaskTime}
+                    selectedPriority={newSubtaskPriority}
+                    onPrioritySelect={setNewSubtaskPriority}
+                    selectedReminder={newSubtaskReminder}
+                    onReminderSelect={setNewSubtaskReminder}
+                    selectedLabels={newSubtaskLabels}
+                    onLabelsSelect={setNewSubtaskLabels}
+                    selectedRepeat={newSubtaskRepeat}
+                    onRepeatSelect={setNewSubtaskRepeat}
+                    onCancel={handleCancelSubtaskCreation}
+                    onSaveDraft={handleAddNestedSubtask}
+                    onSave={handleAddNestedSubtask}
+                    showDraftButton={false}
+                    autoFocus={true}
+                    mode="create"
+                  />
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Subtasks Section */}
+          {!openedNestedSubtask && (
           <div className="space-y-3">
             <h3 className="text-sm font-semibold text-gray-400">Subtasks</h3>
 
@@ -569,6 +793,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                       onDragEnd={handleSubtaskDragEnd}
                       draggedSubtaskId={draggedSubtaskId}
                       dragOverSubtaskId={dragOverSubtaskId}
+                      onOpen={handleOpenNestedSubtask}
                     />
                   )
                 ))}
@@ -614,6 +839,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
               />
             )}
           </div>
+          )}
         </div>
 
       </div>
