@@ -249,8 +249,13 @@ const TaskItem: React.FC<TaskItemProps> = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
+                            onMouseDown={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                            }}
                             onClick={(e) => {
                               e.stopPropagation();
+                              e.preventDefault();
                               onEditTask(task.id);
                             }}
                             className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
@@ -295,7 +300,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
       </div>
 
       {task.description && (
-        <div className="mb-3 ml-6">
+        <div className="mb-3 ml-6 flex items-start">
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -311,7 +316,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
         </div>
       )}
 
-      <div className="ml-6 flex items-center gap-2 flex-wrap">
+      <div className="ml-6 flex items-center gap-2 flex-wrap mt-2">
         {(task.dueDate || task.time) && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
