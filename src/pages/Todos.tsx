@@ -23,7 +23,7 @@ interface Section {
 
 const Todos = () => {
   const [isRotated, setIsRotated] = useState(false);
-  const [freeTodos, setFreeTodos] = useState<Todo[]>([]); // Todos not in any section
+  const [freeTodos, setFreeTodos] = useState<Todo[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [displayPopoverOpen, setDisplayPopoverOpen] = useState(false);
   const [currentView, setCurrentView] = useState('list');
@@ -49,6 +49,23 @@ const Todos = () => {
   });
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('todos-data');
+    if (savedData) {
+      try {
+        const { freeTodos: savedFreeTodos, sections: savedSections } = JSON.parse(savedData);
+        setFreeTodos(savedFreeTodos || []);
+        setSections(savedSections || []);
+      } catch (error) {
+        console.error('Error loading todos from localStorage:', error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('todos-data', JSON.stringify({ freeTodos, sections }));
+  }, [freeTodos, sections]);
 
   const handleTodoClick = (id: string, e: React.MouseEvent) => {
     if (e.ctrlKey || e.metaKey) {
