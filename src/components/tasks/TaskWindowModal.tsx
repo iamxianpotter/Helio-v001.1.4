@@ -284,19 +284,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setContextMenu({ x: e.clientX, y: e.clientY, subtaskId });
   };
 
-  const findSubtaskRecursivelyForEdit = (subtasks: Subtask[], subtaskId: string): Subtask | null => {
-    for (const st of subtasks) {
-      if (st.id === subtaskId) return st;
-      if (st.subtasks) {
-        const found = findSubtaskRecursivelyForEdit(st.subtasks, subtaskId);
-        if (found) return found;
-      }
-    }
-    return null;
-  };
-
   const handleEditSubtask = (subtaskId: string) => {
-    const subtaskToEdit = findSubtaskRecursivelyForEdit(subtasks, subtaskId);
+    const subtaskToEdit = subtasks.find(st => st.id === subtaskId);
     if (subtaskToEdit) {
       setEditingSubtaskId(subtaskId);
       setEditSubtaskTitle(subtaskToEdit.title);
@@ -325,27 +314,23 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setContextMenu(null);
   };
 
-  const updateSubtaskRecursivelyForEdit = (subtasks: Subtask[], subtaskId: string): Subtask[] => {
-    return subtasks.map(st =>
-      st.id === subtaskId
-        ? {
-            ...st,
-            title: editSubtaskTitle.trim(),
-            description: editSubtaskDescription.trim(),
-            priority: editSubtaskPriority,
-            dueDate: editSubtaskDate ? editSubtaskDate.toLocaleDateString() : st.dueDate,
-            time: editSubtaskTime || st.time,
-            reminder: editSubtaskReminder,
-            labels: editSubtaskLabels,
-            repeat: editSubtaskRepeat || undefined,
-          }
-        : { ...st, subtasks: st.subtasks ? updateSubtaskRecursivelyForEdit(st.subtasks, subtaskId) : undefined }
-    );
-  };
-
   const handleSaveSubtaskEdit = () => {
     if (editSubtaskTitle.trim() && editingSubtaskId) {
-      const updatedSubtasks = updateSubtaskRecursivelyForEdit(subtasks, editingSubtaskId);
+      const updatedSubtasks = subtasks.map(st =>
+        st.id === editingSubtaskId
+          ? {
+              ...st,
+              title: editSubtaskTitle.trim(),
+              description: editSubtaskDescription.trim(),
+              priority: editSubtaskPriority,
+              dueDate: editSubtaskDate ? editSubtaskDate.toLocaleDateString() : st.dueDate,
+              time: editSubtaskTime || st.time,
+              reminder: editSubtaskReminder,
+              labels: editSubtaskLabels,
+              repeat: editSubtaskRepeat || undefined,
+            }
+          : st
+      );
       setSubtasks(updatedSubtasks);
 
       const updatedTask = { ...localTask, subtasks: updatedSubtasks };

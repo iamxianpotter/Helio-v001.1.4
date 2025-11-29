@@ -306,7 +306,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
       </div>
 
       {subtask.description && (
-        <div className="mb-3" style={{ marginLeft: `${24 + (hasNestedSubtasks ? 24 : 0)}px` }}>
+        <div className="mb-3 ml-6">
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -322,7 +322,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         </div>
       )}
 
-      <div className="flex items-center gap-2 flex-wrap" style={{ marginLeft: `${24 + (hasNestedSubtasks ? 24 : 0)}px` }}>
+      <div className="ml-6 flex items-center gap-2 flex-wrap">
         {(subtask.dueDate || subtask.time) && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
