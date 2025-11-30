@@ -171,11 +171,28 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
           setIsDeleteConfirming(false);
         }}
         draggable
-        onDragStart={(e) => onDragStart?.(e, subtask.id)}
-        onDragOver={(e) => onDragOver?.(e, subtask.id)}
-        onDragLeave={onDragLeave}
-        onDrop={(e) => onDrop?.(e, subtask.id)}
-        onDragEnd={onDragEnd}
+        onDragStart={(e) => {
+          e.stopPropagation();
+          onDragStart?.(e, subtask.id);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDragOver?.(e, subtask.id);
+        }}
+        onDragLeave={(e) => {
+          e.stopPropagation();
+          onDragLeave?.();
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDrop?.(e, subtask.id);
+        }}
+        onDragEnd={(e) => {
+          e.stopPropagation();
+          onDragEnd?.();
+        }}
         style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
       >
         <div className="flex items-center gap-2 mb-2">
