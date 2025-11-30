@@ -26,23 +26,6 @@ interface Task {
   isDraft?: boolean;
 }
 
-const flattenSubtasks = (subtasks: any[] = []): any[] => {
-  const flattened: any[] = [];
-
-  const flatten = (items: any[]) => {
-    items.forEach(item => {
-      const { subtasks: nestedSubtasks, ...rest } = item;
-      flattened.push(rest);
-      if (nestedSubtasks && nestedSubtasks.length > 0) {
-        flatten(nestedSubtasks);
-      }
-    });
-  };
-
-  flatten(subtasks);
-  return flattened;
-};
-
 const Tasks = () => {
   const [currentView, setCurrentView] = useState('list');
   const [currentTaskView, setCurrentTaskView] = useState<'drafts' | 'total' | 'completed' | 'pending' | 'deleted'>('total');
@@ -52,18 +35,7 @@ const Tasks = () => {
     if (!savedTasks) return [];
 
     const parsedTasks = JSON.parse(savedTasks);
-    const migratedTasks = parsedTasks.map((task: any) => {
-      if (task.subtasks) {
-        return {
-          ...task,
-          subtasks: flattenSubtasks(task.subtasks),
-        };
-      }
-      return task;
-    });
-
-    localStorage.setItem('kario-tasks', JSON.stringify(migratedTasks));
-    return migratedTasks;
+    return parsedTasks;
   });
   const [deletedTasks, setDeletedTasks] = useState<Task[]>(() => {
     const savedDeletedTasks = localStorage.getItem('kario-deleted-tasks');
