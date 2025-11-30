@@ -65,8 +65,34 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
-  const [isNestedExpanded, setIsNestedExpanded] = useState(false);
+  const [isNestedExpanded, setIsNestedExpanded] = useState(() => {
+    const savedExpandedSubtasks = localStorage.getItem('kario-expanded-subtasks');
+    if (savedExpandedSubtasks) {
+      const expandedIds = JSON.parse(savedExpandedSubtasks);
+      return expandedIds.includes(subtask.id);
+    }
+    return false;
+  });
   const hasNestedSubtasks = subtask.subtasks && subtask.subtasks.length > 0;
+
+  const handleExpandedChange = (expanded: boolean) => {
+    setIsNestedExpanded(expanded);
+    const savedExpandedSubtasks = localStorage.getItem('kario-expanded-subtasks');
+    const expandedIds = savedExpandedSubtasks ? JSON.parse(savedExpandedSubtasks) : [];
+
+    if (expanded) {
+      if (!expandedIds.includes(subtask.id)) {
+        expandedIds.push(subtask.id);
+      }
+    } else {
+      const index = expandedIds.indexOf(subtask.id);
+      if (index > -1) {
+        expandedIds.splice(index, 1);
+      }
+    }
+
+    localStorage.setItem('kario-expanded-subtasks', JSON.stringify(expandedIds));
+  };
 
   const getPriorityCheckboxColor = (priority: string) => {
     const priorityStyle = getPriorityStyle(priority);
@@ -183,7 +209,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setIsNestedExpanded(!isNestedExpanded);
+                handleExpandedChange(!isNestedExpanded);
               }}
               className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
             >
