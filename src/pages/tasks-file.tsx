@@ -1030,14 +1030,15 @@ const Tasks = () => {
                 
                 {/* Add Task Button */}
                 {!isAddingTask && (
-                  <Button
-                    onClick={() => setIsAddingTask(true)}
-                    variant="ghost"
-                    className="w-full justify-start text-gray-400 hover:text-white hover:bg-[#2A2A2C] p-3 rounded-lg"
-                  >
-                    <Plus className="h-5 w-5 mr-3" />
-                    Add a task
-                  </Button>
+                  <div className="flex justify-center mt-6">
+                    <Button
+                      onClick={() => setIsAddingTask(true)}
+                      className="flex items-center gap-2 px-6 py-3 rounded-[20px] bg-[#f5f5f3] text-black hover:bg-white transition-colors duration-200"
+                    >
+                      <Plus className="h-5 w-5" />
+                      New task
+                    </Button>
+                  </div>
                 )}
               </div>
             )}
