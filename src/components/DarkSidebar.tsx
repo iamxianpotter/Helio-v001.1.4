@@ -18,13 +18,13 @@ const DarkSidebar = () => {
   });
 
   useEffect(() => {
-    const handleStorageChange = () => {
-      const saved = localStorage.getItem('sidebar-auto-off');
-      setAutoOffEnabled(saved ? JSON.parse(saved) : false);
+    const handleAutoOffChanged = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      setAutoOffEnabled(customEvent.detail.value);
     };
 
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auto-off-changed', handleAutoOffChanged);
+    return () => window.removeEventListener('auto-off-changed', handleAutoOffChanged);
   }, []);
 
   useEffect(() => {

@@ -51,6 +51,7 @@ const SettingsModal = ({
   const handleAutoOffToggle = (value: boolean) => {
     setAutoOffEnabled(value);
     localStorage.setItem('sidebar-auto-off', JSON.stringify(value));
+    window.dispatchEvent(new CustomEvent('auto-off-changed', { detail: { value } }));
   };
 
   const renderContent = () => {
