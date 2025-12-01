@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog';
 import { X, User, Palette, MousePointer, Wrench, Database, Grid3X3, Languages, Key } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Switch } from '../ui/switch';
 import ApiKeyDialog from './ApiKeyDialog';
 
 interface SettingsModalProps {
@@ -16,6 +17,10 @@ const SettingsModal = ({
 }: SettingsModalProps) => {
   const [activeSection, setActiveSection] = useState('Account');
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
+  const [autoOffEnabled, setAutoOffEnabled] = useState(() => {
+    const saved = localStorage.getItem('sidebar-auto-off');
+    return saved ? JSON.parse(saved) : false;
+  });
 
   const sidebarItems = [{
     icon: User,
@@ -42,6 +47,11 @@ const SettingsModal = ({
     label: 'Connected Apps',
     id: 'Connected Apps'
   }];
+
+  const handleAutoOffToggle = (value: boolean) => {
+    setAutoOffEnabled(value);
+    localStorage.setItem('sidebar-auto-off', JSON.stringify(value));
+  };
 
   const renderContent = () => {
     switch (activeSection) {
@@ -124,6 +134,19 @@ const SettingsModal = ({
                   </Button>
                 </div>
               </div>
+            </div>
+          </div>;
+      case 'Behavior':
+        return <div className="space-y-6">
+            <div className="flex items-center justify-between p-4 rounded-xl">
+              <div>
+                <div className="text-white font-medium">Auto-off Sidebar</div>
+                <div className="text-gray-400 text-sm mt-1">Automatically close sidebar when navigating to a page</div>
+              </div>
+              <Switch
+                checked={autoOffEnabled}
+                onCheckedChange={handleAutoOffToggle}
+              />
             </div>
           </div>;
       default:

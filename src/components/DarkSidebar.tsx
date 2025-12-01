@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useSidebarContext } from '../contexts/SidebarContext';
 import { useLocation } from 'react-router-dom';
 import SidebarLogo from './sidebar/SidebarLogo';
@@ -12,6 +12,26 @@ import CustomSlider from './sidebar/CustomSlider';
 const DarkSidebar = () => {
   const { isOpen, setIsOpen } = useSidebarContext();
   const location = useLocation();
+  const [autoOffEnabled, setAutoOffEnabled] = useState(() => {
+    const saved = localStorage.getItem('sidebar-auto-off');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const saved = localStorage.getItem('sidebar-auto-off');
+      setAutoOffEnabled(saved ? JSON.parse(saved) : false);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
+  useEffect(() => {
+    if (autoOffEnabled && isOpen) {
+      setIsOpen(false);
+    }
+  }, [location.pathname, autoOffEnabled, isOpen, setIsOpen]);
 
 
   return (

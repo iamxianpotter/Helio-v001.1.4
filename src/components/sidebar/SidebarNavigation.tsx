@@ -73,9 +73,7 @@ const [pendingExpand, setPendingExpand] = useState<string | null>(null);
   // More section links
   const moreLinks = [
     { name: 'Notes', icon: StickyNote, href: '/notes' },
-    { name: 'To dos', icon: CheckSquare, href: '/todos' },
     { name: 'Tasks', icon: ListTodo, href: '/tasks' },
-    { name: 'Summaries', icon: ScrollText, href: '/summaries' },
     { name: 'Emails', icon: Mail, href: '/emails' },
   ];
 
