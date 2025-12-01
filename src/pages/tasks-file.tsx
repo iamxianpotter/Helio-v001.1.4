@@ -52,8 +52,6 @@ const Tasks = () => {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string } | null>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
-  const [isHoveringTopArea, setIsHoveringTopArea] = useState(false);
-  const [isHoveringBottomArea, setIsHoveringBottomArea] = useState(false);
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -673,26 +671,6 @@ const Tasks = () => {
             {/* Expandable content - positioned below the main section */}
             {isSectionExpanded && (
               <div className="bg-transparent max-w-[980px]" style={{ marginBottom: '45px' }}>
-                {/* Top hover area for adding task */}
-                <div
-                  onMouseEnter={() => setIsHoveringTopArea(true)}
-                  onMouseLeave={() => setIsHoveringTopArea(false)}
-                  className="relative h-8 flex items-center justify-center cursor-pointer mt-2 mb-2"
-                >
-                  {isHoveringTopArea && (
-                    <button
-                      onClick={() => setIsAddingTask(true)}
-                      className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-                    >
-                      <Plus className="h-4 w-4" />
-                      <div className="flex-1 h-px bg-gray-600/30"></div>
-                    </button>
-                  )}
-                  {!isHoveringTopArea && displayedTasks.length > 0 && (
-                    <div className="flex-1 h-px bg-gray-600/20"></div>
-                  )}
-                </div>
-
                 {/* Card-based task list */}
                 <div className="space-y-3">
                   {sortSettings.creationDate ? (
@@ -1049,27 +1027,17 @@ const Tasks = () => {
                     </div>
                   </div>
                 )}
-
-                {/* Bottom hover area for adding task */}
+                
+                {/* Add Task Button */}
                 {!isAddingTask && (
-                  <div
-                    onMouseEnter={() => setIsHoveringBottomArea(true)}
-                    onMouseLeave={() => setIsHoveringBottomArea(false)}
-                    className="relative h-8 flex items-center justify-center cursor-pointer mt-2"
+                  <Button
+                    onClick={() => setIsAddingTask(true)}
+                    variant="ghost"
+                    className="w-full justify-start text-gray-400 hover:text-white hover:bg-[#2A2A2C] p-3 rounded-lg"
                   >
-                    {isHoveringBottomArea && (
-                      <button
-                        onClick={() => setIsAddingTask(true)}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors w-full"
-                      >
-                        <Plus className="h-4 w-4 flex-shrink-0" />
-                        <div className="flex-1 h-px bg-gray-600/30"></div>
-                      </button>
-                    )}
-                    {!isHoveringBottomArea && displayedTasks.length > 0 && (
-                      <div className="flex-1 h-px bg-gray-600/20"></div>
-                    )}
-                  </div>
+                    <Plus className="h-5 w-5 mr-3" />
+                    Add a task
+                  </Button>
                 )}
               </div>
             )}
