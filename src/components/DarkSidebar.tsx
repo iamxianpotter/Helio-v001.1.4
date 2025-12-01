@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSidebarContext } from '../contexts/SidebarContext';
 import { useLocation } from 'react-router-dom';
 import SidebarLogo from './sidebar/SidebarLogo';
@@ -16,6 +16,7 @@ const DarkSidebar = () => {
     const saved = localStorage.getItem('sidebar-auto-off');
     return saved ? JSON.parse(saved) : false;
   });
+  const prevPathnameRef = useRef(location.pathname);
 
   useEffect(() => {
     const handleAutoOffChanged = (e: Event) => {
@@ -28,9 +29,10 @@ const DarkSidebar = () => {
   }, []);
 
   useEffect(() => {
-    if (autoOffEnabled && isOpen) {
+    if (autoOffEnabled && isOpen && location.pathname !== prevPathnameRef.current) {
       setIsOpen(false);
     }
+    prevPathnameRef.current = location.pathname;
   }, [location.pathname, autoOffEnabled, isOpen, setIsOpen]);
 
 
