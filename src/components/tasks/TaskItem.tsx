@@ -199,6 +199,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        <span className="px-2 py-0.5 bg-[#252527] border border-[#414141] rounded-full text-xs text-white font-orbitron font-bold">K</span>
 
         {/* Action buttons on hover */}
         {isHovered && (
@@ -339,12 +340,42 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
         {task.priority && (() => {
           const style = getPriorityStyle(task.priority);
+          const getColorHex = (colorClass: string): string => {
+            const colorMap: { [key: string]: string } = {
+              'text-red-500': '#ef4444',
+              'text-orange-500': '#f97316',
+              'text-yellow-500': '#eab308',
+              'text-green-500': '#22c55e',
+              'text-blue-500': '#3b82f6',
+              'text-cyan-500': '#06b6d4',
+              'text-emerald-500': '#10b981',
+              'text-teal-500': '#14b8a6',
+              'text-sky-500': '#0ea5e9',
+              'text-amber-500': '#f59e0b',
+              'text-lime-500': '#84cc16',
+              'text-pink-500': '#ec4899',
+              'text-rose-500': '#f43f5e',
+              'text-fuchsia-500': '#d946ef',
+              'text-slate-400': '#cbd5e1',
+              'text-gray-400': '#9ca3af',
+              'text-zinc-400': '#a1a5ab',
+              'text-stone-400': '#a8a29e',
+              'text-purple-500': '#a855f7'
+            };
+            return colorMap[colorClass] || '#9ca3af';
+          };
           return (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${style.bg} ${style.text} cursor-help`}>
-                    <Flag className={`h-3 w-3 ${style.text}`} />
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 bg-transparent cursor-help border`}
+                    style={{
+                      borderColor: getColorHex(style.text),
+                      color: getColorHex(style.text)
+                    }}
+                  >
+                    <Flag className={`h-3 w-3`} style={{ color: getColorHex(style.text) }} />
                     <span>{task.priority}</span>
                   </span>
                 </TooltipTrigger>
