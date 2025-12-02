@@ -353,7 +353,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
       </div>
 
       {subtask.description && (
-        <div className="mb-3 flex items-start" style={{ marginLeft: `${depth * 24 + 24}px` }}>
+        <div className="mb-3 ml-6 flex items-start">
           <TooltipProvider delayDuration={100}>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -369,7 +369,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         </div>
       )}
 
-      <div className="flex items-center gap-2 flex-wrap mt-2" style={{ marginLeft: `${depth * 24 + 24}px` }}>
+      <div className="ml-6 flex items-center gap-2 flex-wrap mt-2">
         {(subtask.dueDate || subtask.time) && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
@@ -391,14 +391,43 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         )}
 
         {subtask.priority && (() => {
-          const style = getPriorityStyle(subtask.priority);
           const flagColor = getPriorityFlagColor(subtask.priority);
+          const getColorHex = (colorClass: string): string => {
+            const colorMap: { [key: string]: string } = {
+              'text-red-500': '#ef4444',
+              'text-orange-500': '#f97316',
+              'text-yellow-500': '#eab308',
+              'text-green-500': '#22c55e',
+              'text-blue-500': '#3b82f6',
+              'text-cyan-500': '#06b6d4',
+              'text-emerald-500': '#10b981',
+              'text-teal-500': '#14b8a6',
+              'text-sky-500': '#0ea5e9',
+              'text-amber-500': '#f59e0b',
+              'text-lime-500': '#84cc16',
+              'text-pink-500': '#ec4899',
+              'text-rose-500': '#f43f5e',
+              'text-fuchsia-500': '#d946ef',
+              'text-slate-400': '#cbd5e1',
+              'text-gray-400': '#9ca3af',
+              'text-zinc-400': '#a1a5ab',
+              'text-stone-400': '#a8a29e',
+              'text-purple-500': '#a855f7'
+            };
+            return colorMap[colorClass] || '#9ca3af';
+          };
           return (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${style.bg} ${style.text} cursor-help`}>
-                    <Flag className={`h-3 w-3 ${flagColor}`} />
+                  <span
+                    className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 bg-transparent cursor-help border`}
+                    style={{
+                      borderColor: getColorHex(flagColor),
+                      color: getColorHex(flagColor)
+                    }}
+                  >
+                    <Flag className={`h-3 w-3`} style={{ color: getColorHex(flagColor) }} />
                     <span>{subtask.priority}</span>
                   </span>
                 </TooltipTrigger>
