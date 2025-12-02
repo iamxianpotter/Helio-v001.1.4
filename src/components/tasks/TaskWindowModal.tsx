@@ -833,10 +833,9 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                 {!isAddingSubtask && (
                   <button
                     onClick={() => setIsAddingSubtask(true)}
-                    className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
+                    className="w-8 h-8 rounded-full bg-[#2e2e30] hover:bg-[#353537] transition-all duration-200 flex items-center justify-center"
                   >
-                    <Plus className="h-4 w-4" />
-                    Add nested task
+                    <Plus className="h-4 w-4 text-white" />
                   </button>
                 )}
 
@@ -934,10 +933,9 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
             {!isAddingSubtask && (
               <button
                 onClick={() => setIsAddingSubtask(true)}
-                className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
+                className="w-8 h-8 rounded-full bg-[#2e2e30] hover:bg-[#353537] transition-all duration-200 flex items-center justify-center"
               >
-                <Plus className="h-4 w-4" />
-                Add a subtask
+                <Plus className="h-4 w-4 text-white" />
               </button>
             )}
 
