@@ -94,6 +94,31 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [openedNestedSubtask, setOpenedNestedSubtask] = useState<Subtask | null>(null);
   const [parentSubtaskStack, setParentSubtaskStack] = useState<Subtask[]>([]);
 
+  const getPriorityFlagColor = (priority: string) => {
+    if (priority.startsWith('Priority ')) {
+      const level = parseInt(priority.replace('Priority ', ''));
+      const colorMap = {
+        1: 'text-red-500',
+        2: 'text-orange-500',
+        3: 'text-yellow-500',
+        4: 'text-green-500',
+        5: 'text-blue-500',
+        6: 'text-purple-500',
+      };
+      return colorMap[level as keyof typeof colorMap] || 'text-gray-400';
+    }
+    const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
+    if (customPrioritiesJson) {
+      const customPriorities = JSON.parse(customPrioritiesJson);
+      const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
+      if (customPriority) {
+        return customPriority.color;
+      }
+    }
+    const style = getPriorityStyle(priority);
+    return style.text || 'text-gray-400';
+  };
+
   useEffect(() => {
     setLocalTask(task);
     if (task) {
@@ -685,8 +710,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
 
                     {/* Priority */}
                     {(() => {
-                      const style = getPriorityStyle(localTask.priority);
-                      const flagColorClass = style.text;
+                      const flagColorClass = getPriorityFlagColor(localTask.priority);
                       return (
                         <div className="flex items-start gap-3">
                           <Flag className={`h-4 w-4 ${flagColorClass} flex-shrink-0 mt-1`} />

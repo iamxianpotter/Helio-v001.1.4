@@ -147,6 +147,31 @@ const TaskItem: React.FC<TaskItemProps> = ({
     return colorMap[colorClassFromStyle] || 'border-gray-400 hover:border-gray-300';
   };
 
+  const getPriorityFlagColor = (priority: string) => {
+    if (priority.startsWith('Priority ')) {
+      const level = parseInt(priority.replace('Priority ', ''));
+      const colorMap = {
+        1: 'text-red-500',
+        2: 'text-orange-500',
+        3: 'text-yellow-500',
+        4: 'text-green-500',
+        5: 'text-blue-500',
+        6: 'text-purple-500',
+      };
+      return colorMap[level as keyof typeof colorMap] || 'text-gray-400';
+    }
+    const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
+    if (customPrioritiesJson) {
+      const customPriorities = JSON.parse(customPrioritiesJson);
+      const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
+      if (customPriority) {
+        return customPriority.color;
+      }
+    }
+    const style = getPriorityStyle(priority);
+    return style.text || 'text-gray-400';
+  };
+
   return (
     <div
       key={task.id}
@@ -340,6 +365,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
         {task.priority && (() => {
           const style = getPriorityStyle(task.priority);
+          const flagColor = getPriorityFlagColor(task.priority);
           const getColorHex = (colorClass: string): string => {
             const colorMap: { [key: string]: string } = {
               'text-red-500': '#ef4444',
@@ -371,11 +397,11 @@ const TaskItem: React.FC<TaskItemProps> = ({
                   <span
                     className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 bg-transparent cursor-help border`}
                     style={{
-                      borderColor: getColorHex(style.text),
-                      color: getColorHex(style.text)
+                      borderColor: getColorHex(flagColor),
+                      color: getColorHex(flagColor)
                     }}
                   >
-                    <Flag className={`h-3 w-3`} style={{ color: getColorHex(style.text) }} />
+                    <Flag className={`h-3 w-3`} style={{ color: getColorHex(flagColor) }} />
                     <span>{task.priority}</span>
                   </span>
                 </TooltipTrigger>

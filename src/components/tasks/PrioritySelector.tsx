@@ -248,7 +248,7 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
                           : 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black'
                       )}
                     >
-                      <Flag className={cn("h-4 w-4 transition-all", tempSelectedPriority === customPri.name ? `${customPri.color} drop-shadow-lg` : customPri.color)} />
+                      <Flag className={cn("h-4 w-4 transition-all", `${customPri.color} drop-shadow-lg`)} />
                       <span className="truncate">{customPri.name}</span>
                     </Button>
                     <button
@@ -284,13 +284,13 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
                   key={priority.level}
                   variant="ghost"
                   size="sm"
-                  onClick={() => handlePrioritySelect(`Priority ${priority.level}`)}
+                  onClick={() => handlePrioritySelect(`Priority ${priority.level}`, priority.color)}
                   className={cn(
                     "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
                     getPriorityBg(`Priority ${priority.level}`, tempSelectedPriority === `Priority ${priority.level}`)
                   )}
                 >
-                  <Flag className={cn("h-4 w-4 transition-all", tempSelectedPriority === `Priority ${priority.level}` ? `${priority.color} drop-shadow-lg` : priority.color)} />
+                  <Flag className={cn("h-4 w-4 transition-all", `${priority.color} drop-shadow-lg`)} />
                   <span>Priority {priority.level}</span>
                 </Button>
               ))}

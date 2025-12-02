@@ -141,6 +141,31 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
     return colorMap[colorClassFromStyle] || 'border-gray-400 hover:border-gray-300';
   };
 
+  const getPriorityFlagColor = (priority: string) => {
+    if (priority.startsWith('Priority ')) {
+      const level = parseInt(priority.replace('Priority ', ''));
+      const colorMap = {
+        1: 'text-red-500',
+        2: 'text-orange-500',
+        3: 'text-yellow-500',
+        4: 'text-green-500',
+        5: 'text-blue-500',
+        6: 'text-purple-500',
+      };
+      return colorMap[level as keyof typeof colorMap] || 'text-gray-400';
+    }
+    const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
+    if (customPrioritiesJson) {
+      const customPriorities = JSON.parse(customPrioritiesJson);
+      const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
+      if (customPriority) {
+        return customPriority.color;
+      }
+    }
+    const style = getPriorityStyle(priority);
+    return style.text || 'text-gray-400';
+  };
+
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsDeleteConfirming(true);
@@ -367,12 +392,13 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
 
         {subtask.priority && (() => {
           const style = getPriorityStyle(subtask.priority);
+          const flagColor = getPriorityFlagColor(subtask.priority);
           return (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <span className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${style.bg} ${style.text} cursor-help`}>
-                    <Flag className={`h-3 w-3 ${style.text}`} />
+                    <Flag className={`h-3 w-3 ${flagColor}`} />
                     <span>{subtask.priority}</span>
                   </span>
                 </TooltipTrigger>
