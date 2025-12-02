@@ -269,6 +269,23 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
               <Button
                 variant="ghost"
                 size="sm"
+                onClick={() => {
+                  setTempSelectedReminder(undefined);
+                  onSelect(undefined);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                  !tempSelectedReminder
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                )}
+              >
+                None
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={() => handleReminderSelect('at-time')}
                 disabled={!selectedDate || !selectedTime}
                 className={cn(
@@ -278,7 +295,7 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
                     : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                 )}
               >
-                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === 'at-time' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === 'at-time' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                 At time
               </Button>
               <Button
@@ -293,7 +310,7 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
                     : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                 )}
               >
-                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '10m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '10m' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                 10 min
               </Button>
               <Button
@@ -308,7 +325,7 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
                     : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                 )}
               >
-                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '30m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '30m' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                 30 min
               </Button>
               <Button
@@ -323,7 +340,7 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
                     : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                 )}
               >
-                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '1h' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '1h' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                 1 hour
               </Button>
             </div>

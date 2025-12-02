@@ -438,6 +438,27 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => {
+                          setSelectedTime('');
+                          setTimeInputValue('');
+                          setParsedTime(null);
+                          setShowDateConfirmation(false);
+                          if (onTimeSelect) {
+                            onTimeSelect('');
+                          }
+                        }}
+                        className={cn(
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === ''
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
+                      >
+                        None
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => handleQuickTimeSelect('09:00')}
                         className={cn(
                           "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
@@ -446,7 +467,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '09:00 AM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '09:00 AM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         9:00 AM
                       </Button>
                       <Button
@@ -460,7 +481,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 PM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         12:00 PM
                       </Button>
                       <Button
@@ -474,7 +495,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '3:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '3:00 PM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         3:00 PM
                       </Button>
                       <Button
@@ -488,7 +509,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '6:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '6:00 PM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         6:00 PM
                       </Button>
                       <Button
@@ -502,7 +523,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '9:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '9:00 PM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         9:00 PM
                       </Button>
                       <Button
@@ -516,7 +537,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                         )}
                       >
-                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 AM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 AM' ? "text-black drop-shadow-lg" : "text-gray-400")} />
                         Midnight
                       </Button>
                     </div>

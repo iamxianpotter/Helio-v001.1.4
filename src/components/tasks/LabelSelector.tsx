@@ -216,13 +216,14 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
                       onClick={() => handleToggleLabel(label.name)}
                       disabled={!selectedLabels.includes(label.name) && selectedLabels.length >= 3}
                       className={cn(
-                        "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                        "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex gap-1",
                         selectedLabels.includes(label.name)
                           ? "bg-white text-black"
                           : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                       )}
                     >
-                      <Tag className={cn("h-4 w-4 transition-all", selectedLabels.includes(label.name) ? `${label.color} drop-shadow-lg` : label.color)} />
+                      <Tag className={cn("h-4 w-4 transition-all flex-shrink-0", selectedLabels.includes(label.name) ? `${label.color} drop-shadow-lg` : label.color)} />
+                      <span className="truncate">{label.name}</span>
                     </Button>
                     <button
                       onClick={(e) => handleDeleteLabel(label.name, e)}
@@ -249,13 +250,14 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
                   onClick={() => handleToggleLabel(preset.name)}
                   disabled={!selectedLabels.includes(preset.name) && selectedLabels.length >= 3}
                   className={cn(
-                    "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex gap-1",
                     selectedLabels.includes(preset.name)
                       ? "bg-white text-black"
                       : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                   )}
                 >
-                  <Tag className={cn("h-4 w-4 transition-all", selectedLabels.includes(preset.name) ? `${preset.color} drop-shadow-lg` : preset.color)} />
+                  <Tag className={cn("h-4 w-4 transition-all flex-shrink-0", selectedLabels.includes(preset.name) ? `${preset.color} drop-shadow-lg` : preset.color)} />
+                  <span className="truncate">{preset.name}</span>
                 </Button>
               ))}
             </div>
