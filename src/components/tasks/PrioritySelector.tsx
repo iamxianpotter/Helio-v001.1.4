@@ -80,7 +80,7 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
   };
 
   const handlePrioritySelect = (priority: string, color?: string) => {
-    setTempSelectedPriority(priority);
+    setTempSelectedPriority(priority === 'None' ? '' : priority);
     if (color) {
       setSelectedPriorityColor(color);
     }
@@ -108,27 +108,7 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
 
   const getPriorityBg = (priority: string, isSelected: boolean) => {
     if (!isSelected) return 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black';
-
-    if (priority.startsWith('Priority ')) {
-      const level = parseInt(priority.replace('Priority ', ''));
-      switch (level) {
-        case 1:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-red-500/50';
-        case 2:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-orange-500/50';
-        case 3:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-yellow-500/50';
-        case 4:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-green-500/50';
-        case 5:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-blue-500/50';
-        case 6:
-          return 'bg-white text-black hover:bg-white shadow-lg shadow-purple-500/50';
-        default:
-          return 'bg-[#252525] text-gray-300';
-      }
-    }
-    return 'bg-white text-black hover:bg-white shadow-lg shadow-gray-500/50';
+    return 'bg-white text-black hover:bg-white';
   };
 
   useEffect(() => {
@@ -181,10 +161,10 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
           size="sm"
           className={cn(
             "text-gray-400 hover:text-white hover:border hover:border-[#252232] hover:bg-[#1e1e1f] hover:rounded-[8px] px-3 py-1 h-8 whitespace-nowrap transition-all duration-200 border border-transparent",
-            selectedPriority && selectedPriority !== 'Priority 3' && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
+            selectedPriority && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
           )}
         >
-          <Flag className={cn("h-4 w-4 mr-2", getPriorityColor(selectedPriority))} />
+          <Flag className={cn("h-4 w-4 mr-2 transition-all", selectedPriority ? `${getPriorityColor(selectedPriority)} drop-shadow-lg` : "text-gray-400")} />
           Priority
         </Button>
       </PopoverTrigger>
@@ -264,21 +244,18 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
                       className={cn(
                         "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
                         tempSelectedPriority === customPri.name
-                          ? 'bg-white text-black shadow-lg'
+                          ? 'bg-white text-black'
                           : 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black'
                       )}
-                      style={tempSelectedPriority === customPri.name ? {
-                        boxShadow: `0 0 16px ${customPri.color.replace('text-', '').replace('-500', '')}`
-                      } : {}}
                     >
-                      <Flag className={cn("h-4 w-4", customPri.color)} />
+                      <Flag className={cn("h-4 w-4 transition-all", tempSelectedPriority === customPri.name ? `${customPri.color} drop-shadow-lg` : customPri.color)} />
                       <span className="truncate">{customPri.name}</span>
                     </Button>
                     <button
                       onClick={(e) => handleDeleteCustomPriority(customPri.name, e)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-0.5 hover:bg-red-500/20 rounded-md"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/30 rounded-md"
                     >
-                      <X className="h-3 w-3 text-red-400" />
+                      <X className="h-4 w-4 text-red-400" />
                     </button>
                   </div>
                 ))}
@@ -290,6 +267,18 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
           <div className="p-3 space-y-2">
             <div className="text-xs text-gray-500 mb-2">Default Priorities</div>
             <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handlePrioritySelect('None')}
+                className={cn(
+                  "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
+                  getPriorityBg('None', tempSelectedPriority === '')
+                )}
+              >
+                <Flag className={`h-4 w-4 ${tempSelectedPriority === '' ? 'text-gray-400 drop-shadow-lg' : 'text-gray-400'}`} />
+                <span>None</span>
+              </Button>
               {priorities.map((priority) => (
                 <Button
                   key={priority.level}
@@ -301,8 +290,8 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
                     getPriorityBg(`Priority ${priority.level}`, tempSelectedPriority === `Priority ${priority.level}`)
                   )}
                 >
-                  <Flag className={`h-4 w-4 ${priority.color} ${tempSelectedPriority === `Priority ${priority.level}` ? `drop-shadow-lg` : ''}`} style={tempSelectedPriority === `Priority ${priority.level}` ? { filter: `drop-shadow(0 0 8px ${priority.color.replace('text-', '')})` } : {}} />
-                  <span>P{priority.level}</span>
+                  <Flag className={cn("h-4 w-4 transition-all", tempSelectedPriority === `Priority ${priority.level}` ? `${priority.color} drop-shadow-lg` : priority.color)} />
+                  <span>Priority {priority.level}</span>
                 </Button>
               ))}
             </div>
