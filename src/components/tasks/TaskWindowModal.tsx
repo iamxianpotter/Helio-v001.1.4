@@ -77,6 +77,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   const [newSubtaskLabels, setNewSubtaskLabels] = useState<string[]>([]);
   const [newSubtaskRepeat, setNewSubtaskRepeat] = useState('');
   const [isAddingSubtask, setIsAddingSubtask] = useState(false);
+  const [isAddingNestedSubtask, setIsAddingNestedSubtask] = useState(false);
   const [localTask, setLocalTask] = useState<Task | null>(task);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; subtaskId: string } | null>(null);
   const [editingSubtaskId, setEditingSubtaskId] = useState<string | null>(null);
@@ -580,6 +581,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       setNewSubtaskLabels([]);
       setNewSubtaskRepeat('');
       setIsAddingSubtask(false);
+      setIsAddingNestedSubtask(false);
     }
   };
 
@@ -830,9 +832,9 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                   </div>
                 )}
 
-                {!isAddingSubtask && (
+                {!isAddingNestedSubtask && (
                   <button
-                    onClick={() => setIsAddingSubtask(true)}
+                    onClick={() => setIsAddingNestedSubtask(true)}
                     className="w-full flex items-center gap-2 px-3 py-2 text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors text-sm"
                   >
                     <Plus className="h-4 w-4" />
@@ -840,7 +842,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                   </button>
                 )}
 
-                {isAddingSubtask && (
+                {isAddingNestedSubtask && (
                   <TaskCreationForm
                     title={newSubtaskTitle}
                     onTitleChange={setNewSubtaskTitle}
@@ -858,7 +860,17 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                     onLabelsSelect={setNewSubtaskLabels}
                     selectedRepeat={newSubtaskRepeat}
                     onRepeatSelect={setNewSubtaskRepeat}
-                    onCancel={handleCancelSubtaskCreation}
+                    onCancel={() => {
+                      setIsAddingNestedSubtask(false);
+                      setNewSubtaskTitle('');
+                      setNewSubtaskDescription('');
+                      setNewSubtaskDate(undefined);
+                      setNewSubtaskTime('');
+                      setNewSubtaskPriority('Priority 3');
+                      setNewSubtaskReminder(undefined);
+                      setNewSubtaskLabels([]);
+                      setNewSubtaskRepeat('');
+                    }}
                     onSaveDraft={handleAddNestedSubtask}
                     onSave={handleAddNestedSubtask}
                     showDraftButton={false}
