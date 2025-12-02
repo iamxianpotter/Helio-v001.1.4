@@ -831,12 +831,15 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                 )}
 
                 {!isAddingSubtask && (
-                  <button
-                    onClick={() => setIsAddingSubtask(true)}
-                    className="w-8 h-8 rounded-full bg-[#2e2e30] hover:bg-[#353537] transition-all duration-200 flex items-center justify-center"
-                  >
-                    <Plus className="h-4 w-4 text-white" />
-                  </button>
+                  <div className="flex justify-center mt-4">
+                    <button
+                      onClick={() => setIsAddingSubtask(true)}
+                      className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-[20px] hover:bg-gray-200 transition-all duration-200 font-medium text-sm"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Subtask
+                    </button>
+                  </div>
                 )}
 
                 {isAddingSubtask && (
@@ -931,12 +934,15 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
 
             {/* Add Subtask Button or Form */}
             {!isAddingSubtask && (
-              <button
-                onClick={() => setIsAddingSubtask(true)}
-                className="w-8 h-8 rounded-full bg-[#2e2e30] hover:bg-[#353537] transition-all duration-200 flex items-center justify-center"
-              >
-                <Plus className="h-4 w-4 text-white" />
-              </button>
+              <div className="flex justify-center mt-4">
+                <button
+                  onClick={() => setIsAddingSubtask(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-white text-black rounded-[20px] hover:bg-gray-200 transition-all duration-200 font-medium text-sm"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Subtask
+                </button>
+              </div>
             )}
 
             {/* Add Subtask Form */}
