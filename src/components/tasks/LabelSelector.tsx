@@ -138,7 +138,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
             selectedLabels.length > 0 && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
           )}
         >
-          <Tag className={cn("h-4 w-4 mr-2", getButtonIconColor())} />
+          <Tag className={cn("h-4 w-4 mr-2 transition-all", selectedLabels.length > 0 ? `${getButtonIconColor()} drop-shadow-lg` : "text-gray-400")} />
           {selectedLabels.length > 0 ? `${selectedLabels.length} Label${selectedLabels.length > 1 ? 's' : ''}` : 'Label'}
         </Button>
       </PopoverTrigger>
@@ -215,21 +215,20 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
                     onClick={() => handleToggleLabel(label.name)}
                     disabled={!selectedLabels.includes(label.name) && selectedLabels.length >= 3}
                     className={cn(
-                      "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                      selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
+                      "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                      selectedLabels.includes(label.name)
+                        ? "bg-white text-black"
+                        : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                     )}
                   >
-                    <Tag className={cn("h-4 w-4 mr-2", label.color)} />
+                    <Tag className={cn("h-4 w-4 mr-2 transition-all", selectedLabels.includes(label.name) ? `${label.color} drop-shadow-lg` : label.color)} />
                     #{label.name}
-                    {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400 group-hover:hidden">✓</span>
-                    )}
                   </Button>
                   <button
                     onClick={(e) => handleDeleteLabel(label.name, e)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/20 rounded-md"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/30 rounded-md"
                   >
-                    <X className="h-3.5 w-3.5 text-red-400" />
+                    <X className="h-4 w-4 text-red-400" />
                   </button>
                 </div>
               ))}
@@ -248,15 +247,14 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
                 onClick={() => handleToggleLabel(preset.name)}
                 disabled={!selectedLabels.includes(preset.name) && selectedLabels.length >= 3}
                 className={cn(
-                  "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                  selectedLabels.includes(preset.name) && "bg-[#2e2e2e] text-white"
+                  "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                  selectedLabels.includes(preset.name)
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
                 )}
               >
-                <Tag className={cn("h-4 w-4 mr-2", preset.color)} />
+                <Tag className={cn("h-4 w-4 mr-2 transition-all", selectedLabels.includes(preset.name) ? `${preset.color} drop-shadow-lg` : preset.color)} />
                 {preset.name}
-                {selectedLabels.includes(preset.name) && (
-                  <span className="ml-auto text-green-400">✓</span>
-                )}
               </Button>
             ))}
           </div>

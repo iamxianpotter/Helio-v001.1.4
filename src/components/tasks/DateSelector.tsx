@@ -251,10 +251,10 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
           size="sm"
           className={cn(
             "text-gray-400 hover:text-white hover:border hover:border-[#252232] hover:bg-[#1e1e1f] hover:rounded-[8px] px-3 py-1 h-8 whitespace-nowrap transition-all duration-200 border border-transparent",
-            !selectedDate && "text-gray-400"
+            selectedDate && "text-white border-[#252232] bg-[#1e1e1f] rounded-[8px]"
           )}
         >
-          <CalendarIcon className="h-4 w-4 mr-2" />
+          <CalendarIcon className={cn("h-4 w-4 mr-2 transition-all", selectedDate ? "text-white drop-shadow-lg" : "text-gray-400")} />
           {selectedDate && isValid(selectedDate) ? format(selectedDate, "MMM dd") : "Date"}
         </Button>
       </PopoverTrigger>
@@ -439,48 +439,84 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('09:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '09:00 AM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '09:00 AM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         9:00 AM
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('12:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '12:00 PM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         12:00 PM
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('15:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '3:00 PM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '3:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         3:00 PM
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('18:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '6:00 PM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '6:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         6:00 PM
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('21:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '9:00 PM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '9:00 PM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         9:00 PM
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('00:00')}
-                        className="bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs"
+                        className={cn(
+                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          selectedTime === '12:00 AM'
+                            ? "bg-white text-black"
+                            : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                        )}
                       >
+                        <Clock className={cn("h-3.5 w-3.5 mr-1 transition-all", selectedTime === '12:00 AM' ? "text-white drop-shadow-lg" : "text-gray-400")} />
                         Midnight
                       </Button>
                     </div>
