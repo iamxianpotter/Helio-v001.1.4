@@ -220,156 +220,156 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         }}
         style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
       >
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-2">
-            {hasNestedSubtasks && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsNestedExpanded(!isNestedExpanded);
-                }}
-                className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
-              >
-                <ChevronDown
-                  className={`h-4 w-4 transition-transform ${isNestedExpanded ? 'rotate-0' : '-rotate-90'}`}
-                />
-              </button>
-            )}
-            <div
-              className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
-                subtask.completed
-                  ? 'bg-white border-white'
-                  : getPriorityCheckboxColor(subtask.priority)
-              }`}
+        <div className="flex items-center gap-2 mb-2">
+          {hasNestedSubtasks && (
+            <button
               onClick={(e) => {
                 e.stopPropagation();
-                onToggle(subtask.id);
+                setIsNestedExpanded(!isNestedExpanded);
               }}
-            />
+              className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+            >
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${isNestedExpanded ? 'rotate-0' : '-rotate-90'}`}
+              />
+            </button>
+          )}
+          <div
+            className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
+              subtask.completed
+                ? 'bg-white border-white'
+                : getPriorityCheckboxColor(subtask.priority)
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggle(subtask.id);
+            }}
+          />
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <h3 className={`text-base font-semibold flex-1 truncate ${
+                  subtask.completed ? 'text-gray-400 line-through' : 'text-white'
+                }`}>
+                  {subtask.title}
+                </h3>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                <p className="max-w-sm">{subtask.title}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+
+          {hasNestedSubtasks && (
             <TooltipProvider delayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <h3 className={`text-base font-semibold truncate ${
-                    subtask.completed ? 'text-gray-400 line-through' : 'text-white'
-                  }`}>
-                    {subtask.title}
-                  </h3>
+                  <span className="text-xs text-gray-400 bg-[#252527] px-2 py-1 rounded-full flex-shrink-0">
+                    {subtask.subtasks!.length}
+                  </span>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                  <p className="max-w-sm">{subtask.title}</p>
+                <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                  <p className="text-xs">{subtask.subtasks!.length} nested task{subtask.subtasks!.length !== 1 ? 's' : ''}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
+          )}
 
-            {subtask.description && (
-              <TooltipProvider delayDuration={100}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <p className="text-sm text-gray-300 cursor-help line-clamp-1">
-                      {subtask.description}
-                    </p>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                    <p className="max-w-sm">{subtask.description}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
+          {/* Action buttons on hover */}
+          {isHovered && (
+            <div className="flex items-center gap-1 ml-auto">
+              {!isDeleteConfirming ? (
+                <>
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpen?.(subtask.id);
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Open</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-            {hasNestedSubtasks && (
-              <TooltipProvider delayDuration={100}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <span className="text-xs text-gray-400 bg-[#252527] px-2 py-1 rounded-full flex-shrink-0">
-                      {subtask.subtasks!.length}
-                    </span>
-                  </TooltipTrigger>
-                  <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                    <p className="text-xs">{subtask.subtasks!.length} nested task{subtask.subtasks!.length !== 1 ? 's' : ''}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onMouseDown={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                          }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            onEdit(subtask.id);
+                          }}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Edit</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-            {/* Action buttons on hover */}
-            {isHovered && (
-              <div className="flex items-center gap-1 ml-auto flex-shrink-0">
-                {!isDeleteConfirming ? (
-                  <>
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpen?.(subtask.id);
-                            }}
-                            className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                          >
-                            <ChevronRight className="h-4 w-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                          <p className="text-xs">Open</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onMouseDown={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                            }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              e.preventDefault();
-                              onEdit(subtask.id);
-                            }}
-                            className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                          <p className="text-xs">Edit</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-
-                    <TooltipProvider delayDuration={100}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            onClick={handleDeleteClick}
-                            className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                          <p className="text-xs">Delete</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleConfirmDelete}
-                    className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
-                  >
-                    Confirm Delete
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={handleDeleteClick}
+                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Delete</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </>
+              ) : (
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
+                >
+                  Confirm Delete
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex items-center gap-2 flex-wrap">
+      {subtask.description && (
+        <div className="mb-3 ml-6 flex items-start">
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <p className="text-sm text-gray-300 cursor-help line-clamp-2">
+                  {subtask.description}
+                </p>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                <p className="max-w-sm">{subtask.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
+
+      <div className="ml-6 flex items-center gap-2 flex-wrap mt-2">
         {(subtask.dueDate || subtask.time) && (
           <TooltipProvider delayDuration={100}>
             <Tooltip>
