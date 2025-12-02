@@ -113,22 +113,22 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
       const level = parseInt(priority.replace('Priority ', ''));
       switch (level) {
         case 1:
-          return 'bg-red-500/20 text-red-400 hover:bg-red-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-red-500/50';
         case 2:
-          return 'bg-orange-500/20 text-orange-400 hover:bg-orange-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-orange-500/50';
         case 3:
-          return 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-yellow-500/50';
         case 4:
-          return 'bg-green-500/20 text-green-400 hover:bg-green-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-green-500/50';
         case 5:
-          return 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-blue-500/50';
         case 6:
-          return 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/20';
+          return 'bg-white text-black hover:bg-white shadow-lg shadow-purple-500/50';
         default:
           return 'bg-[#252525] text-gray-300';
       }
     }
-    return 'bg-gray-500/20 text-gray-400 hover:bg-gray-500/20';
+    return 'bg-white text-black hover:bg-white shadow-lg shadow-gray-500/50';
   };
 
   useEffect(() => {
@@ -254,51 +254,58 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({ selectedPriority, o
           {recentCustomPriorities.length > 0 && (
             <div className="p-3 space-y-2">
               <div className="text-xs text-gray-500 mb-2">Recent Custom</div>
-              {recentCustomPriorities.map((customPri, index) => (
-                <div key={index} className="relative group">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handlePrioritySelect(customPri.name, customPri.color)}
-                    className={cn(
-                      "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-2 transition-all duration-200",
-                      tempSelectedPriority === customPri.name
-                        ? 'bg-[#2e2e2e] text-white'
-                        : 'bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white'
-                    )}
-                  >
-                    <Flag className={cn("h-4 w-4", customPri.color)} />
-                    {customPri.name}
-                  </Button>
-                  <button
-                    onClick={(e) => handleDeleteCustomPriority(customPri.name, e)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/20 rounded-md"
-                  >
-                    <X className="h-3.5 w-3.5 text-red-400" />
-                  </button>
-                </div>
-              ))}
+              <div className="grid grid-cols-2 gap-2">
+                {recentCustomPriorities.map((customPri, index) => (
+                  <div key={index} className="relative group">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePrioritySelect(customPri.name, customPri.color)}
+                      className={cn(
+                        "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
+                        tempSelectedPriority === customPri.name
+                          ? 'bg-white text-black shadow-lg'
+                          : 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black'
+                      )}
+                      style={tempSelectedPriority === customPri.name ? {
+                        boxShadow: `0 0 16px ${customPri.color.replace('text-', '').replace('-500', '')}`
+                      } : {}}
+                    >
+                      <Flag className={cn("h-4 w-4", customPri.color)} />
+                      <span className="truncate">{customPri.name}</span>
+                    </Button>
+                    <button
+                      onClick={(e) => handleDeleteCustomPriority(customPri.name, e)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-0.5 hover:bg-red-500/20 rounded-md"
+                    >
+                      <X className="h-3 w-3 text-red-400" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {/* Priority Options */}
           <div className="p-3 space-y-2">
             <div className="text-xs text-gray-500 mb-2">Default Priorities</div>
-            {priorities.map((priority) => (
-              <Button
-                key={priority.level}
-                variant="ghost"
-                size="sm"
-                onClick={() => handlePrioritySelect(`Priority ${priority.level}`)}
-                className={cn(
-                  "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-2 transition-all duration-200",
-                  getPriorityBg(`Priority ${priority.level}`, tempSelectedPriority === `Priority ${priority.level}`)
-                )}
-              >
-                <Flag className={`h-4 w-4 ${priority.color}`} />
-                Priority {priority.level}
-              </Button>
-            ))}
+            <div className="grid grid-cols-2 gap-2">
+              {priorities.map((priority) => (
+                <Button
+                  key={priority.level}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handlePrioritySelect(`Priority ${priority.level}`)}
+                  className={cn(
+                    "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
+                    getPriorityBg(`Priority ${priority.level}`, tempSelectedPriority === `Priority ${priority.level}`)
+                  )}
+                >
+                  <Flag className={`h-4 w-4 ${priority.color} ${tempSelectedPriority === `Priority ${priority.level}` ? `drop-shadow-lg` : ''}`} style={tempSelectedPriority === `Priority ${priority.level}` ? { filter: `drop-shadow(0 0 8px ${priority.color.replace('text-', '')})` } : {}} />
+                  <span>P{priority.level}</span>
+                </Button>
+              ))}
+            </div>
           </div>
 
           {/* Confirmation */}
