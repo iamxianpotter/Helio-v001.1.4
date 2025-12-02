@@ -433,14 +433,14 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                   )}
 
                   {/* Quick Time Select Buttons */}
-                  <div className="p-3 space-y-2 flex-1 overflow-auto">
+                  <div className="p-3 flex-1 overflow-auto">
                     <div className="grid grid-cols-2 gap-2">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleQuickTimeSelect('09:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '09:00 AM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
@@ -454,7 +454,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         size="sm"
                         onClick={() => handleQuickTimeSelect('12:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '12:00 PM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
@@ -468,7 +468,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         size="sm"
                         onClick={() => handleQuickTimeSelect('15:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '3:00 PM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
@@ -482,7 +482,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         size="sm"
                         onClick={() => handleQuickTimeSelect('18:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '6:00 PM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
@@ -496,7 +496,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         size="sm"
                         onClick={() => handleQuickTimeSelect('21:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '9:00 PM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
@@ -510,7 +510,7 @@ const DateSelector: React.FC<DateSelectorProps> = ({ selectedDate, onSelect, onT
                         size="sm"
                         onClick={() => handleQuickTimeSelect('00:00')}
                         className={cn(
-                          "border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                          "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
                           selectedTime === '12:00 AM'
                             ? "bg-white text-black"
                             : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"

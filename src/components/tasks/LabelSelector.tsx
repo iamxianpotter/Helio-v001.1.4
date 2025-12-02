@@ -205,58 +205,60 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({ selectedLabels, onSelect 
           )}
 
           {availableLabels.length > 0 && (
-            <div className="px-3 pb-3 space-y-2">
+            <div className="p-3">
               <div className="text-xs text-gray-500 mb-2">Custom Labels</div>
-              {availableLabels.map((label, index) => (
-                <div key={index} className="relative group">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleLabel(label.name)}
-                    disabled={!selectedLabels.includes(label.name) && selectedLabels.length >= 3}
-                    className={cn(
-                      "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                      selectedLabels.includes(label.name)
-                        ? "bg-white text-black"
-                        : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-                    )}
-                  >
-                    <Tag className={cn("h-4 w-4 mr-2 transition-all", selectedLabels.includes(label.name) ? `${label.color} drop-shadow-lg` : label.color)} />
-                    #{label.name}
-                  </Button>
-                  <button
-                    onClick={(e) => handleDeleteLabel(label.name, e)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/30 rounded-md"
-                  >
-                    <X className="h-4 w-4 text-red-400" />
-                  </button>
-                </div>
-              ))}
+              <div className="grid grid-cols-2 gap-2">
+                {availableLabels.map((label, index) => (
+                  <div key={index} className="relative group">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleToggleLabel(label.name)}
+                      disabled={!selectedLabels.includes(label.name) && selectedLabels.length >= 3}
+                      className={cn(
+                        "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                        selectedLabels.includes(label.name)
+                          ? "bg-white text-black"
+                          : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                      )}
+                    >
+                      <Tag className={cn("h-4 w-4 transition-all", selectedLabels.includes(label.name) ? `${label.color} drop-shadow-lg` : label.color)} />
+                    </Button>
+                    <button
+                      onClick={(e) => handleDeleteLabel(label.name, e)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 p-1 hover:bg-red-500/30 rounded-md"
+                    >
+                      <X className="h-3 w-3 text-red-400" />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          <div className="p-3 space-y-2">
+          <div className="p-3">
             {availableLabels.length > 0 && (
               <div className="text-xs text-gray-500 mb-2">Preset Labels</div>
             )}
-            {presetLabels.map((preset, index) => (
-              <Button
-                key={index}
-                variant="ghost"
-                size="sm"
-                onClick={() => handleToggleLabel(preset.name)}
-                disabled={!selectedLabels.includes(preset.name) && selectedLabels.length >= 3}
-                className={cn(
-                  "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                  selectedLabels.includes(preset.name)
-                    ? "bg-white text-black"
-                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-                )}
-              >
-                <Tag className={cn("h-4 w-4 mr-2 transition-all", selectedLabels.includes(preset.name) ? `${preset.color} drop-shadow-lg` : preset.color)} />
-                {preset.name}
-              </Button>
-            ))}
+            <div className="grid grid-cols-2 gap-2">
+              {presetLabels.map((preset, index) => (
+                <Button
+                  key={index}
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleToggleLabel(preset.name)}
+                  disabled={!selectedLabels.includes(preset.name) && selectedLabels.length >= 3}
+                  className={cn(
+                    "w-full justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                    selectedLabels.includes(preset.name)
+                      ? "bg-white text-black"
+                      : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                  )}
+                >
+                  <Tag className={cn("h-4 w-4 transition-all", selectedLabels.includes(preset.name) ? `${preset.color} drop-shadow-lg` : preset.color)} />
+                </Button>
+              ))}
+            </div>
           </div>
         </div>
       </PopoverContent>

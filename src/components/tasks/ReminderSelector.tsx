@@ -261,70 +261,72 @@ const ReminderSelector: React.FC<ReminderSelectorProps> = ({ selectedReminder, o
             </div>
           )}
 
-          <div className="p-3 space-y-2">
+          <div className="p-3">
             {recentCustomReminders.length > 0 && (
               <div className="text-xs text-gray-500 mb-2">Default Reminders</div>
             )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleReminderSelect('at-time')}
-              disabled={!selectedDate || !selectedTime}
-              className={cn(
-                "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                tempSelectedReminder === 'at-time'
-                  ? "bg-white text-black"
-                  : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-              )}
-            >
-              <Bell className={cn("h-4 w-4 mr-2 transition-all", tempSelectedReminder === 'at-time' ? "text-white drop-shadow-lg" : "text-gray-400")} />
-              At the time of the tasks
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleReminderSelect('10m')}
-              disabled={!selectedDate || !selectedTime}
-              className={cn(
-                "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                tempSelectedReminder === '10m'
-                  ? "bg-white text-black"
-                  : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-              )}
-            >
-              <Bell className={cn("h-4 w-4 mr-2 transition-all", tempSelectedReminder === '10m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
-              10 minutes before
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleReminderSelect('30m')}
-              disabled={!selectedDate || !selectedTime}
-              className={cn(
-                "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                tempSelectedReminder === '30m'
-                  ? "bg-white text-black"
-                  : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-              )}
-            >
-              <Bell className={cn("h-4 w-4 mr-2 transition-all", tempSelectedReminder === '30m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
-              30 minutes before
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleReminderSelect('1h')}
-              disabled={!selectedDate || !selectedTime}
-              className={cn(
-                "w-full justify-start text-left border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
-                tempSelectedReminder === '1h'
-                  ? "bg-white text-black"
-                  : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
-              )}
-            >
-              <Bell className={cn("h-4 w-4 mr-2 transition-all", tempSelectedReminder === '1h' ? "text-white drop-shadow-lg" : "text-gray-400")} />
-              1 hour before
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReminderSelect('at-time')}
+                disabled={!selectedDate || !selectedTime}
+                className={cn(
+                  "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                  tempSelectedReminder === 'at-time'
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                )}
+              >
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === 'at-time' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                At time
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReminderSelect('10m')}
+                disabled={!selectedDate || !selectedTime}
+                className={cn(
+                  "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                  tempSelectedReminder === '10m'
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                )}
+              >
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '10m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                10 min
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReminderSelect('30m')}
+                disabled={!selectedDate || !selectedTime}
+                className={cn(
+                  "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                  tempSelectedReminder === '30m'
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                )}
+              >
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '30m' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                30 min
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => handleReminderSelect('1h')}
+                disabled={!selectedDate || !selectedTime}
+                className={cn(
+                  "justify-center items-center text-center border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+                  tempSelectedReminder === '1h'
+                    ? "bg-white text-black"
+                    : "bg-[#252525] text-gray-300 hover:bg-white hover:text-black"
+                )}
+              >
+                <Bell className={cn("h-4 w-4 mr-1 transition-all", tempSelectedReminder === '1h' ? "text-white drop-shadow-lg" : "text-gray-400")} />
+                1 hour
+              </Button>
+            </div>
           </div>
         </div>
       </PopoverContent>
