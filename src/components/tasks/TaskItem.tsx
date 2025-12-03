@@ -34,6 +34,7 @@ interface TaskItemProps {
   getLabelColor: (labelName: string) => string;
   getPriorityStyle: (priorityName: string) => { bg: string; text: string };
   isDeleted?: boolean;
+  onLabelClick?: (label: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -55,6 +56,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
   getLabelColor,
   getPriorityStyle,
   isDeleted = false,
+  onLabelClick,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
@@ -458,20 +460,32 @@ const TaskItem: React.FC<TaskItemProps> = ({
                     className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full hover:border-[#525252] transition-all duration-200 cursor-pointer w-fit"
                   >
                     {task.labels.map((label, index) => (
-                      <Tag
+                      <button
                         key={index}
-                        className={`h-4 w-4 ${getLabelColor(label)} transition-all duration-200`}
-                      />
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onLabelClick?.(label);
+                        }}
+                        className="hover:opacity-80 transition-opacity"
+                      >
+                        <Tag
+                          className={`h-4 w-4 ${getLabelColor(label)} transition-all duration-200`}
+                        />
+                      </button>
                     ))}
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border border-[#414141] z-50 p-2">
                   <div className="flex flex-col gap-2">
                     {task.labels.map((label, index) => (
-                      <div key={index} className="flex items-center gap-2">
+                      <button
+                        key={index}
+                        onClick={() => onLabelClick?.(label)}
+                        className="flex items-center gap-2 hover:opacity-70 transition-opacity text-left"
+                      >
                         <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
                         <span className="text-xs">{label}</span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </TooltipContent>
@@ -482,10 +496,14 @@ const TaskItem: React.FC<TaskItemProps> = ({
               <div className="absolute top-full mt-1 left-0 bg-[#1f1f1f] border border-[#414141] rounded-[12px] p-3 z-50 shadow-xl whitespace-nowrap">
                 <div className="flex flex-col gap-2">
                   {task.labels.map((label, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <button
+                      key={index}
+                      onClick={() => onLabelClick?.(label)}
+                      className="flex items-center gap-2 text-white hover:opacity-70 transition-opacity text-left"
+                    >
                       <Tag className={`h-4 w-4 ${getLabelColor(label)}`} />
-                      <span className="text-xs text-white">{label}</span>
-                    </div>
+                      <span className="text-xs">{label}</span>
+                    </button>
                   ))}
                 </div>
               </div>

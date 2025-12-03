@@ -796,6 +796,20 @@ const Tasks = () => {
                               getLabelColor={getLabelColor}
                               getPriorityStyle={getPriorityStyle}
                               isDeleted={currentTaskView === 'deleted'}
+                              onLabelClick={(label) => {
+                                const newValues = {
+                                  ...filterValues,
+                                  labels: [label]
+                                };
+                                setFilterValues(newValues);
+                                localStorage.setItem('kario-filter-values', JSON.stringify(newValues));
+                                const newSettings = {
+                                  ...filterSettings,
+                                  label: true
+                                };
+                                setFilterSettings(newSettings);
+                                localStorage.setItem('kario-filter-settings', JSON.stringify(newSettings));
+                              }}
                             />
                           )
                         ))}
@@ -919,6 +933,20 @@ const Tasks = () => {
                             getLabelColor={getLabelColor}
                             getPriorityStyle={getPriorityStyle}
                             isDeleted={currentTaskView === 'deleted'}
+                            onLabelClick={(label) => {
+                              const newValues = {
+                                ...filterValues,
+                                labels: [label]
+                              };
+                              setFilterValues(newValues);
+                              localStorage.setItem('kario-filter-values', JSON.stringify(newValues));
+                              const newSettings = {
+                                ...filterSettings,
+                                label: true
+                              };
+                              setFilterSettings(newSettings);
+                              localStorage.setItem('kario-filter-settings', JSON.stringify(newSettings));
+                            }}
                           />
                       )
                     ))
