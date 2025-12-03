@@ -141,10 +141,10 @@ const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({ selectedLabels,
                       selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
                     )}
                   >
-                    <Tag className={cn("h-4 w-4 mr-2", label.color)} />
-                    {label.name}
+                    <Tag className={cn("h-4 w-4 mr-2 flex-shrink-0", label.color)} />
+                    <span className="flex-1 truncate">{label.name}</span>
                     {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
+                      <span className="text-green-400 flex-shrink-0">✓</span>
                     )}
                   </Button>
                 ))}
@@ -169,10 +169,10 @@ const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({ selectedLabels,
                       selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
                     )}
                   >
-                    <Tag className={cn("h-4 w-4 mr-2", label.color)} />
-                    {label.name}
+                    <Tag className={cn("h-4 w-4 mr-2 flex-shrink-0", label.color)} />
+                    <span className="flex-1 truncate">{label.name}</span>
                     {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
+                      <span className="text-green-400 flex-shrink-0">✓</span>
                     )}
                   </Button>
                 ))}

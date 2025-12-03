@@ -108,9 +108,9 @@ const PriorityFilterPopover: React.FC<PriorityFilterPopoverProps> = ({ selectedP
                     )}
                   >
                     <Flag className={cn("w-3 h-3 mr-2 flex-shrink-0", priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
+                    <span className="flex-1 truncate">{priority.name}</span>
                     {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
+                      <span className="text-green-400 flex-shrink-0">✓</span>
                     )}
                   </Button>
                 ))}
@@ -136,9 +136,9 @@ const PriorityFilterPopover: React.FC<PriorityFilterPopoverProps> = ({ selectedP
                     )}
                   >
                     <Flag className={cn("w-3 h-3 mr-2 flex-shrink-0", priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
+                    <span className="flex-1 truncate">{priority.name}</span>
                     {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
+                      <span className="text-green-400 flex-shrink-0">✓</span>
                     )}
                   </Button>
                 ))}
