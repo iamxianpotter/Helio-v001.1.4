@@ -103,18 +103,18 @@ const InlinePriorityFilter: React.FC<InlinePriorityFilterProps> = ({
                       size="sm"
                       onClick={() => togglePriority(priority.name)}
                       className={cn(
-                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200 overflow-hidden',
                         selectedPriorities.includes(priority.name) && 'bg-white text-black hover:bg-white hover:text-black'
                       )}
                     >
-                      <Flag 
+                      <Flag
                         className={cn(
                           'w-3 h-3 mr-1.5 flex-shrink-0 transition-all duration-200',
                           priority.color,
                           selectedPriorities.includes(priority.name) && 'drop-shadow-[0_0_6px_currentColor]'
-                        )} 
+                        )}
                       />
-                      {priority.name}
+                      <span className="truncate">{priority.name}</span>
                     </Button>
                   ))}
                 </div>
@@ -135,18 +135,18 @@ const InlinePriorityFilter: React.FC<InlinePriorityFilterProps> = ({
                       size="sm"
                       onClick={() => togglePriority(priority.name)}
                       className={cn(
-                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200 overflow-hidden',
                         selectedPriorities.includes(priority.name) && 'bg-white text-black hover:bg-white hover:text-black'
                       )}
                     >
-                      <Flag 
+                      <Flag
                         className={cn(
                           'w-3 h-3 mr-1.5 flex-shrink-0 transition-all duration-200',
                           priority.color,
                           selectedPriorities.includes(priority.name) && 'drop-shadow-[0_0_6px_currentColor]'
-                        )} 
+                        )}
                       />
-                      {priority.name}
+                      <span className="truncate">{priority.name}</span>
                     </Button>
                   ))}
                 </div>

@@ -107,18 +107,18 @@ const InlineLabelFilter: React.FC<InlineLabelFilterProps> = ({
                       size="sm"
                       onClick={() => toggleLabel(label.name)}
                       className={cn(
-                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200 overflow-hidden',
                         selectedLabels.includes(label.name) && 'bg-white text-black hover:bg-white hover:text-black'
                       )}
                     >
-                      <Tag 
+                      <Tag
                         className={cn(
                           'h-3 w-3 mr-1.5 flex-shrink-0 transition-all duration-200',
                           label.color,
                           selectedLabels.includes(label.name) && 'drop-shadow-[0_0_6px_currentColor]'
-                        )} 
+                        )}
                       />
-                      {label.name}
+                      <span className="truncate">{label.name}</span>
                     </Button>
                   ))}
                 </div>
@@ -139,18 +139,18 @@ const InlineLabelFilter: React.FC<InlineLabelFilterProps> = ({
                       size="sm"
                       onClick={() => toggleLabel(label.name)}
                       className={cn(
-                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200',
+                        'w-full justify-center text-center bg-[#1b1b1b] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs font-normal transition-all duration-200 overflow-hidden',
                         selectedLabels.includes(label.name) && 'bg-white text-black hover:bg-white hover:text-black'
                       )}
                     >
-                      <Tag 
+                      <Tag
                         className={cn(
                           'h-3 w-3 mr-1.5 flex-shrink-0 transition-all duration-200',
                           label.color,
                           selectedLabels.includes(label.name) && 'drop-shadow-[0_0_6px_currentColor]'
-                        )} 
+                        )}
                       />
-                      {label.name}
+                      <span className="truncate">{label.name}</span>
                     </Button>
                   ))}
                 </div>
