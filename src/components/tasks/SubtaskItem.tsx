@@ -220,304 +220,310 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         }}
         style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
       >
-        <div className="flex items-center gap-2 mb-2">
-          {hasNestedSubtasks && (
-            <button
+        <div className="flex items-start gap-3">
+          <div className="flex-shrink-0 flex items-center gap-2 mt-1">
+            {hasNestedSubtasks && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsNestedExpanded(!isNestedExpanded);
+                }}
+                className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+              >
+                <ChevronDown
+                  className={`h-4 w-4 transition-transform ${isNestedExpanded ? 'rotate-0' : '-rotate-90'}`}
+                />
+              </button>
+            )}
+            <div
+              className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
+                subtask.completed
+                  ? 'bg-white border-white'
+                  : getPriorityCheckboxColor(subtask.priority)
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
-                setIsNestedExpanded(!isNestedExpanded);
+                onToggle(subtask.id);
               }}
-              className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
-            >
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${isNestedExpanded ? 'rotate-0' : '-rotate-90'}`}
-              />
-            </button>
-          )}
-          <div
-            className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
-              subtask.completed
-                ? 'bg-white border-white'
-                : getPriorityCheckboxColor(subtask.priority)
-            }`}
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle(subtask.id);
-            }}
-          />
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <h3 className={`text-base font-semibold flex-1 truncate ${
-                  subtask.completed ? 'text-gray-400 line-through' : 'text-white'
-                }`}>
-                  {subtask.title}
-                </h3>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                <p className="max-w-sm">{subtask.title}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+            />
+          </div>
 
-          {hasNestedSubtasks && (
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="text-xs text-gray-400 bg-[#252527] px-2 py-1 rounded-full flex-shrink-0">
-                    {subtask.subtasks!.length}
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                  <p className="text-xs">{subtask.subtasks!.length} nested task{subtask.subtasks!.length !== 1 ? 's' : ''}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <TooltipProvider delayDuration={100}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <h3 className={`text-base font-semibold flex-1 truncate ${
+                      subtask.completed ? 'text-gray-400 line-through' : 'text-white'
+                    }`}>
+                      {subtask.title}
+                    </h3>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                    <p className="max-w-sm">{subtask.title}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
 
-          {/* Action buttons on hover */}
-          {isHovered && (
-            <div className="flex items-center gap-1 ml-auto">
-              {!isDeleteConfirming ? (
-                <>
-                  <TooltipProvider delayDuration={100}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpen?.(subtask.id);
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                        <p className="text-xs">Open</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+              {hasNestedSubtasks && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span className="text-xs text-gray-400 bg-[#252527] px-2 py-1 rounded-full flex-shrink-0">
+                        {subtask.subtasks!.length}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                      <p className="text-xs">{subtask.subtasks!.length} nested task{subtask.subtasks!.length !== 1 ? 's' : ''}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
 
-                  <TooltipProvider delayDuration={100}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onMouseDown={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            onEdit(subtask.id);
-                          }}
-                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                        <p className="text-xs">Edit</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+              {isHovered && (
+                <div className="flex items-center gap-1 ml-auto">
+                  {!isDeleteConfirming ? (
+                    <>
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onOpen?.(subtask.id);
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                            >
+                              <ChevronRight className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                            <p className="text-xs">Open</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
 
-                  <TooltipProvider delayDuration={100}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={handleDeleteClick}
-                          className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                        <p className="text-xs">Delete</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </>
-              ) : (
-                <button
-                  onClick={handleConfirmDelete}
-                  className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
-                >
-                  Confirm Delete
-                </button>
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onMouseDown={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                              }}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                onEdit(subtask.id);
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                            <p className="text-xs">Edit</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+
+                      <TooltipProvider delayDuration={100}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              onClick={handleDeleteClick}
+                              className="p-1.5 rounded-lg hover:bg-[#2a2a2a] text-gray-400 hover:text-white transition-all"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                            <p className="text-xs">Delete</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </>
+                  ) : (
+                    <button
+                      onClick={handleConfirmDelete}
+                      className="px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-all text-xs font-medium"
+                    >
+                      Confirm Delete
+                    </button>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
-      </div>
-
-      {subtask.description && (
-        <div className="mb-3 ml-6 flex items-start">
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <p className="text-sm text-gray-300 cursor-help line-clamp-2">
-                  {subtask.description}
-                </p>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                <p className="max-w-sm">{subtask.description}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )}
-
-      <div className="ml-6 flex items-center gap-2 flex-wrap mt-2">
-        {(subtask.dueDate || subtask.time) && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full text-xs text-gray-300 cursor-help">
-                  <Calendar className="h-3 w-3" />
-                  <span>
-                    {subtask.dueDate && subtask.time ? `${subtask.dueDate} ${subtask.time}` : subtask.dueDate || subtask.time}
-                  </span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                <p className="text-xs">
-                  {subtask.dueDate && subtask.time ? `Due: ${subtask.dueDate} at ${subtask.time}` : `Due: ${subtask.dueDate || subtask.time}`}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
-        {subtask.priority && (() => {
-          const flagColor = getPriorityFlagColor(subtask.priority);
-          const getColorHex = (colorClass: string): string => {
-            const colorMap: { [key: string]: string } = {
-              'text-red-500': '#ef4444',
-              'text-orange-500': '#f97316',
-              'text-yellow-500': '#eab308',
-              'text-green-500': '#22c55e',
-              'text-blue-500': '#3b82f6',
-              'text-cyan-500': '#06b6d4',
-              'text-emerald-500': '#10b981',
-              'text-teal-500': '#14b8a6',
-              'text-sky-500': '#0ea5e9',
-              'text-amber-500': '#f59e0b',
-              'text-lime-500': '#84cc16',
-              'text-pink-500': '#ec4899',
-              'text-rose-500': '#f43f5e',
-              'text-fuchsia-500': '#d946ef',
-              'text-slate-400': '#cbd5e1',
-              'text-gray-400': '#9ca3af',
-              'text-zinc-400': '#a1a5ab',
-              'text-stone-400': '#a8a29e',
-              'text-purple-500': '#a855f7'
-            };
-            return colorMap[colorClass] || '#9ca3af';
-          };
-          return (
-            <TooltipProvider delayDuration={100}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 bg-transparent cursor-help border`}
-                    style={{
-                      borderColor: getColorHex(flagColor),
-                      color: getColorHex(flagColor)
-                    }}
-                  >
-                    <Flag className={`h-3 w-3`} style={{ color: getColorHex(flagColor) }} />
-                    <span>{subtask.priority}</span>
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                  <p className="text-xs">Priority: {subtask.priority}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          );
-        })()}
-
-        {subtask.reminder && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-help">
-                  <Bell className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-300">{subtask.reminder}</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                <p className="text-xs">Reminder: {subtask.reminder}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
-        {subtask.repeat && (
-          <TooltipProvider delayDuration={100}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-help">
-                  <Repeat className="h-3 w-3 text-gray-400" />
-                  <span className="text-xs text-gray-300">Repeats</span>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
-                <p className="text-xs">Repeats: {subtask.repeat.replace(/-/g, ' ')}</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        )}
-
-        {subtask.labels && subtask.labels.length > 0 && (
-          <div className="relative">
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onToggleLabels(subtask.id);
-                    }}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full hover:border-[#525252] transition-all duration-200 cursor-pointer w-fit"
-                  >
-                    {subtask.labels.map((label, index) => (
-                      <Tag
-                        key={index}
-                        className={`h-4 w-4 ${getLabelColor(label)} transition-all duration-200`}
-                      />
-                    ))}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border border-[#414141] z-50 p-2">
-                  <div className="flex flex-col gap-2">
-                    {subtask.labels.map((label, index) => (
-                      <div key={index} className="flex items-center gap-2">
-                        <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
-                        <span className="text-xs">{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {expandedLabelsSubtaskId === subtask.id && (
-              <div className="absolute top-full mt-1 left-0 bg-[#1f1f1f] border border-[#414141] rounded-[12px] p-3 z-50 shadow-xl whitespace-nowrap">
-                <div className="flex flex-col gap-2">
-                  {subtask.labels.map((label, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Tag className={`h-4 w-4 ${getLabelColor(label)}`} />
-                      <span className="text-xs text-white">{label}</span>
-                    </div>
-                  ))}
-                </div>
+            
+            {subtask.description && (
+              <div className="mt-1">
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <p className="text-sm text-gray-300 cursor-help line-clamp-2">
+                        {subtask.description}
+                      </p>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                      <p className="max-w-sm">{subtask.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             )}
+
+            <div className="flex items-center gap-2 flex-wrap mt-2">
+              {(subtask.dueDate || subtask.time) && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full text-xs text-gray-300 cursor-help">
+                        <Calendar className="h-3 w-3" />
+                        <span>
+                          {subtask.dueDate && subtask.time ? `${subtask.dueDate} ${subtask.time}` : subtask.dueDate || subtask.time}
+                        </span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                      <p className="text-xs">
+                        {subtask.dueDate && subtask.time ? `Due: ${subtask.dueDate} at ${subtask.time}` : `Due: ${subtask.dueDate || subtask.time}`}
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {subtask.priority && (() => {
+                const flagColor = getPriorityFlagColor(subtask.priority);
+                const getColorHex = (colorClass: string): string => {
+                  const colorMap: { [key: string]: string } = {
+                    'text-red-500': '#ef4444',
+                    'text-orange-500': '#f97316',
+                    'text-yellow-500': '#eab308',
+                    'text-green-500': '#22c55e',
+                    'text-blue-500': '#3b82f6',
+                    'text-cyan-500': '#06b6d4',
+                    'text-emerald-500': '#10b981',
+                    'text-teal-500': '#14b8a6',
+                    'text-sky-500': '#0ea5e9',
+                    'text-amber-500': '#f59e0b',
+                    'text-lime-500': '#84cc16',
+                    'text-pink-500': '#ec4899',
+                    'text-rose-500': '#f43f5e',
+                    'text-fuchsia-500': '#d946ef',
+                    'text-slate-400': '#cbd5e1',
+                    'text-gray-400': '#9ca3af',
+                    'text-zinc-400': '#a1a5ab',
+                    'text-stone-400': '#a8a29e',
+                    'text-purple-500': '#a855f7'
+                  };
+                  return colorMap[colorClass] || '#9ca3af';
+                };
+                return (
+                  <TooltipProvider delayDuration={100}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 bg-transparent cursor-help border`}
+                          style={{
+                            borderColor: getColorHex(flagColor),
+                            color: getColorHex(flagColor)
+                          }}
+                        >
+                          <Flag className={`h-3 w-3`} style={{ color: getColorHex(flagColor) }} />
+                          <span>{subtask.priority}</span>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                        <p className="text-xs">Priority: {subtask.priority}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                );
+              })()}
+
+              {subtask.reminder && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-help">
+                        <Bell className="h-3 w-3 text-gray-400" />
+                        <span className="text-xs text-gray-300">{subtask.reminder}</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                      <p className="text-xs">Reminder: {subtask.reminder}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {subtask.repeat && (
+                <TooltipProvider delayDuration={100}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-help">
+                        <Repeat className="h-3 w-3 text-gray-400" />
+                        <span className="text-xs text-gray-300">Repeats</span>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                      <p className="text-xs">Repeats: {subtask.repeat.replace(/-/g, ' ')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
+
+              {subtask.labels && subtask.labels.length > 0 && (
+                <div className="relative">
+                  <TooltipProvider delayDuration={200}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onToggleLabels(subtask.id);
+                          }}
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full hover:border-[#525252] transition-all duration-200 cursor-pointer w-fit"
+                        >
+                          {subtask.labels.map((label, index) => (
+                            <Tag
+                              key={index}
+                              className={`h-4 w-4 ${getLabelColor(label)} transition-all duration-200`}
+                            />
+                          ))}
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border border-[#414141] z-50 p-2">
+                        <div className="flex flex-col gap-2">
+                          {subtask.labels.map((label, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                              <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
+                              <span className="text-xs">{label}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {expandedLabelsSubtaskId === subtask.id && (
+                    <div className="absolute top-full mt-1 left-0 bg-[#1f1f1f] border border-[#414141] rounded-[12px] p-3 z-50 shadow-xl whitespace-nowrap">
+                      <div className="flex flex-col gap-2">
+                        {subtask.labels.map((label, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <Tag className={`h-4 w-4 ${getLabelColor(label)}`} />
+                            <span className="text-xs text-white">{label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {isNestedExpanded && hasNestedSubtasks && (
