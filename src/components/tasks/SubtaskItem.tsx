@@ -248,7 +248,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
             />
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 overflow-hidden">
             <div className="flex items-center gap-2">
               <TooltipProvider delayDuration={100}>
                 <Tooltip>
