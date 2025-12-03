@@ -6,6 +6,7 @@ import ReminderSelector from '@/components/tasks/ReminderSelector';
 import LabelSelector from '@/components/tasks/LabelSelector';
 import TaskItem from '@/components/tasks/TaskItem';
 import TaskWindowModal from '@/components/tasks/TaskWindowModal';
+import LabelDrawer from '@/components/tasks/LabelDrawer';
 import { Plus, ChevronRight, MoveVertical as MoreVertical, Calendar, Flag, Bell, Tag, Link, Edit, Trash2, Repeat } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -75,6 +76,7 @@ const Tasks = () => {
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
   const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
   const [parentTaskId, setParentTaskId] = useState('');
+  const [selectedLabelForDrawer, setSelectedLabelForDrawer] = useState<string | null>(null);
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -797,18 +799,7 @@ const Tasks = () => {
                               getPriorityStyle={getPriorityStyle}
                               isDeleted={currentTaskView === 'deleted'}
                               onLabelClick={(label) => {
-                                const newValues = {
-                                  ...filterValues,
-                                  labels: [label]
-                                };
-                                setFilterValues(newValues);
-                                localStorage.setItem('kario-filter-values', JSON.stringify(newValues));
-                                const newSettings = {
-                                  ...filterSettings,
-                                  label: true
-                                };
-                                setFilterSettings(newSettings);
-                                localStorage.setItem('kario-filter-settings', JSON.stringify(newSettings));
+                                setSelectedLabelForDrawer(label);
                               }}
                             />
                           )
@@ -934,18 +925,7 @@ const Tasks = () => {
                             getPriorityStyle={getPriorityStyle}
                             isDeleted={currentTaskView === 'deleted'}
                             onLabelClick={(label) => {
-                              const newValues = {
-                                ...filterValues,
-                                labels: [label]
-                              };
-                              setFilterValues(newValues);
-                              localStorage.setItem('kario-filter-values', JSON.stringify(newValues));
-                              const newSettings = {
-                                ...filterSettings,
-                                label: true
-                              };
-                              setFilterSettings(newSettings);
-                              localStorage.setItem('kario-filter-settings', JSON.stringify(newSettings));
+                              setSelectedLabelForDrawer(label);
                             }}
                           />
                       )
@@ -1162,6 +1142,29 @@ const Tasks = () => {
         onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
         isSubtaskOpened={isSubtaskOpened}
         parentTaskId={parentTaskId}
+      />
+
+      <LabelDrawer
+        isOpen={selectedLabelForDrawer !== null}
+        label={selectedLabelForDrawer}
+        tasks={selectedLabelForDrawer ? tasks.filter(t => t.labels?.includes(selectedLabelForDrawer)) : []}
+        onClose={() => setSelectedLabelForDrawer(null)}
+        draggedTaskId={draggedTaskId}
+        dragOverTaskId={dragOverTaskId}
+        expandedLabelsTaskId={expandedLabelsTaskId}
+        onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onToggle={handleToggleTask}
+        onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
+        onOpenTask={handleOpenTask}
+        onEditTask={handleEditTask}
+        onDeleteTask={handleDeleteTask}
+        getLabelColor={getLabelColor}
+        getPriorityStyle={getPriorityStyle}
       />
     </div>
   );
