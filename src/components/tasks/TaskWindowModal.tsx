@@ -679,7 +679,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
           {localTask.description && (
             <div>
               <h3 className="text-sm font-semibold text-gray-400 mb-2">Description</h3>
-              <p className="text-white whitespace-pre-wrap">{localTask.description}</p>
+              <p className="text-white whitespace-pre-wrap break-words">{localTask.description}</p>
             </div>
           )}
 
