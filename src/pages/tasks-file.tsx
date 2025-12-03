@@ -1165,6 +1165,26 @@ const Tasks = () => {
         onDeleteTask={handleDeleteTask}
         getLabelColor={getLabelColor}
         getPriorityStyle={getPriorityStyle}
+        editingTaskId={editingTaskId}
+        editTitle={editTitle}
+        editDescription={editDescription}
+        editPriority={editPriority}
+        editDate={editDate}
+        selectedTime={selectedTime}
+        selectedReminder={selectedReminder}
+        selectedLabels={selectedLabels}
+        selectedRepeat={selectedRepeat}
+        onSetEditTitle={setEditTitle}
+        onSetEditDescription={setEditDescription}
+        onSetEditPriority={setEditPriority}
+        onSetEditDate={setEditDate}
+        onSetSelectedTime={setSelectedTime}
+        onSetSelectedReminder={setSelectedReminder}
+        onSetSelectedLabels={setSelectedLabels}
+        onSetSelectedRepeat={setSelectedRepeat}
+        onSaveEdit={handleSaveEdit}
+        onSaveDraftEdit={handleSaveDraftEdit}
+        onCancelEdit={handleCancelEdit}
       />
     </div>
   );
