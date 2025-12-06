@@ -764,7 +764,8 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                         {localTask.labels.map((label, index) => (
                           <div
                             key={index}
-                            className="flex items-center gap-2 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full"
+                            onClick={onClose}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-pointer hover:bg-[#2a2a2c] transition-colors"
                           >
                             <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
                             <span className="text-xs text-gray-300">{label}</span>
