@@ -710,14 +710,17 @@ const Todos = () => {
           {sections.map((section) => (
             <div key={section.id} className="space-y-3">
               {/* Section Header */}
-              <div className="flex items-center gap-3 mb-4">
+              <div
+                className="flex items-center gap-3 mb-4"
+                onContextMenu={(e) => handleButtonRightClick(e, section.id)}
+              >
                 {section.isEditing ? (
                   <Input
                     ref={(el) => (inputRefs.current[section.id] = el)}
                     value={section.name}
                     onChange={(e) => {
                       const newName = e.target.value;
-                      setSections(prev => prev.map(s => 
+                      setSections(prev => prev.map(s =>
                         s.id === section.id ? { ...s, name: newName } : s
                       ));
                     }}
@@ -727,14 +730,14 @@ const Todos = () => {
                     placeholder="Enter section name..."
                   />
                 ) : (
-                  <h2 
+                  <h2
                     className="text-xl font-semibold text-white cursor-pointer hover:text-gray-300 transition-colors duration-200"
                     onClick={() => startEditingSection(section.id)}
                   >
                     {section.name || 'Untitled Section'}
                   </h2>
                 )}
-                
+
                 {/* Add Todo Button for this section */}
                 <Button
                   onClick={() => handleButtonClick(section.id)}
