@@ -378,6 +378,11 @@ const Tasks = () => {
     setContextMenu(null);
   };
 
+  const handleOpenTaskFromDrawer = (taskId: string) => {
+    handleOpenTask(taskId);
+    setSelectedLabelForDrawer(null);
+  };
+
   const handleOpenSubtaskAsTask = (subtask: any, parentId?: string) => {
     const subtaskAsTask: Task = {
       id: subtask.id,
@@ -1160,7 +1165,7 @@ const Tasks = () => {
         onDragEnd={handleDragEnd}
         onToggle={handleToggleTask}
         onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
-        onOpenTask={handleOpenTask}
+        onOpenTask={handleOpenTaskFromDrawer}
         onEditTask={handleEditTask}
         onDeleteTask={handleDeleteTask}
         getLabelColor={getLabelColor}
