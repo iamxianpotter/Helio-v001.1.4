@@ -48,6 +48,7 @@ const Todos = () => {
     chats: false
   });
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sectionId?: string } | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
 
   const handleTodoClick = (id: string, e: React.MouseEvent) => {
@@ -324,6 +325,38 @@ const Todos = () => {
 
   const deleteSection = (id: string) => {
     setSections(prev => prev.filter(section => section.id !== id));
+  };
+
+  const handleButtonRightClick = (e: React.MouseEvent, sectionId?: string) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY, sectionId });
+  };
+
+  const handleAddSection = () => {
+    createNewSection();
+    setContextMenu(null);
+  };
+
+  const handleSelect = () => {
+    if (contextMenu?.sectionId) {
+      setSections(prev => prev.map(section =>
+        section.id === contextMenu.sectionId
+          ? { ...section, todos: section.todos.map(todo => ({ ...todo, selected: true })) }
+          : section
+      ));
+    }
+    setContextMenu(null);
+  };
+
+  const handleKairo = () => {
+    if (contextMenu?.sectionId) {
+      const selectedData = {
+        sectionId: contextMenu.sectionId,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('kario-selected-section', JSON.stringify(selectedData));
+    }
+    setContextMenu(null);
   };
 
   // Calculate totals across all free todos and sections
@@ -635,6 +668,42 @@ const Todos = () => {
         </div>
       )}
 
+      {/* Context Menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setContextMenu(null)}
+          />
+          <div
+            className="fixed z-50 bg-[#1F1F1F] border border-[#414141] rounded-lg shadow-lg py-1"
+            style={{
+              top: `${contextMenu.y}px`,
+              left: `${contextMenu.x}px`,
+            }}
+          >
+            <button
+              onClick={handleAddSection}
+              className="w-full px-4 py-2 text-left text-gray-300 hover:bg-[#2e2e30] hover:text-white transition-colors text-sm"
+            >
+              Add Section
+            </button>
+            <button
+              onClick={handleSelect}
+              className="w-full px-4 py-2 text-left text-gray-300 hover:bg-[#2e2e30] hover:text-white transition-colors text-sm"
+            >
+              Select
+            </button>
+            <button
+              onClick={handleKairo}
+              className="w-full px-4 py-2 text-left font-orbitron font-bold text-gray-300 hover:bg-[#2e2e30] hover:text-white transition-colors text-sm"
+            >
+              Kairo
+            </button>
+          </div>
+        </>
+      )}
+
       {/* Sections List */}
       <div className="px-4 mt-8">
         <div className="ml-20 space-y-8">
@@ -669,6 +738,7 @@ const Todos = () => {
                 {/* Add Todo Button for this section */}
                 <Button
                   onClick={() => handleButtonClick(section.id)}
+                  onContextMenu={(e) => handleButtonRightClick(e, section.id)}
                   className="w-8 h-8 rounded-full bg-[#2e2e30] hover:bg-[#353537] transition-all duration-200"
                   size="icon"
                 >
