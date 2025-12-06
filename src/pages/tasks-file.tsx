@@ -6,6 +6,7 @@ import ReminderSelector from '@/components/tasks/ReminderSelector';
 import LabelSelector from '@/components/tasks/LabelSelector';
 import TaskItem from '@/components/tasks/TaskItem';
 import TaskWindowModal from '@/components/tasks/TaskWindowModal';
+import LabelDrawer from '@/components/tasks/LabelDrawer';
 import { Plus, ChevronRight, MoveVertical as MoreVertical, Calendar, Flag, Bell, Tag, Link, Edit, Trash2, Repeat } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -50,6 +51,7 @@ const Tasks = () => {
   const [selectedReminder, setSelectedReminder] = useState<string | undefined>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string } | null>(null);
+  const [pageContextMenu, setPageContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
   const [newTaskDescription, setNewTaskDescription] = useState('');
@@ -75,6 +77,7 @@ const Tasks = () => {
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
   const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
   const [parentTaskId, setParentTaskId] = useState('');
+  const [selectedLabelForDrawer, setSelectedLabelForDrawer] = useState<string | null>(null);
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -260,7 +263,41 @@ const Tasks = () => {
 
   const handleContextMenu = (e: React.MouseEvent, taskId: string) => {
     e.preventDefault();
-    setContextMenu({ x: e.clientX, y: e.clientY, taskId });
+    e.stopPropagation();
+
+    const menuWidth = 180;
+    const menuHeight = 160; // Estimated height
+    let x = e.clientX;
+    let y = e.clientY;
+
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 5;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 5;
+    }
+
+    setPageContextMenu(null);
+    setContextMenu({ x, y, taskId });
+  };
+
+  const handlePageContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+
+    const menuWidth = 180;
+    const menuHeight = 160; // Estimated height
+    let x = e.clientX;
+    let y = e.clientY;
+
+    if (x + menuWidth > window.innerWidth) {
+      x = window.innerWidth - menuWidth - 5;
+    }
+    if (y + menuHeight > window.innerHeight) {
+      y = window.innerHeight - menuHeight - 5;
+    }
+
+    setContextMenu(null);
+    setPageContextMenu({ x, y });
   };
 
   const handleDeleteTask = (taskId: string) => {
@@ -376,6 +413,20 @@ const Tasks = () => {
     setContextMenu(null);
   };
 
+  const handleOpenTaskFromDrawer = (taskId: string) => {
+    handleOpenTask(taskId);
+    setSelectedLabelForDrawer(null);
+  };
+
+  const handleLabelClickFromDrawer = (labelName: string) => {
+    setSelectedLabelForDrawer(labelName);
+  };
+
+  const handleLabelClickFromModal = (labelName: string) => {
+    setSelectedTaskForModal(null);
+    setSelectedLabelForDrawer(labelName);
+  };
+
   const handleOpenSubtaskAsTask = (subtask: any, parentId?: string) => {
     const subtaskAsTask: Task = {
       id: subtask.id,
@@ -412,6 +463,7 @@ const Tasks = () => {
   React.useEffect(() => {
     const handleClick = () => {
       setContextMenu(null);
+      setPageContextMenu(null);
       setExpandedLabelsTaskId(null);
     };
     document.addEventListener('click', handleClick);
@@ -592,7 +644,7 @@ const Tasks = () => {
   const displayedTasks = currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks);
 
   return (
-    <div className="min-h-screen w-full bg-[#161618]">
+    <div className="min-h-screen w-full bg-[#161618] flex flex-col">
       <TasksHeader
         totalTasks={totalTasks}
         completedTasks={completedTasks}
@@ -624,7 +676,7 @@ const Tasks = () => {
       
       {/* LIST View Content */}
       {currentView === 'list' && (
-        <div className="px-4 mt-4">
+        <div onContextMenu={handlePageContextMenu} className="px-4 mt-4 flex-grow">
           <div className="ml-20">
             
             {/* Information text for deleted section */}
@@ -796,6 +848,9 @@ const Tasks = () => {
                               getLabelColor={getLabelColor}
                               getPriorityStyle={getPriorityStyle}
                               isDeleted={currentTaskView === 'deleted'}
+                              onLabelClick={(label) => {
+                                setSelectedLabelForDrawer(label);
+                              }}
                             />
                           )
                         ))}
@@ -919,6 +974,9 @@ const Tasks = () => {
                             getLabelColor={getLabelColor}
                             getPriorityStyle={getPriorityStyle}
                             isDeleted={currentTaskView === 'deleted'}
+                            onLabelClick={(label) => {
+                              setSelectedLabelForDrawer(label);
+                            }}
                           />
                       )
                     ))
@@ -1046,94 +1104,294 @@ const Tasks = () => {
         </div>
       )}
 
-      {/* Context Menu */}
-      {contextMenu && (
-        <div
-          className="fixed shadow-xl py-2 px-2 z-50"
-          style={{
-            left: `${contextMenu.x}px`,
-            top: `${contextMenu.y}px`,
-            borderRadius: '16px',
-            background: '#1f1f1f',
-            width: '180px',
-            border: 'none'
-          }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-            onClick={() => handleOpenTask(contextMenu.taskId)}
-          >
-            <ChevronRight className="w-4 h-4" />
-            <span>Open</span>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-            onClick={() => handleEditTask(contextMenu.taskId)}
-          >
-            <Edit className="w-4 h-4" />
-            <span>Edit</span>
-          </button>
-          <button
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-            onClick={() => handleDeleteTask(contextMenu.taskId)}
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>Delete</span>
-          </button>
-        </div>
-      )}
+            {/* Context Menu */}
 
-      <TaskWindowModal
-        task={selectedTaskForModal}
-        onClose={handleCloseModal}
+            {contextMenu && (
+
+              <div
+
+                className="fixed shadow-xl py-2 px-2 z-50"
+
+                style={{
+
+                  left: `${contextMenu.x}px`,
+
+                  top: `${contextMenu.y}px`,
+
+                  borderRadius: '16px',
+
+                  background: '#1f1f1f',
+
+                  width: '180px',
+
+                  border: 'none'
+
+                }}
+
+                onClick={(e) => e.stopPropagation()}
+
+              >
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                  onClick={() => handleOpenTask(contextMenu.taskId)}
+
+                >
+
+                  <ChevronRight className="w-4 h-4" />
+
+                  <span>Open</span>
+
+                </button>
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                  onClick={() => handleEditTask(contextMenu.taskId)}
+
+                >
+
+                  <Edit className="w-4 h-4" />
+
+                  <span>Edit</span>
+
+                </button>
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                  onClick={() => handleDeleteTask(contextMenu.taskId)}
+
+                >
+
+                  <Trash2 className="w-4 h-4" />
+
+                  <span>Delete</span>
+
+                </button>
+
+              </div>
+
+            )}
+
+      
+
+            {/* Page Context Menu */}
+
+            {pageContextMenu && (
+
+              <div
+
+                className="fixed shadow-xl py-2 px-2 z-50"
+
+                style={{
+
+                  left: `${pageContextMenu.x}px`,
+
+                  top: `${pageContextMenu.y}px`,
+
+                  borderRadius: '16px',
+
+                  background: '#1f1f1f',
+
+                  width: '180px',
+
+                  border: 'none'
+
+                }}
+
+                onClick={(e) => e.stopPropagation()}
+
+              >
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                >
+
+                  <span>Add Section</span>
+
+                </button>
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                >
+
+                  <span>Select</span>
+
+                </button>
+
+                <button
+
+                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+
+                >
+
+                  <span className="font-orbitron">Kairo</span>
+
+                </button>
+
+              </div>
+
+            )}
+
+      
+
+      
+
+            <TaskWindowModal
+
+              task={selectedTaskForModal}
+
+              onClose={handleCloseModal}
+
+              getLabelColor={getLabelColor}
+
+              getPriorityStyle={getPriorityStyle}
+
+              onTaskUpdate={(updatedTask) => {
+
+                if (isSubtaskOpened && parentTaskId) {
+
+                  const updatedTasks = tasks.map(t => {
+
+                    if (t.id === parentTaskId) {
+
+                      const updateSubtaskInTask = (task: Task, updated: Task): Task => {
+
+                        const updateRecursively = (subtasks: any[] = []): any[] => {
+
+                          return subtasks.map(st =>
+
+                            st.id === updated.id
+
+                              ? {
+
+                                  ...st,
+
+                                  title: updated.title,
+
+                                  description: updated.description,
+
+                                  completed: updated.completed,
+
+                                  dueDate: updated.dueDate,
+
+                                  time: updated.time,
+
+                                  priority: updated.priority,
+
+                                  reminder: updated.reminder,
+
+                                  labels: updated.labels,
+
+                                  repeat: updated.repeat,
+
+                                  subtasks: updated.subtasks
+
+                                }
+
+                              : { ...st, subtasks: st.subtasks ? updateRecursively(st.subtasks) : undefined }
+
+                          );
+
+                        };
+
+                        return { ...task, subtasks: updateRecursively(task.subtasks) };
+
+                      };
+
+                      return updateSubtaskInTask(t, updatedTask);
+
+                    }
+
+                    return t;
+
+                  });
+
+                  setTasks(updatedTasks);
+
+                  localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+
+                } else {
+
+                  const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
+
+                  setTasks(updatedTasks);
+
+                  localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+
+                }
+
+              }}
+
+              onNavigate={handleNavigateTask}
+
+              allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
+
+              currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
+
+              sectionName="Tasks Made By Kairo"
+
+              onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
+
+              isSubtaskOpened={isSubtaskOpened}
+
+              parentTaskId={parentTaskId}
+
+              onLabelClick={handleLabelClickFromModal}
+
+            />
+
+      <LabelDrawer
+        isOpen={selectedLabelForDrawer !== null}
+        label={selectedLabelForDrawer}
+        tasks={selectedLabelForDrawer ? tasks.filter(t => t.labels?.includes(selectedLabelForDrawer)) : []}
+        onClose={() => setSelectedLabelForDrawer(null)}
+        draggedTaskId={draggedTaskId}
+        dragOverTaskId={dragOverTaskId}
+        expandedLabelsTaskId={expandedLabelsTaskId}
+        onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onDragEnd={handleDragEnd}
+        onToggle={handleToggleTask}
+        onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
+        onOpenTask={handleOpenTaskFromDrawer}
+        onEditTask={handleEditTask}
+        onDeleteTask={handleDeleteTask}
+        onLabelClick={handleLabelClickFromDrawer}
         getLabelColor={getLabelColor}
         getPriorityStyle={getPriorityStyle}
-        onTaskUpdate={(updatedTask) => {
-          if (isSubtaskOpened && parentTaskId) {
-            const updatedTasks = tasks.map(t => {
-              if (t.id === parentTaskId) {
-                const updateSubtaskInTask = (task: Task, updated: Task): Task => {
-                  const updateRecursively = (subtasks: any[] = []): any[] => {
-                    return subtasks.map(st =>
-                      st.id === updated.id
-                        ? {
-                            ...st,
-                            title: updated.title,
-                            description: updated.description,
-                            completed: updated.completed,
-                            dueDate: updated.dueDate,
-                            time: updated.time,
-                            priority: updated.priority,
-                            reminder: updated.reminder,
-                            labels: updated.labels,
-                            repeat: updated.repeat,
-                            subtasks: updated.subtasks
-                          }
-                        : { ...st, subtasks: st.subtasks ? updateRecursively(st.subtasks) : undefined }
-                    );
-                  };
-                  return { ...task, subtasks: updateRecursively(task.subtasks) };
-                };
-                return updateSubtaskInTask(t, updatedTask);
-              }
-              return t;
-            });
-            setTasks(updatedTasks);
-            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-          } else {
-            const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
-            setTasks(updatedTasks);
-            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-          }
-        }}
-        onNavigate={handleNavigateTask}
-        allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
-        currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
-        sectionName="Tasks Made By Kairo"
-        onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
-        isSubtaskOpened={isSubtaskOpened}
-        parentTaskId={parentTaskId}
+        editingTaskId={editingTaskId}
+        editTitle={editTitle}
+        editDescription={editDescription}
+        editPriority={editPriority}
+        editDate={editDate}
+        selectedTime={selectedTime}
+        selectedReminder={selectedReminder}
+        selectedLabels={selectedLabels}
+        selectedRepeat={selectedRepeat}
+        onSetEditTitle={setEditTitle}
+        onSetEditDescription={setEditDescription}
+        onSetEditPriority={setEditPriority}
+        onSetEditDate={setEditDate}
+        onSetSelectedTime={setSelectedTime}
+        onSetSelectedReminder={setSelectedReminder}
+        onSetSelectedLabels={setSelectedLabels}
+        onSetSelectedRepeat={setSelectedRepeat}
+        onSaveEdit={handleSaveEdit}
+        onSaveDraftEdit={handleSaveDraftEdit}
+        onCancelEdit={handleCancelEdit}
       />
     </div>
   );
