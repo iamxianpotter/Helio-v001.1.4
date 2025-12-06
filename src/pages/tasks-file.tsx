@@ -387,6 +387,11 @@ const Tasks = () => {
     setSelectedLabelForDrawer(labelName);
   };
 
+  const handleLabelClickFromModal = (labelName: string) => {
+    setSelectedTaskForModal(null);
+    setSelectedLabelForDrawer(labelName);
+  };
+
   const handleOpenSubtaskAsTask = (subtask: any, parentId?: string) => {
     const subtaskAsTask: Task = {
       id: subtask.id,
@@ -1151,6 +1156,7 @@ const Tasks = () => {
         onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
         isSubtaskOpened={isSubtaskOpened}
         parentTaskId={parentTaskId}
+        onLabelClick={handleLabelClickFromModal}
       />
 
       <LabelDrawer

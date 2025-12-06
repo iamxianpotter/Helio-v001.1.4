@@ -50,6 +50,7 @@ interface TaskWindowModalProps {
   onOpenSubtaskAsTask?: (subtask: any) => void;
   isSubtaskOpened?: boolean;
   parentTaskId?: string;
+  onLabelClick?: (label: string) => void;
 }
 
 const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
@@ -65,6 +66,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
   onOpenSubtaskAsTask,
   isSubtaskOpened = false,
   parentTaskId = '',
+  onLabelClick,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(true);
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
@@ -764,7 +766,10 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                         {localTask.labels.map((label, index) => (
                           <div
                             key={index}
-                            onClick={onClose}
+                            onClick={() => {
+                              onLabelClick?.(label);
+                              onClose();
+                            }}
                             className="flex items-center gap-2 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full cursor-pointer hover:bg-[#2a2a2c] transition-colors"
                           >
                             <Tag className={`h-3 w-3 ${getLabelColor(label)}`} />
