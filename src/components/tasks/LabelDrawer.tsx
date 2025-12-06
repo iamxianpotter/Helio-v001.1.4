@@ -43,6 +43,7 @@ interface LabelDrawerProps {
   onOpenTask: (taskId: string) => void;
   onEditTask: (taskId: string) => void;
   onDeleteTask: (taskId: string) => void;
+  onLabelClick?: (labelName: string) => void;
   getLabelColor: (labelName: string) => string;
   getPriorityStyle: (priorityName: string) => { bg: string; text: string };
   editingTaskId?: string | null;
@@ -86,6 +87,7 @@ const LabelDrawer: React.FC<LabelDrawerProps> = ({
   onOpenTask,
   onEditTask,
   onDeleteTask,
+  onLabelClick = () => {},
   getLabelColor,
   getPriorityStyle,
   editingTaskId,
@@ -320,7 +322,7 @@ const LabelDrawer: React.FC<LabelDrawerProps> = ({
                         onDeleteTask={onDeleteTask}
                         getLabelColor={getLabelColor}
                         getPriorityStyle={getPriorityStyle}
-                        onLabelClick={() => {}}
+                        onLabelClick={onLabelClick}
                       />
                     )
                   ))}

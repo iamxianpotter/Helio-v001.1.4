@@ -383,6 +383,10 @@ const Tasks = () => {
     setSelectedLabelForDrawer(null);
   };
 
+  const handleLabelClickFromDrawer = (labelName: string) => {
+    setSelectedLabelForDrawer(labelName);
+  };
+
   const handleOpenSubtaskAsTask = (subtask: any, parentId?: string) => {
     const subtaskAsTask: Task = {
       id: subtask.id,
@@ -1168,6 +1172,7 @@ const Tasks = () => {
         onOpenTask={handleOpenTaskFromDrawer}
         onEditTask={handleEditTask}
         onDeleteTask={handleDeleteTask}
+        onLabelClick={handleLabelClickFromDrawer}
         getLabelColor={getLabelColor}
         getPriorityStyle={getPriorityStyle}
         editingTaskId={editingTaskId}
