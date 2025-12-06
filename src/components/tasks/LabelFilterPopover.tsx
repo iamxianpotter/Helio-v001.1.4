@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { Tag, X } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -125,29 +126,41 @@ const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({ selectedLabels,
           </div>
 
           {/* Labels List */}
-          <div className="flex-1 overflow-auto px-3 pb-3 space-y-2 max-h-[300px]">
+          <div className="flex-1 overflow-auto px-3 pb-3 max-h-[300px]">
             {/* Custom Labels */}
             {availableLabels.length > 0 && filteredCustom.length > 0 && (
               <>
                 <div className="text-xs text-gray-500 mb-2">Custom Labels</div>
-                {filteredCustom.map((label) => (
-                  <Button
-                    key={label.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLabel(label.name)}
-                    className={cn(
-                      "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
-                      selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
-                    )}
-                  >
-                    <Tag className={cn("h-4 w-4 mr-2", label.color)} />
-                    {label.name}
-                    {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredCustom.map((label) => (
+                    <TooltipProvider key={label.name} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleLabel(label.name)}
+                            className={cn(
+                              "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
+                              selectedLabels.includes(label.name)
+                                ? 'bg-white text-black'
+                                : 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black'
+                            )}
+                          >
+                            <Tag className={cn("h-4 w-4 flex-shrink-0", label.color)} />
+                            <span className="truncate">{label.name}</span>
+                            {selectedLabels.includes(label.name) && (
+                              <span className="text-green-500 ml-1">✓</span>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{label.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
               </>
             )}
 
@@ -158,24 +171,34 @@ const LabelFilterPopover: React.FC<LabelFilterPopoverProps> = ({ selectedLabels,
                   <div className="border-t border-[#414141] my-2"></div>
                 )}
                 <div className="text-xs text-gray-500 mb-2">Preset Labels</div>
-                {filteredPreset.map((label) => (
-                  <Button
-                    key={label.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => toggleLabel(label.name)}
-                    className={cn(
-                      "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
-                      selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
-                    )}
-                  >
-                    <Tag className={cn("h-4 w-4 mr-2", label.color)} />
-                    {label.name}
-                    {selectedLabels.includes(label.name) && (
-                      <span className="ml-auto text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="space-y-2">
+                  {filteredPreset.map((label) => (
+                    <TooltipProvider key={label.name} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleLabel(label.name)}
+                            className={cn(
+                              "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                              selectedLabels.includes(label.name) && "bg-[#2e2e2e] text-white"
+                            )}
+                          >
+                            <Tag className={cn("h-4 w-4 mr-2", label.color)} />
+                            <span className="flex-1 truncate min-w-0">{label.name}</span>
+                            {selectedLabels.includes(label.name) && (
+                              <span className="ml-auto text-green-400">✓</span>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{label.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
               </>
             )}
 

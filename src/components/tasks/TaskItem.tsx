@@ -402,7 +402,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                     }}
                   >
                     <Flag className={`h-3 w-3`} style={{ color: getColorHex(flagColor) }} />
-                    <span>{task.priority}</span>
+                    <span className="inline-block max-w-[120px] truncate">{task.priority}</span>
                   </span>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" align="start" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">

@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, X, Flag } from 'lucide-react';
 import { Input } from "@/components/ui/input";
@@ -91,29 +92,38 @@ const PriorityFilterPopover: React.FC<PriorityFilterPopoverProps> = ({ selectedP
           </div>
 
           {/* Priority List */}
-          <div className="flex-1 overflow-auto px-3 pb-3 space-y-2 max-h-[300px]">
+          <div className="flex-1 overflow-auto px-3 pb-3 max-h-[300px]">
             {/* Custom Priorities */}
             {customPriorities.length > 0 && filteredCustom.length > 0 && (
               <>
                 <div className="text-xs text-gray-500 mb-2">Custom</div>
-                {filteredCustom.map((priority) => (
-                  <Button
-                    key={priority.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => togglePriority(priority.name)}
-                    className={cn(
-                      "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
-                      selectedPriorities.includes(priority.name) && "bg-[#2e2e2e] text-white"
-                    )}
-                  >
-                    <Flag className={cn("w-3 h-3 mr-2 flex-shrink-0", priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
-                    {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="grid grid-cols-2 gap-2">
+                  {filteredCustom.map((priority) => (
+                    <TooltipProvider key={priority.name} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => togglePriority(priority.name)}
+                            className={cn(
+                              "w-full justify-center text-center border border-[#414141] rounded-[15px] h-9 text-xs flex items-center gap-1 transition-all duration-200",
+                              selectedPriorities.includes(priority.name)
+                                ? 'bg-white text-black'
+                                : 'bg-[#252525] text-gray-300 hover:bg-white hover:text-black'
+                            )}
+                          >
+                            <Flag className={cn("h-4 w-4 transition-all flex-shrink-0", priority.color)} />
+                            <span className="truncate min-w-0">{priority.name}</span>
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{priority.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
               </>
             )}
 
@@ -124,24 +134,34 @@ const PriorityFilterPopover: React.FC<PriorityFilterPopoverProps> = ({ selectedP
                   <div className="border-t border-[#414141] my-2"></div>
                 )}
                 <div className="text-xs text-gray-500 mb-2">Default</div>
-                {filteredPreset.map((priority) => (
-                  <Button
-                    key={priority.name}
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => togglePriority(priority.name)}
-                    className={cn(
-                      "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
-                      selectedPriorities.includes(priority.name) && "bg-[#2e2e2e] text-white"
-                    )}
-                  >
-                    <Flag className={cn("w-3 h-3 mr-2 flex-shrink-0", priority.color)} />
-                    <span className="flex-1">{priority.name}</span>
-                    {selectedPriorities.includes(priority.name) && (
-                      <span className="text-green-400">✓</span>
-                    )}
-                  </Button>
-                ))}
+                <div className="space-y-2">
+                  {filteredPreset.map((priority) => (
+                    <TooltipProvider key={priority.name} delayDuration={100}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => togglePriority(priority.name)}
+                            className={cn(
+                              "w-full justify-start text-left bg-[#252525] text-gray-300 hover:bg-[#2e2e2e] hover:text-white border border-[#414141] rounded-[15px] h-9 text-xs transition-all duration-200",
+                              selectedPriorities.includes(priority.name) && "bg-[#2e2e2e] text-white"
+                            )}
+                          >
+                            <Flag className={cn("w-3 h-3 mr-2 flex-shrink-0", priority.color)} />
+                            <span className="truncate">{priority.name}</span>
+                            {selectedPriorities.includes(priority.name) && (
+                              <span className="ml-auto text-green-400">✓</span>
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{priority.name}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
               </>
             )}
 
