@@ -603,3 +603,5 @@ const TaskItem: React.FC<TaskItemProps> = ({
     </div>
   );
 };
+
+export default TaskItem;
