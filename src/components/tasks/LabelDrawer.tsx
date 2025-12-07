@@ -22,6 +22,7 @@ interface Task {
   labels?: string[];
   repeat?: string;
   isDraft?: boolean;
+  subtasks?: Task[];
 }
 
 interface LabelDrawerProps {
@@ -66,6 +67,8 @@ interface LabelDrawerProps {
   onSaveEdit?: () => void;
   onSaveDraftEdit?: () => void;
   onCancelEdit?: () => void;
+  expandedTaskId?: string | null;
+  onToggleExpand?: (taskId: string) => void;
 }
 
 const LabelDrawer: React.FC<LabelDrawerProps> = ({
@@ -110,6 +113,8 @@ const LabelDrawer: React.FC<LabelDrawerProps> = ({
   onSaveEdit,
   onSaveDraftEdit,
   onCancelEdit,
+  expandedTaskId,
+  onToggleExpand,
 }) => {
   const [drawerWidth, setDrawerWidth] = useState(editingTaskId ? 700 : 450);
   const [isResizing, setIsResizing] = useState(false);
@@ -323,6 +328,8 @@ const LabelDrawer: React.FC<LabelDrawerProps> = ({
                         getLabelColor={getLabelColor}
                         getPriorityStyle={getPriorityStyle}
                         onLabelClick={onLabelClick}
+                        expandedTaskId={expandedTaskId}
+                        onToggleExpand={onToggleExpand}
                       />
                     )
                   ))}

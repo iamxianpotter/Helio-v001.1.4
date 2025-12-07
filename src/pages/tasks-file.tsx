@@ -25,6 +25,7 @@ interface Task {
   labels?: string[];
   repeat?: string;
   isDraft?: boolean;
+  subtasks?: Task[];
 }
 
 const Tasks = () => {
@@ -78,6 +79,7 @@ const Tasks = () => {
   const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
   const [parentTaskId, setParentTaskId] = useState('');
   const [selectedLabelForDrawer, setSelectedLabelForDrawer] = useState<string | null>(null);
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -851,6 +853,8 @@ const Tasks = () => {
                               onLabelClick={(label) => {
                                 setSelectedLabelForDrawer(label);
                               }}
+                              expandedTaskId={expandedTaskId}
+                              onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
                             />
                           )
                         ))}
@@ -977,6 +981,8 @@ const Tasks = () => {
                             onLabelClick={(label) => {
                               setSelectedLabelForDrawer(label);
                             }}
+                            expandedTaskId={expandedTaskId}
+                            onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
                           />
                       )
                     ))
@@ -1392,6 +1398,8 @@ const Tasks = () => {
         onSaveEdit={handleSaveEdit}
         onSaveDraftEdit={handleSaveDraftEdit}
         onCancelEdit={handleCancelEdit}
+        expandedTaskId={expandedTaskId}
+        onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
       />
     </div>
   );
