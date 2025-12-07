@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, Edit, Trash2 } from 'lucide-react';
+import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, ChevronDown, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +16,7 @@ interface TaskItemProps {
     labels?: string[];
     repeat?: string;
     isDraft?: boolean;
+    subtasks?: any[];
   };
   draggedTaskId: string | null;
   dragOverTaskId: string | null;
@@ -35,6 +36,8 @@ interface TaskItemProps {
   getPriorityStyle: (priorityName: string) => { bg: string; text: string };
   isDeleted?: boolean;
   onLabelClick?: (label: string) => void;
+  expandedTaskId?: string | null;
+  onToggleExpand?: (taskId: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -57,9 +60,33 @@ const TaskItem: React.FC<TaskItemProps> = ({
   getPriorityStyle,
   isDeleted = false,
   onLabelClick,
+  expandedTaskId,
+  onToggleExpand,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
+
+  const hasSubtasks = task.subtasks && task.subtasks.length > 0;
+
+  const getCompletedSubtasksCount = () => {
+    if (!task.subtasks) return 0;
+    const countCompleted = (subtasks: any[]): number => {
+      return subtasks.reduce((count, st) => {
+        return count + (st.completed ? 1 : 0) + (st.subtasks ? countCompleted(st.subtasks) : 0);
+      }, 0);
+    };
+    return countCompleted(task.subtasks);
+  };
+
+  const getTotalSubtasksCount = () => {
+    if (!task.subtasks) return 0;
+    const countAll = (subtasks: any[]): number => {
+      return subtasks.reduce((count, st) => {
+        return count + 1 + (st.subtasks ? countAll(st.subtasks) : 0);
+      }, 0);
+    };
+    return countAll(task.subtasks);
+  };
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -197,6 +224,23 @@ const TaskItem: React.FC<TaskItemProps> = ({
       style={{ cursor: draggedTaskId === task.id ? 'grabbing' : 'grab' }}
     >
       <div className="flex items-center gap-2 mb-2">
+        <div className="flex items-center gap-1">
+          {hasSubtasks && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleExpand?.(task.id);
+              }}
+              className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+            >
+              <ChevronRight
+                className={`h-4 w-4 transition-transform ${
+                  expandedTaskId === task.id ? 'rotate-90' : 'rotate-0'
+                }`}
+              />
+            </button>
+          )}
+        </div>
         <div
           className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 ${
             isDeleted || task.isDraft ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
@@ -226,6 +270,20 @@ const TaskItem: React.FC<TaskItemProps> = ({
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
+        {hasSubtasks && (
+          <TooltipProvider delayDuration={100}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="px-2 py-0.5 bg-[#252527] border border-[#414141] rounded-full text-xs text-gray-300 flex-shrink-0">
+                  {getCompletedSubtasksCount()}/{getTotalSubtasksCount()}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="top" className="bg-[#1f1f1f] text-white rounded-xl border-0 z-50">
+                <p className="text-xs">{getCompletedSubtasksCount()} of {getTotalSubtasksCount()} subtasks completed</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         <span className="px-2 py-0.5 bg-[#252527] border border-[#414141] rounded-full text-xs text-white font-orbitron font-bold">K</span>
 
         {/* Action buttons on hover */}
@@ -511,6 +569,32 @@ const TaskItem: React.FC<TaskItemProps> = ({
           </div>
         )}
       </div>
+
+      {expandedTaskId === task.id && hasSubtasks && (
+        <div className="mt-2 space-y-1 ml-6">
+          {task.subtasks!.map((subtask) => (
+            <div
+              key={subtask.id}
+              className="rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative"
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
+                    subtask.completed
+                      ? 'bg-white border-white'
+                      : 'border-gray-400 hover:border-gray-300'
+                  }`}
+                />
+                <span className={`text-sm ${
+                  subtask.completed ? 'text-gray-400 line-through' : 'text-gray-300'
+                }`}>
+                  {subtask.title}
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
