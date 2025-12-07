@@ -28,6 +28,29 @@ interface Task {
   subtasks?: Task[];
 }
 
+const updateTaskRecursively = (
+  tasks: Task[], 
+  taskId: string, 
+  updateFn: (task: Task) => Task
+): { updatedTasks: Task[]; success: boolean } => {
+  let success = false;
+  const updatedTasks = tasks.map(task => {
+      if (task.id === taskId) {
+          success = true;
+          return updateFn(task);
+      }
+      if (task.subtasks) {
+          const result = updateTaskRecursively(task.subtasks, taskId, updateFn);
+          if (result.success) {
+              success = true;
+              return { ...task, subtasks: result.updatedTasks };
+          }
+      }
+      return task;
+  });
+  return { updatedTasks, success };
+};
+
 const Tasks = () => {
   const [currentView, setCurrentView] = useState('list');
   const [currentTaskView, setCurrentTaskView] = useState<'drafts' | 'total' | 'completed' | 'pending' | 'deleted'>('total');
@@ -215,24 +238,24 @@ const Tasks = () => {
 
   const handleSaveDraftEdit = () => {
     if (editTitle.trim() && editingTaskId) {
-      const updatedTasks = tasks.map(task =>
-        task.id === editingTaskId
-          ? {
-              ...task,
-              title: editTitle.trim(),
-              description: editDescription.trim(),
-              priority: editPriority,
-              dueDate: editDate ? editDate.toLocaleDateString() : task.dueDate,
-              time: selectedTime || task.time,
-              reminder: selectedReminder,
-              labels: selectedLabels,
-              repeat: selectedRepeat || undefined,
-              isDraft: true
-            }
-          : task
-      );
-      setTasks(updatedTasks);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      const result = updateTaskRecursively(tasks, editingTaskId, (task) => ({
+        ...task,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        priority: editPriority,
+        dueDate: editDate ? editDate.toLocaleDateString() : task.dueDate,
+        time: selectedTime || task.time,
+        reminder: selectedReminder,
+        labels: selectedLabels,
+        repeat: selectedRepeat || undefined,
+        isDraft: true
+      }));
+
+      if(result.success) {
+        setTasks(result.updatedTasks);
+        localStorage.setItem('kario-tasks', JSON.stringify(result.updatedTasks));
+      }
+      
       setEditingTaskId(null);
       setEditTitle('');
       setEditDescription('');
@@ -246,9 +269,19 @@ const Tasks = () => {
   };
 
   const handleToggleTask = (taskId: string) => {
-    const updatedTasks = tasks.map(task =>
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    );
+    const toggleRecursively = (tasks: Task[]): Task[] => {
+      return tasks.map(task => {
+        if (task.id === taskId) {
+          return { ...task, completed: !task.completed };
+        }
+        if (task.subtasks) {
+          return { ...task, subtasks: toggleRecursively(task.subtasks) };
+        }
+        return task;
+      });
+    };
+
+    const updatedTasks = toggleRecursively(tasks);
     setTasks(updatedTasks);
     localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
   };
@@ -303,15 +336,39 @@ const Tasks = () => {
   };
 
   const handleDeleteTask = (taskId: string) => {
-    const taskToDelete = tasks.find(task => task.id === taskId);
-    if (taskToDelete) {
-      // Move task to deleted tasks
-      setDeletedTasks(prev => [...prev, { ...taskToDelete, deletedAt: new Date().toISOString() } as any]);
-      // Remove from active tasks
-      const updatedTasks = tasks.filter(task => task.id !== taskId);
-      setTasks(updatedTasks);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+    let deletedTask: Task | null = null;
+    
+    const findTask = (tasks: Task[], id: string): Task | null => {
+        for (const task of tasks) {
+            if (task.id === id) return task;
+            if (task.subtasks) {
+                const found = findTask(task.subtasks, id);
+                if (found) return found;
+            }
+        }
+        return null;
     }
+    
+    const taskToDelete = findTask(tasks, taskId);
+
+    const removeRecursively = (taskList: Task[]): Task[] => {
+        return taskList
+            .filter(task => task.id !== taskId)
+            .map(task => {
+                if (task.subtasks) {
+                    return { ...task, subtasks: removeRecursively(task.subtasks) };
+                }
+                return task;
+            });
+    };
+
+    if (taskToDelete) {
+        const updatedTasks = removeRecursively(tasks);
+        setTasks(updatedTasks);
+        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+        setDeletedTasks(prev => [...prev, { ...taskToDelete, deletedAt: new Date().toISOString() } as any]);
+    }
+    
     setContextMenu(null);
   };
 
@@ -332,7 +389,21 @@ const Tasks = () => {
   };
 
   const handleEditTask = (taskId: string) => {
-    const taskToEdit = tasks.find(t => t.id === taskId);
+    const findTaskRecursively = (tasks: Task[], taskId: string): Task | null => {
+      for (const task of tasks) {
+        if (task.id === taskId) {
+          return task;
+        }
+        if (task.subtasks) {
+          const found = findTaskRecursively(task.subtasks, taskId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+    const taskToEdit = findTaskRecursively(tasks, taskId);
     if (taskToEdit) {
       setEditingTaskId(taskId);
       setEditTitle(taskToEdit.title);
@@ -365,24 +436,24 @@ const Tasks = () => {
 
   const handleSaveEdit = () => {
     if (editTitle.trim() && editingTaskId) {
-      const updatedTasks = tasks.map(task =>
-        task.id === editingTaskId
-          ? {
-              ...task,
-              title: editTitle.trim(),
-              description: editDescription.trim(),
-              priority: editPriority,
-              dueDate: editDate ? editDate.toLocaleDateString() : task.dueDate,
-              time: selectedTime || task.time,
-              reminder: selectedReminder,
-              labels: selectedLabels,
-              repeat: selectedRepeat || undefined,
-              isDraft: !editDate && !editDescription.trim() // Update draft status
-            }
-          : task
-      );
-      setTasks(updatedTasks);
-      localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+      const result = updateTaskRecursively(tasks, editingTaskId, (task) => ({
+        ...task,
+        title: editTitle.trim(),
+        description: editDescription.trim(),
+        priority: editPriority,
+        dueDate: editDate ? editDate.toLocaleDateString() : task.dueDate,
+        time: selectedTime || task.time,
+        reminder: selectedReminder,
+        labels: selectedLabels,
+        repeat: selectedRepeat || undefined,
+        isDraft: !editDate && !editDescription.trim() // Update draft status
+      }));
+
+      if(result.success) {
+        setTasks(result.updatedTasks);
+        localStorage.setItem('kario-tasks', JSON.stringify(result.updatedTasks));
+      }
+
       setEditingTaskId(null);
       setEditTitle('');
       setEditDescription('');
@@ -408,7 +479,21 @@ const Tasks = () => {
   };
 
   const handleOpenTask = (taskId: string) => {
-    const task = tasks.find(t => t.id === taskId);
+    const findTaskRecursively = (tasks: Task[], taskId: string): Task | null => {
+      for (const task of tasks) {
+        if (task.id === taskId) {
+          return task;
+        }
+        if (task.subtasks) {
+          const found = findTaskRecursively(task.subtasks, taskId);
+          if (found) {
+            return found;
+          }
+        }
+      }
+      return null;
+    };
+    const task = findTaskRecursively(tasks, taskId);
     if (task) {
       setSelectedTaskForModal(task);
     }
@@ -462,6 +547,8 @@ const Tasks = () => {
     }
   };
 
+  const [draggedTaskParentId, setDraggedTaskParentId] = useState<string | null>(null);
+
   React.useEffect(() => {
     const handleClick = () => {
       setContextMenu(null);
@@ -472,8 +559,9 @@ const Tasks = () => {
     return () => document.removeEventListener('click', handleClick);
   }, []);
 
-  const handleDragStart = (e: React.DragEvent, taskId: string) => {
+  const handleDragStart = (e: React.DragEvent, taskId: string, parentId: string | null) => {
     setDraggedTaskId(taskId);
+    setDraggedTaskParentId(parentId);
     e.dataTransfer.effectAllowed = 'move';
   };
 
@@ -487,30 +575,68 @@ const Tasks = () => {
     setDragOverTaskId(null);
   };
 
-  const handleDrop = (e: React.DragEvent, dropTaskId: string) => {
+  const handleDrop = (e: React.DragEvent, dropTaskId: string, dropTaskParentId: string | null) => {
     e.preventDefault();
     if (!draggedTaskId || draggedTaskId === dropTaskId) {
       setDraggedTaskId(null);
       setDragOverTaskId(null);
+      setDraggedTaskParentId(null);
       return;
     }
 
-    const draggedIndex = tasks.findIndex(task => task.id === draggedTaskId);
-    const dropIndex = tasks.findIndex(task => task.id === dropTaskId);
+    // Only handle reordering within the same list for now
+    if (draggedTaskParentId !== dropTaskParentId) {
+        console.warn("Moving tasks between different lists is not supported yet.");
+        setDraggedTaskId(null);
+        setDragOverTaskId(null);
+        setDraggedTaskParentId(null);
+        return;
+    }
 
-    const newTasks = [...tasks];
-    const [draggedTask] = newTasks.splice(draggedIndex, 1);
-    newTasks.splice(dropIndex, 0, draggedTask);
+    let newTasks = [...tasks];
+
+    if (draggedTaskParentId === null) {
+        // Top-level reorder
+        const draggedIndex = tasks.findIndex(task => task.id === draggedTaskId);
+        const dropIndex = tasks.findIndex(task => task.id === dropTaskId);
+        if (draggedIndex === -1 || dropIndex === -1) return;
+        const [draggedTask] = newTasks.splice(draggedIndex, 1);
+        newTasks.splice(dropIndex, 0, draggedTask);
+    } else {
+        // Subtask reorder
+        const reorderSubtasks = (taskList: Task[]): Task[] => {
+            return taskList.map(task => {
+                if (task.id === draggedTaskParentId) {
+                    const subtasks = task.subtasks || [];
+                    const draggedIndex = subtasks.findIndex(st => st.id === draggedTaskId);
+                    const dropIndex = subtasks.findIndex(st => st.id === dropTaskId);
+                    if (draggedIndex > -1 && dropIndex > -1) {
+                        const newSubtasks = [...subtasks];
+                        const [draggedSubtask] = newSubtasks.splice(draggedIndex, 1);
+                        newSubtasks.splice(dropIndex, 0, draggedSubtask);
+                        return { ...task, subtasks: newSubtasks };
+                    }
+                }
+                if (task.subtasks) {
+                    return { ...task, subtasks: reorderSubtasks(task.subtasks) };
+                }
+                return task;
+            });
+        };
+        newTasks = reorderSubtasks(tasks);
+    }
 
     setTasks(newTasks);
     localStorage.setItem('kario-tasks', JSON.stringify(newTasks));
     setDraggedTaskId(null);
     setDragOverTaskId(null);
+    setDraggedTaskParentId(null);
   };
 
   const handleDragEnd = () => {
     setDraggedTaskId(null);
     setDragOverTaskId(null);
+    setDraggedTaskParentId(null);
   };
 
   const applyFiltersAndSort = (tasksToFilter: Task[]): Task[] => {
@@ -829,34 +955,35 @@ const Tasks = () => {
                                 </div>
                               </div>
                             </div>
-                          ) : (
-                            <TaskItem
-                              key={task.id}
-                              task={task}
-                              draggedTaskId={draggedTaskId}
-                              dragOverTaskId={dragOverTaskId}
-                              expandedLabelsTaskId={expandedLabelsTaskId}
-                              onContextMenu={handleContextMenu}
-                              onDragStart={handleDragStart}
-                              onDragOver={handleDragOver}
-                              onDragLeave={handleDragLeave}
-                              onDrop={handleDrop}
-                              onDragEnd={handleDragEnd}
-                              onToggle={handleToggleTask}
-                              onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
-                              onOpenTask={handleOpenTask}
-                              onEditTask={handleEditTask}
-                              onDeleteTask={currentTaskView === 'deleted' ? handleRestoreTask : handleDeleteTask}
-                              getLabelColor={getLabelColor}
-                              getPriorityStyle={getPriorityStyle}
-                              isDeleted={currentTaskView === 'deleted'}
-                              onLabelClick={(label) => {
-                                setSelectedLabelForDrawer(label);
-                              }}
-                              expandedTaskId={expandedTaskId}
-                              onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
-                            />
-                          )
+                                                    ) : (
+                                                      <TaskItem
+                                                        key={task.id}
+                                                        task={task}
+                                                        parentId={null}
+                                                        draggedTaskId={draggedTaskId}
+                                                        dragOverTaskId={dragOverTaskId}
+                                                        expandedLabelsTaskId={expandedLabelsTaskId}
+                                                        onContextMenu={handleContextMenu}
+                                                        onDragStart={handleDragStart}
+                                                        onDragOver={handleDragOver}
+                                                        onDragLeave={handleDragLeave}
+                                                        onDrop={handleDrop}
+                                                        onDragEnd={handleDragEnd}
+                                                        onToggle={handleToggleTask}
+                                                        onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
+                                                        onOpenTask={handleOpenTask}
+                                                        onEditTask={handleEditTask}
+                                                        onDeleteTask={currentTaskView === 'deleted' ? handleRestoreTask : handleDeleteTask}
+                                                        getLabelColor={getLabelColor}
+                                                        getPriorityStyle={getPriorityStyle}
+                                                        isDeleted={currentTaskView === 'deleted'}
+                                                        onLabelClick={(label) => {
+                                                          setSelectedLabelForDrawer(label);
+                                                        }}
+                                                        expandedTaskId={expandedTaskId}
+                                                        onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
+                                                      />
+                                                    )
                         ))}
                       </div>
                     ))
@@ -961,6 +1088,7 @@ const Tasks = () => {
                         <TaskItem
                           key={task.id}
                           task={task}
+                          parentId={null}
                           draggedTaskId={draggedTaskId}
                           dragOverTaskId={dragOverTaskId}
                           expandedLabelsTaskId={expandedLabelsTaskId}

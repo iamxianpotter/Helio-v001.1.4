@@ -18,6 +18,7 @@ interface Subtask {
 
 interface SubtaskItemProps {
   subtask: Subtask;
+  parentId: string | null;
   onToggle: (subtaskId: string) => void;
   onEdit: (subtaskId: string) => void;
   onDelete: (subtaskId: string) => void;
@@ -26,13 +27,13 @@ interface SubtaskItemProps {
   getPriorityStyle: (priorityName: string) => { bg: string; text: string };
   expandedLabelsSubtaskId: string | null;
   onToggleLabels: (subtaskId: string) => void;
-  onDragStart?: (e: React.DragEvent, subtaskId: string) => void;
+  onDragStart?: (e: React.DragEvent, subtaskId: string, parentId: string | null) => void;
   onDragOver?: (e: React.DragEvent, subtaskId: string) => void;
   onDragLeave?: () => void;
-  onDrop?: (e: React.DragEvent, subtaskId: string) => void;
+  onDrop?: (e: React.DragEvent, subtaskId: string, parentId: string | null) => void;
   onDragEnd?: () => void;
-  draggedSubtaskId?: string | null;
-  dragOverSubtaskId?: string | null;
+  draggedTaskId?: string | null;
+  dragOverTaskId?: string | null;
   onOpen?: (subtaskId: string) => void;
   onAddNestedSubtask?: (parentSubtaskId: string) => void;
   onUpdateNestedSubtask?: (parentSubtaskId: string, updatedSubtask: Subtask) => void;
@@ -42,6 +43,7 @@ interface SubtaskItemProps {
 
 const SubtaskItem: React.FC<SubtaskItemProps> = ({
   subtask,
+  parentId,
   onToggle,
   onEdit,
   onDelete,
@@ -55,8 +57,8 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
   onDragLeave,
   onDrop,
   onDragEnd,
-  draggedSubtaskId,
-  dragOverSubtaskId,
+  draggedTaskId,
+  dragOverTaskId,
   onOpen,
   onAddNestedSubtask,
   onUpdateNestedSubtask,
@@ -185,9 +187,9 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
     <div>
       <div
         className={`rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative ${
-          draggedSubtaskId === subtask.id ? 'opacity-50' : ''
+          draggedTaskId === subtask.id ? 'opacity-50' : ''
         } ${
-          dragOverSubtaskId === subtask.id ? 'border border-blue-500' : ''
+          dragOverTaskId === subtask.id ? 'border border-blue-500' : ''
         }`}
         onContextMenu={(e) => onContextMenu(e, subtask.id)}
         onMouseEnter={() => setIsHovered(true)}
@@ -198,7 +200,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         draggable
         onDragStart={(e) => {
           e.stopPropagation();
-          onDragStart?.(e, subtask.id);
+          onDragStart?.(e, subtask.id, parentId);
         }}
         onDragOver={(e) => {
           e.preventDefault();
@@ -212,13 +214,13 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
         onDrop={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          onDrop?.(e, subtask.id);
+          onDrop?.(e, subtask.id, parentId);
         }}
         onDragEnd={(e) => {
           e.stopPropagation();
           onDragEnd?.();
         }}
-        style={{ cursor: draggedSubtaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
+        style={{ cursor: draggedTaskId === subtask.id ? 'grabbing' : 'grab', marginLeft: `${depth * 24}px` }}
       >
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 flex items-center gap-2 mt-1">
@@ -532,6 +534,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
             <SubtaskItem
               key={nestedSubtask.id}
               subtask={nestedSubtask}
+              parentId={subtask.id}
               onToggle={onToggle}
               onEdit={onEdit}
               onDelete={onDelete}
@@ -545,8 +548,8 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
               onDragLeave={onDragLeave}
               onDrop={onDrop}
               onDragEnd={onDragEnd}
-              draggedSubtaskId={draggedSubtaskId}
-              dragOverSubtaskId={dragOverSubtaskId}
+              draggedTaskId={draggedTaskId}
+              dragOverTaskId={dragOverTaskId}
               onOpen={onOpen}
               onAddNestedSubtask={onAddNestedSubtask}
               onUpdateNestedSubtask={onUpdateNestedSubtask}

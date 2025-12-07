@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Calendar, Flag, Bell, Repeat, Tag, ChevronRight, ChevronDown, Edit, Trash2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import SubtaskItem from './SubtaskItem';
 
 interface TaskItemProps {
   task: {
@@ -18,14 +19,15 @@ interface TaskItemProps {
     isDraft?: boolean;
     subtasks?: any[];
   };
+  parentId: string | null;
   draggedTaskId: string | null;
   dragOverTaskId: string | null;
   expandedLabelsTaskId: string | null;
   onContextMenu: (e: React.MouseEvent, taskId: string) => void;
-  onDragStart: (e: React.DragEvent, taskId: string) => void;
+  onDragStart: (e: React.DragEvent, taskId: string, parentId: string | null) => void;
   onDragOver: (e: React.DragEvent, taskId: string) => void;
   onDragLeave: () => void;
-  onDrop: (e: React.DragEvent, taskId: string) => void;
+  onDrop: (e: React.DragEvent, taskId: string, parentId: string | null) => void;
   onDragEnd: () => void;
   onToggle: (taskId: string) => void;
   onToggleLabels: (taskId: string) => void;
@@ -42,6 +44,7 @@ interface TaskItemProps {
 
 const TaskItem: React.FC<TaskItemProps> = ({
   task,
+  parentId,
   draggedTaskId,
   dragOverTaskId,
   expandedLabelsTaskId,
@@ -216,10 +219,10 @@ const TaskItem: React.FC<TaskItemProps> = ({
         setIsDeleteConfirming(false);
       }}
       draggable
-      onDragStart={(e) => onDragStart(e, task.id)}
+      onDragStart={(e) => onDragStart(e, task.id, parentId)}
       onDragOver={(e) => onDragOver(e, task.id)}
       onDragLeave={onDragLeave}
-      onDrop={(e) => onDrop(e, task.id)}
+      onDrop={(e) => onDrop(e, task.id, parentId)}
       onDragEnd={onDragEnd}
       style={{ cursor: draggedTaskId === task.id ? 'grabbing' : 'grab' }}
     >
@@ -573,30 +576,30 @@ const TaskItem: React.FC<TaskItemProps> = ({
       {expandedTaskId === task.id && hasSubtasks && (
         <div className="mt-2 space-y-1 ml-6">
           {task.subtasks!.map((subtask) => (
-            <div
+            <SubtaskItem
               key={subtask.id}
-              className="rounded-[12px] p-4 bg-transparent hover:bg-[#2a2a2a] transition-all relative"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
-                    subtask.completed
-                      ? 'bg-white border-white'
-                      : 'border-gray-400 hover:border-gray-300'
-                  }`}
-                />
-                <span className={`text-sm ${
-                  subtask.completed ? 'text-gray-400 line-through' : 'text-gray-300'
-                }`}>
-                  {subtask.title}
-                </span>
-              </div>
-            </div>
+              subtask={subtask}
+              parentId={task.id}
+              onToggle={onToggle}
+              onEdit={onEditTask}
+              onDelete={onDeleteTask}
+              onContextMenu={onContextMenu}
+              getLabelColor={getLabelColor}
+              getPriorityStyle={getPriorityStyle}
+              expandedLabelsSubtaskId={expandedLabelsTaskId}
+              onToggleLabels={onToggleLabels}
+              onOpen={onOpenTask}
+              onDragStart={onDragStart}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              onDragEnd={onDragEnd}
+              draggedTaskId={draggedTaskId}
+              dragOverTaskId={dragOverTaskId}
+            />
           ))}
         </div>
       )}
     </div>
   );
 };
-
-export default TaskItem;
