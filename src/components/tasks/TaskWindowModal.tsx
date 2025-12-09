@@ -203,23 +203,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const updatedTask = { ...localTask, subtasks: updatedSubtasks };
       setLocalTask(updatedTask);
       if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-      const savedTasks = localStorage.getItem('kario-tasks');
-      if (savedTasks) {
-        const tasks = JSON.parse(savedTasks);
-        if (isSubtaskOpened && parentTaskId) {
-          const updatedTasks = tasks.map((t: Task) => {
-            if (t.id === parentTaskId) {
-              return updateSubtaskInTask(t, updatedTask);
-            }
-            return t;
-          });
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        } else {
-          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        }
-      }
     }
   };
 
@@ -250,23 +233,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     const updatedTask = { ...localTask, subtasks: updatedSubtasks };
     setLocalTask(updatedTask);
     if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-    const savedTasks = localStorage.getItem('kario-tasks');
-    if (savedTasks) {
-      const tasks = JSON.parse(savedTasks);
-      if (isSubtaskOpened && parentTaskId) {
-        const updatedTasks = tasks.map((t: Task) => {
-          if (t.id === parentTaskId) {
-            return updateSubtaskInTask(t, updatedTask);
-          }
-          return t;
-        });
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-      } else {
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-      }
-    }
   };
 
   const deleteSubtaskRecursively = (subtasks: Subtask[], subtaskId: string): Subtask[] => {
@@ -286,22 +252,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
     setLocalTask(updatedTask);
     if (onTaskUpdate) onTaskUpdate(updatedTask);
 
-    const savedTasks = localStorage.getItem('kario-tasks');
-    if (savedTasks) {
-      const tasks = JSON.parse(savedTasks);
-      if (isSubtaskOpened && parentTaskId) {
-        const updatedTasks = tasks.map((t: Task) => {
-          if (t.id === parentTaskId) {
-            return updateSubtaskInTask(t, updatedTask);
-          }
-          return t;
-        });
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-      } else {
-        const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-        localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-      }
-    }
     setContextMenu(null);
   };
 
@@ -378,23 +328,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const updatedTask = { ...localTask, subtasks: updatedSubtasks };
       setLocalTask(updatedTask);
       if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-      const savedTasks = localStorage.getItem('kario-tasks');
-      if (savedTasks) {
-        const tasks = JSON.parse(savedTasks);
-        if (isSubtaskOpened && parentTaskId) {
-          const updatedTasks = tasks.map((t: Task) => {
-            if (t.id === parentTaskId) {
-              return updateSubtaskInTask(t, updatedTask);
-            }
-            return t;
-          });
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        } else {
-          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        }
-      }
 
       setEditingSubtaskId(null);
       setEditSubtaskTitle('');
@@ -481,23 +414,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
         const updatedTask = { ...localTask!, subtasks: newSubtasks };
         setLocalTask(updatedTask);
         if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-        const savedTasks = localStorage.getItem('kario-tasks');
-        if (savedTasks) {
-          const tasks = JSON.parse(savedTasks);
-          if (isSubtaskOpened && parentTaskId) {
-            const updatedTasks = tasks.map((t: Task) => {
-              if (t.id === parentTaskId) {
-                return updateSubtaskInTask(t, updatedTask);
-              }
-              return t;
-            });
-            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-          } else {
-            const updatedTasks = tasks.map((t: Task) => t.id === localTask!.id ? updatedTask : t);
-            localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-          }
-        }
       }
     }
 
@@ -580,23 +496,6 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
       const updatedTask = { ...localTask, subtasks: updatedSubtasks };
       setLocalTask(updatedTask);
       if (onTaskUpdate) onTaskUpdate(updatedTask);
-
-      const savedTasks = localStorage.getItem('kario-tasks');
-      if (savedTasks) {
-        const tasks = JSON.parse(savedTasks);
-        if (isSubtaskOpened && parentTaskId) {
-          const updatedTasks = tasks.map((t: Task) => {
-            if (t.id === parentTaskId) {
-              return updateSubtaskInTask(t, updatedTask);
-            }
-            return t;
-          });
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        } else {
-          const updatedTasks = tasks.map((t: Task) => t.id === localTask.id ? updatedTask : t);
-          localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-        }
-      }
 
       setNewSubtaskTitle('');
       setNewSubtaskDescription('');
@@ -854,6 +753,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                           draggedSubtaskId={draggedSubtaskId}
                           dragOverSubtaskId={dragOverSubtaskId}
                           onOpen={handleOpenNestedSubtask}
+                          isTaskOpen={true}
                         />
                       )
                     ))}
@@ -956,6 +856,7 @@ const TaskWindowModal: React.FC<TaskWindowModalProps> = ({
                       draggedSubtaskId={draggedSubtaskId}
                       dragOverSubtaskId={dragOverSubtaskId}
                       onOpen={handleOpenNestedSubtask}
+                      isTaskOpen={true}
                     />
                   )
                 ))}

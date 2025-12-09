@@ -74,7 +74,7 @@ const Tasks = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>('');
   const [selectedReminder, setSelectedReminder] = useState<string | undefined>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string; isSubtaskInList?: boolean } | null>(null);
   const [pageContextMenu, setPageContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
@@ -99,10 +99,10 @@ const Tasks = () => {
     return saved ? JSON.parse(saved) : { date: '', priorities: [], labels: [] };
   });
   const [selectedTaskForModal, setSelectedTaskForModal] = useState<Task | null>(null);
-  const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
-  const [parentTaskId, setParentTaskId] = useState('');
   const [selectedLabelForDrawer, setSelectedLabelForDrawer] = useState<string | null>(null);
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
+  const [parentTaskId, setParentTaskId] = useState('');
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -296,7 +296,7 @@ const Tasks = () => {
     }
   };
 
-  const handleContextMenu = (e: React.MouseEvent, taskId: string) => {
+  const handleContextMenu = (e: React.MouseEvent, taskId: string, isSubtaskInList = false) => {
     e.preventDefault();
     e.stopPropagation();
 
@@ -313,7 +313,7 @@ const Tasks = () => {
     }
 
     setPageContextMenu(null);
-    setContextMenu({ x, y, taskId });
+    setContextMenu({ x, y, taskId, isSubtaskInList });
   };
 
   const handlePageContextMenu = (e: React.MouseEvent) => {
@@ -478,7 +478,7 @@ const Tasks = () => {
     setSelectedRepeat('');
   };
 
-  const handleOpenTask = (taskId: string) => {
+  const handleOpenTask = (taskId: string, parentId: string | null = null) => {
     const findTaskRecursively = (tasks: Task[], taskId: string): Task | null => {
       for (const task of tasks) {
         if (task.id === taskId) {
@@ -496,6 +496,13 @@ const Tasks = () => {
     const task = findTaskRecursively(tasks, taskId);
     if (task) {
       setSelectedTaskForModal(task);
+      if (parentId) {
+        setIsSubtaskOpened(true);
+        setParentTaskId(parentId);
+      } else {
+        setIsSubtaskOpened(false);
+        setParentTaskId('');
+      }
     }
     setContextMenu(null);
   };
@@ -1268,9 +1275,9 @@ const Tasks = () => {
 
                 <button
 
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
 
-                  onClick={() => handleOpenTask(contextMenu.taskId)}
+                                    onClick={() => handleOpenTask(contextMenu.taskId, null)}
 
                 >
 
@@ -1279,7 +1286,8 @@ const Tasks = () => {
                   <span>Open</span>
 
                 </button>
-
+                {!contextMenu.isSubtaskInList &&
+                (<>
                 <button
 
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
@@ -1307,6 +1315,7 @@ const Tasks = () => {
                   <span>Delete</span>
 
                 </button>
+                </>)}
 
               </div>
 
@@ -1388,101 +1397,39 @@ const Tasks = () => {
 
               getLabelColor={getLabelColor}
 
-              getPriorityStyle={getPriorityStyle}
+                            getPriorityStyle={getPriorityStyle}
 
-              onTaskUpdate={(updatedTask) => {
+                            onTaskUpdate={(updatedTask) => {
 
-                if (isSubtaskOpened && parentTaskId) {
+                              const result = updateTaskRecursively(tasks, updatedTask.id, () => updatedTask);
 
-                  const updatedTasks = tasks.map(t => {
+                              if (result.success) {
 
-                    if (t.id === parentTaskId) {
+                                setTasks(result.updatedTasks);
 
-                      const updateSubtaskInTask = (task: Task, updated: Task): Task => {
+                                localStorage.setItem('kario-tasks', JSON.stringify(result.updatedTasks));
 
-                        const updateRecursively = (subtasks: any[] = []): any[] => {
+                              }
 
-                          return subtasks.map(st =>
+                            }}
 
-                            st.id === updated.id
+                            onNavigate={handleNavigateTask}
 
-                              ? {
+                            allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
 
-                                  ...st,
+                            currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
 
-                                  title: updated.title,
+                            sectionName="Tasks Made By Kairo"
 
-                                  description: updated.description,
+                            onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
 
-                                  completed: updated.completed,
+                            isSubtaskOpened={isSubtaskOpened}
 
-                                  dueDate: updated.dueDate,
+                            parentTaskId={parentTaskId}
 
-                                  time: updated.time,
+                            onLabelClick={handleLabelClickFromModal}
 
-                                  priority: updated.priority,
-
-                                  reminder: updated.reminder,
-
-                                  labels: updated.labels,
-
-                                  repeat: updated.repeat,
-
-                                  subtasks: updated.subtasks
-
-                                }
-
-                              : { ...st, subtasks: st.subtasks ? updateRecursively(st.subtasks) : undefined }
-
-                          );
-
-                        };
-
-                        return { ...task, subtasks: updateRecursively(task.subtasks) };
-
-                      };
-
-                      return updateSubtaskInTask(t, updatedTask);
-
-                    }
-
-                    return t;
-
-                  });
-
-                  setTasks(updatedTasks);
-
-                  localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-
-                } else {
-
-                  const updatedTasks = tasks.map(t => t.id === updatedTask.id ? updatedTask : t);
-
-                  setTasks(updatedTasks);
-
-                  localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
-
-                }
-
-              }}
-
-              onNavigate={handleNavigateTask}
-
-              allTasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
-
-              currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
-
-              sectionName="Tasks Made By Kairo"
-
-              onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
-
-              isSubtaskOpened={isSubtaskOpened}
-
-              parentTaskId={parentTaskId}
-
-              onLabelClick={handleLabelClickFromModal}
-
-            />
+                          />
 
       <LabelDrawer
         isOpen={selectedLabelForDrawer !== null}
