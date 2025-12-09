@@ -40,6 +40,9 @@ interface TaskItemProps {
   onLabelClick?: (label: string) => void;
   expandedTaskId?: string | null;
   onToggleExpand?: (taskId: string) => void;
+  selectMode?: boolean;
+  selected?: boolean;
+  onSelect?: (taskId: string) => void;
 }
 
 const TaskItem: React.FC<TaskItemProps> = ({
@@ -65,6 +68,9 @@ const TaskItem: React.FC<TaskItemProps> = ({
   onLabelClick,
   expandedTaskId,
   onToggleExpand,
+  selectMode,
+  selected,
+  onSelect,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isDeleteConfirming, setIsDeleteConfirming] = useState(false);
@@ -204,115 +210,88 @@ const TaskItem: React.FC<TaskItemProps> = ({
     return style.text || 'text-gray-400';
   };
 
+  const priorityStyle = getPriorityStyle(task.priority);
+
     return (
-
       <div
-
         key={task.id}
-
-        className={`rounded-[12px] p-4 bg-transparent hover:bg-[#1f1f1f] transition-all relative ${
-
-          draggedTaskId === task.id ? 'opacity-50' : ''
-
-        } ${
-
-          dragOverTaskId === task.id ? 'border border-blue-500' : ''
-
+        className={`rounded-[12px] p-4 transition-all relative bg-transparent hover:bg-[#1f1f1f] ${
+          selectMode 
+            ? 'cursor-pointer'
+            : `${draggedTaskId === task.id ? 'opacity-50' : ''} ${dragOverTaskId === task.id ? 'border border-white' : ''}`
         }`}
-
-        onContextMenu={(e) => onContextMenu(e, task.id, false)}
-
-        onMouseEnter={() => setIsHovered(true)}
-
-        onMouseLeave={() => {
-
-          setIsHovered(false);
-
-          setIsDeleteConfirming(false);
-
+        onClick={() => {
+          if (selectMode && onSelect) {
+            onSelect(task.id);
+          }
         }}
-
-        draggable
-
-        onDragStart={(e) => onDragStart(e, task.id, parentId)}
-
-        onDragOver={(e) => onDragOver(e, task.id)}
-
+        onContextMenu={(e) => !selectMode && onContextMenu(e, task.id, false)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => {
+          setIsHovered(false);
+          setIsDeleteConfirming(false);
+        }}
+        draggable={!selectMode}
+        onDragStart={(e) => !selectMode && onDragStart(e, task.id, parentId)}
+        onDragOver={(e) => !selectMode && onDragOver(e, task.id)}
         onDragLeave={onDragLeave}
-
-        onDrop={(e) => onDrop(e, task.id, parentId)}
-
+        onDrop={(e) => !selectMode && onDrop(e, task.id, parentId)}
         onDragEnd={onDragEnd}
-
-        style={{ cursor: draggedTaskId === task.id ? 'grabbing' : 'grab' }}
-
+        style={{ cursor: selectMode ? 'pointer' : (draggedTaskId === task.id ? 'grabbing' : 'grab') }}
       >
-
         <div className="flex items-center gap-2 mb-2">
-
-          <div className="flex items-center gap-1">
-
-            {hasSubtasks && (
-
-              <button
-
-                onClick={(e) => {
-
-                  e.stopPropagation();
-
-                  onToggleExpand?.(task.id);
-
-                }}
-
-                className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
-
-              >
-
-                <ChevronRight
-
-                  className={`h-4 w-4 transition-transform ${
-
-                    expandedTaskId === task.id ? 'rotate-90' : 'rotate-0'
-
-                  }`}
-
-                />
-
-              </button>
-
-            )}
-
-          </div>
-
-          <div
-
-            className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 ${
-
-              isDeleted || task.isDraft ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-
-            } ${
-
-              task.completed
-
-                ? `bg-white border-white`
-
-                : getPriorityCheckboxColor(task.priority)
-
-            }`}
-
-            onClick={(e) => {
-
-              if (!isDeleted && !task.isDraft) {
-
+          {selectMode ? (
+            <div
+              onClick={(e) => {
                 e.stopPropagation();
-
-                onToggle(task.id);
-
-              }
-
-            }}
-
-          />
+                if (onSelect) onSelect(task.id);
+              }}
+              className={`w-5 h-5 border-2 rounded-md flex-shrink-0 cursor-pointer flex items-center justify-center ${
+                selected ? 'bg-white border-white' : 'border-gray-500'
+              }`}
+            >
+              {selected && (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              )}
+            </div>
+          ) : (
+            <>
+              <div className="flex items-center gap-1">
+                {hasSubtasks && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onToggleExpand?.(task.id);
+                    }}
+                    className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+                  >
+                    <ChevronRight
+                      className={`h-4 w-4 transition-transform ${
+                        expandedTaskId === task.id ? 'rotate-90' : 'rotate-0'
+                      }`}
+                    />
+                  </button>
+                )}
+              </div>
+              <div
+                className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 ${
+                  isDeleted || task.isDraft ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                } ${
+                  task.completed
+                    ? `${priorityStyle.bg} ${priorityStyle.text.replace('text-', 'border-')}`
+                    : getPriorityCheckboxColor(task.priority)
+                }`}
+                onClick={(e) => {
+                  if (!isDeleted && !task.isDraft) {
+                    e.stopPropagation();
+                    onToggle(task.id);
+                  }
+                }}
+              />
+            </>
+          )}
 
           <TooltipProvider delayDuration={100}>
 

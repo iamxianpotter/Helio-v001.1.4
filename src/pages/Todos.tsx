@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { IconToggle } from '@/components/ui/icon-toggle';
+import MarqueeSelection from '@/components/ui/MarqueeSelection';
 
 interface Todo {
   id: string;
@@ -50,6 +51,8 @@ const Todos = () => {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sectionId?: string } | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
+  const [marquee, setMarquee] = useState({ startX: 0, startY: 0, endX: 0, endY: 0, isDragging: false });
+  const todoRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   const handleTodoClick = (id: string, e: React.MouseEvent) => {
     if (e.ctrlKey || e.metaKey) {

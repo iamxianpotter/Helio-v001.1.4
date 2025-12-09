@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSidebarContext } from '../contexts/SidebarContext';
 import TasksHeader from '@/components/tasks/TasksHeader';
 import DateSelector from '@/components/tasks/DateSelector';
 import PrioritySelector from '@/components/tasks/PrioritySelector';
@@ -103,6 +104,86 @@ const Tasks = () => {
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const [isSubtaskOpened, setIsSubtaskOpened] = useState(false);
   const [parentTaskId, setParentTaskId] = useState('');
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
+  const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
+  const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number, y: number } | null>(null);
+
+  const handleToggleSelectMode = () => {
+    setSelectMode(!selectMode);
+    setSelectedTaskIds([]);
+    setPageContextMenu(null);
+  };
+
+  const handleTaskSelect = (taskId: string) => {
+    setSelectedTaskIds(prev =>
+      prev.includes(taskId)
+        ? prev.filter(id => id !== taskId)
+        : [...prev, taskId]
+    );
+  };
+
+  const handleSectionMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setSectionMenuPosition({ x: rect.left, y: rect.bottom + 5 });
+    setSectionMenuOpen(true);
+  };
+  
+  const handleMoveToDrafts = () => {
+    const updatedTasks = tasks.map(task => 
+      displayedTasks.some(dt => dt.id === task.id) ? { ...task, isDraft: true } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+    setSectionMenuOpen(false);
+  };
+
+  const handleDeleteAll = () => {
+    const tasksToDelete = displayedTasks;
+    const remainingTasks = tasks.filter(task => !tasksToDelete.some(dt => dt.id === task.id));
+    
+    setTasks(remainingTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(remainingTasks));
+    
+    const deleted = tasks.filter(task => tasksToDelete.some(dt => dt.id === task.id));
+    setDeletedTasks(prev => [...prev, ...deleted.map(t => ({...t, deletedAt: new Date().toISOString() } as any))]);
+    
+    setSectionMenuOpen(false);
+  };
+
+  const handleBulkMoveToDrafts = () => {
+    const updatedTasks = tasks.map(task =>
+      selectedTaskIds.includes(task.id) ? { ...task, isDraft: true } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+  };
+
+  const handleBulkMoveToTasks = () => {
+    const updatedTasks = tasks.map(task =>
+      selectedTaskIds.includes(task.id) ? { ...task, isDraft: false } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+  };
+
+  const handleBulkDelete = () => {
+    const tasksToDelete = tasks.filter(task => selectedTaskIds.includes(task.id));
+    const remainingTasks = tasks.filter(task => !selectedTaskIds.includes(task.id));
+    
+    setTasks(remainingTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(remainingTasks));
+    
+    setDeletedTasks(prev => [...prev, ...tasksToDelete.map(t => ({...t, deletedAt: new Date().toISOString() } as any))]);
+    
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+  };
 
   // Save deleted tasks to localStorage
   React.useEffect(() => {
@@ -131,16 +212,48 @@ const Tasks = () => {
     if (priorityName.startsWith('Priority ')) {
       const level = parseInt(priorityName.replace('Priority ', ''));
       const styles = {
-        1: { bg: 'bg-red-500/20', text: 'text-red-400' },
-        2: { bg: 'bg-orange-500/20', text: 'text-orange-400' },
-        3: { bg: 'bg-yellow-500/20', text: 'text-yellow-400' },
-        4: { bg: 'bg-green-500/20', text: 'text-green-400' },
-        5: { bg: 'bg-blue-500/20', text: 'text-blue-400' },
-        6: { bg: 'bg-purple-500/20', text: 'text-purple-400' },
+        1: { bg: 'bg-red-500', text: 'text-red-400' },
+        2: { bg: 'bg-orange-500', text: 'text-orange-400' },
+        3: { bg: 'bg-yellow-500', text: 'text-yellow-400' },
+        4: { bg: 'bg-green-500', text: 'text-green-400' },
+        5: { bg: 'bg-blue-500', text: 'text-blue-400' },
+        6: { bg: 'bg-purple-500', text: 'text-purple-400' },
       };
-      return styles[level as keyof typeof styles] || { bg: 'bg-gray-500/20', text: 'text-gray-400' };
+      return styles[level as keyof typeof styles] || { bg: 'bg-gray-500', text: 'text-gray-400' };
     }
-    return { bg: 'bg-gray-500/20', text: getPriorityColorFromStorage(priorityName) };
+    
+    const textColor = getPriorityColorFromStorage(priorityName);
+    
+    const colorMap: { [key: string]: string } = {
+        'text-red-500': 'bg-red-500',
+        'text-orange-500': 'bg-orange-500',
+        'text-yellow-500': 'bg-yellow-500',
+        'text-green-500': 'bg-green-500',
+        'text-blue-500': 'bg-blue-500',
+        'text-cyan-500': 'bg-cyan-500',
+        'text-emerald-500': 'bg-emerald-500',
+        'text-teal-500': 'bg-teal-500',
+        'text-sky-500': 'bg-sky-500',
+        'text-amber-500': 'bg-amber-500',
+        'text-lime-500': 'bg-lime-500',
+        'text-pink-500': 'bg-pink-500',
+        'text-rose-500': 'bg-rose-500',
+        'text-fuchsia-500': 'bg-fuchsia-500',
+        'text-slate-400': 'bg-slate-400',
+        'text-gray-400': 'bg-gray-400',
+        'text-zinc-400': 'bg-zinc-400',
+        'text-stone-400': 'bg-stone-400',
+        'text-red-600': 'bg-red-600',
+        'text-orange-600': 'bg-orange-600',
+        'text-lime-600': 'bg-lime-600',
+        'text-emerald-600': 'bg-emerald-600',
+        'text-indigo-500': 'bg-indigo-500',
+        'text-violet-500': 'bg-violet-500',
+    };
+
+    const bgColor = colorMap[textColor] || 'bg-gray-500';
+
+    return { bg: bgColor, text: textColor };
   };
 
   const getLabelColor = (labelName: string): string => {
@@ -269,19 +382,32 @@ const Tasks = () => {
   };
 
   const handleToggleTask = (taskId: string) => {
-    const toggleRecursively = (tasks: Task[]): Task[] => {
+    const toggleRecursively = (tasks: Task[], isCompleted: boolean): Task[] => {
+      return tasks.map(task => ({
+        ...task,
+        completed: isCompleted,
+        subtasks: task.subtasks ? toggleRecursively(task.subtasks, isCompleted) : [],
+      }));
+    };
+
+    const updateTasks = (tasks: Task[]): Task[] => {
       return tasks.map(task => {
         if (task.id === taskId) {
-          return { ...task, completed: !task.completed };
+          const newCompletedStatus = !task.completed;
+          return {
+            ...task,
+            completed: newCompletedStatus,
+            subtasks: task.subtasks ? toggleRecursively(task.subtasks, newCompletedStatus) : [],
+          };
         }
         if (task.subtasks) {
-          return { ...task, subtasks: toggleRecursively(task.subtasks) };
+          return { ...task, subtasks: updateTasks(task.subtasks) };
         }
         return task;
       });
     };
 
-    const updatedTasks = toggleRecursively(tasks);
+    const updatedTasks = updateTasks(tasks);
     setTasks(updatedTasks);
     localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
   };
@@ -809,6 +935,42 @@ const Tasks = () => {
         }}
       />
       
+      {selectMode && selectedTaskIds.length > 0 && (
+        <div
+          className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[180px] border-none"
+          style={{
+            top: '50%',
+            right: '5%',
+            transform: 'translateY(-50%)',
+          }}
+        >
+          {currentTaskView === 'drafts' ? (
+            <button
+              className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+              onClick={handleBulkMoveToTasks}
+            >
+              <span>Move to Tasks</span>
+              <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+            </button>
+          ) : (
+            <button
+              className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+              onClick={handleBulkMoveToDrafts}
+            >
+              <span>Move to Drafts</span>
+              <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+            </button>
+          )}
+          <button
+            className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+            onClick={handleBulkDelete}
+          >
+            <span>Delete Selected</span>
+            <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+          </button>
+        </div>
+      )}
+      
       {/* LIST View Content */}
       {currentView === 'list' && (
         <div onContextMenu={handlePageContextMenu} className="px-4 mt-4 flex-grow">
@@ -849,10 +1011,31 @@ const Tasks = () => {
                 </div>
 
                 {/* Three-dot menu icon (visible on hover) */}
-                <MoreVertical 
+                <MoreVertical
+                  onClick={handleSectionMenu}
                   className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto"
                 />
               </div>
+              {sectionMenuOpen && sectionMenuPosition && (
+                <div 
+                  className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[180px] border-none"
+                  style={{ left: sectionMenuPosition.x, top: sectionMenuPosition.y }}
+                  onMouseLeave={() => setSectionMenuOpen(false)}
+                >
+                  <button
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                    onClick={handleMoveToDrafts}
+                  >
+                    <span>Move all to Drafts</span>
+                  </button>
+                  <button
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                    onClick={handleDeleteAll}
+                  >
+                    <span>Delete all tasks</span>
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Expandable content - positioned below the main section */}
@@ -989,6 +1172,9 @@ const Tasks = () => {
                                                         }}
                                                         expandedTaskId={expandedTaskId}
                                                         onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
+                                                        selectMode={selectMode}
+                                                        selected={selectedTaskIds.includes(task.id)}
+                                                        onSelect={handleTaskSelect}
                                                       />
                                                     )
                         ))}
@@ -1118,6 +1304,9 @@ const Tasks = () => {
                             }}
                             expandedTaskId={expandedTaskId}
                             onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
+                            selectMode={selectMode}
+                            selected={selectedTaskIds.includes(task.id)}
+                            onSelect={handleTaskSelect}
                           />
                       )
                     ))
@@ -1361,15 +1550,21 @@ const Tasks = () => {
 
                 </button>
 
-                <button
-
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
-                >
-
-                  <span>Select</span>
-
-                </button>
+                {selectMode ? (
+                  <button
+                    onClick={handleToggleSelectMode}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                  >
+                    <span>Exit Select Mode</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleToggleSelectMode}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                  >
+                    <span>Select</span>
+                  </button>
+                )}
 
                 <button
 

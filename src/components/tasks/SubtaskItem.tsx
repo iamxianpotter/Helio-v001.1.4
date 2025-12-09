@@ -185,6 +185,8 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
     setIsDeleteConfirming(false);
   };
 
+  const priorityStyle = getPriorityStyle(subtask.priority);
+
   return (
     <div>
       <div
@@ -242,7 +244,7 @@ const SubtaskItem: React.FC<SubtaskItemProps> = ({
             <div
               className={`w-4 h-4 border-2 rounded-full transition-colors flex-shrink-0 cursor-pointer ${
                 subtask.completed
-                  ? 'bg-white border-white'
+                  ? `${priorityStyle.bg} ${priorityStyle.text.replace('text', 'border')}`
                   : getPriorityCheckboxColor(subtask.priority)
               }`}
               onClick={(e) => {
