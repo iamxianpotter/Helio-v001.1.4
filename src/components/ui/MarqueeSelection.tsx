@@ -1,31 +1,21 @@
 import React from 'react';
 
 interface MarqueeSelectionProps {
-  startX: number;
-  startY: number;
-  endX: number;
-  endY: number;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
 }
 
-const MarqueeSelection: React.FC<MarqueeSelectionProps> = ({ startX, startY, endX, endY }) => {
-  const x = Math.min(startX, endX);
-  const y = Math.min(startY, endY);
-  const width = Math.abs(endX - startX);
-  const height = Math.abs(endY - startY);
-
-  if (width === 0 || height === 0) {
-    return null;
-  }
-
+const MarqueeSelection: React.FC<MarqueeSelectionProps> = ({ x, y, width, height }) => {
   return (
     <div
-      className="absolute border border-dashed border-blue-500 bg-blue-500 bg-opacity-20 pointer-events-none"
+      className="fixed bg-blue-500 bg-opacity-20 border border-blue-500 pointer-events-none z-[9999]"
       style={{
         left: x,
         top: y,
-        width: width,
-        height: height,
-        zIndex: 9999,
+        width,
+        height,
       }}
     />
   );

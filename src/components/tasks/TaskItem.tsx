@@ -114,75 +114,103 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
   const getPriorityCheckboxColor = (priority: string) => {
     const priorityStyle = getPriorityStyle(priority);
+    let classString = '';
+
     if (priority.startsWith('Priority ')) {
       const level = parseInt(priority.replace('Priority ', ''));
       const colorMap = {
-        1: 'border-red-500 hover:border-red-400',
-        2: 'border-orange-500 hover:border-orange-400',
-        3: 'border-yellow-500 hover:border-yellow-400',
-        4: 'border-green-500 hover:border-green-400',
-        5: 'border-blue-500 hover:border-blue-400',
-        6: 'border-purple-500 hover:border-purple-400',
+        1: 'border-red-500',
+        2: 'border-orange-500',
+        3: 'border-yellow-500',
+        4: 'border-green-500',
+        5: 'border-blue-500',
+        6: 'border-purple-500',
       };
-      return colorMap[level as keyof typeof colorMap] || 'border-gray-400 hover:border-gray-300';
-    }
-    const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
-    if (customPrioritiesJson) {
-      const customPriorities = JSON.parse(customPrioritiesJson);
-      const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
-      if (customPriority) {
-        const colorTextClass = customPriority.color;
-        const colorMap: { [key: string]: string } = {
-          'text-red-500': 'border-red-500 hover:border-red-400',
-          'text-orange-500': 'border-orange-500 hover:border-orange-400',
-          'text-yellow-500': 'border-yellow-500 hover:border-yellow-400',
-          'text-green-500': 'border-green-500 hover:border-green-400',
-          'text-blue-500': 'border-blue-500 hover:border-blue-400',
-          'text-cyan-500': 'border-cyan-500 hover:border-cyan-400',
-          'text-emerald-500': 'border-emerald-500 hover:border-emerald-400',
-          'text-teal-500': 'border-teal-500 hover:border-teal-400',
-          'text-sky-500': 'border-sky-500 hover:border-sky-400',
-          'text-amber-500': 'border-amber-500 hover:border-amber-400',
-          'text-lime-500': 'border-lime-500 hover:border-lime-400',
-          'text-pink-500': 'border-pink-500 hover:border-pink-400',
-          'text-rose-500': 'border-rose-500 hover:border-rose-400',
-          'text-fuchsia-500': 'border-fuchsia-500 hover:border-fuchsia-400',
-          'text-slate-400': 'border-slate-400 hover:border-slate-300',
-          'text-gray-400': 'border-gray-400 hover:border-gray-300',
-          'text-zinc-400': 'border-zinc-400 hover:border-zinc-300',
-          'text-stone-400': 'border-stone-400 hover:border-stone-300',
-          'text-red-600': 'border-red-600 hover:border-red-500',
-          'text-orange-600': 'border-orange-600 hover:border-orange-500',
-          'text-lime-600': 'border-lime-600 hover:border-lime-500',
-          'text-emerald-600': 'border-emerald-600 hover:border-emerald-500',
-          'text-indigo-500': 'border-indigo-500 hover:border-indigo-400',
-          'text-violet-500': 'border-violet-500 hover:border-violet-400',
-        };
-        return colorMap[colorTextClass] || 'border-gray-400 hover:border-gray-300';
+      const hoverColorMap = {
+        1: 'hover:border-red-400',
+        2: 'hover:border-orange-400',
+        3: 'hover:border-yellow-400',
+        4: 'hover:border-green-400',
+        5: 'hover:border-blue-400',
+        6: 'hover:border-purple-400',
+      };
+      classString = colorMap[level as keyof typeof colorMap] || 'border-gray-400';
+      if (!selectMode) {
+        classString += ` ${hoverColorMap[level as keyof typeof hoverColorMap] || 'hover:border-gray-300'}`;
+      }
+    } else {
+      const customPrioritiesJson = localStorage.getItem('kario-custom-priorities');
+      if (customPrioritiesJson) {
+        const customPriorities = JSON.parse(customPrioritiesJson);
+        const customPriority = customPriorities.find((p: { name: string; color: string }) => p.name === priority);
+        if (customPriority) {
+          const colorTextClass = customPriority.color;
+          const colorMap: { [key: string]: string } = {
+            'text-red-500': 'border-red-500', 'text-orange-500': 'border-orange-500',
+            'text-yellow-500': 'border-yellow-500', 'text-green-500': 'border-green-500',
+            'text-blue-500': 'border-blue-500', 'text-cyan-500': 'border-cyan-500',
+            'text-emerald-500': 'border-emerald-500', 'text-teal-500': 'border-teal-500',
+            'text-sky-500': 'border-sky-500', 'text-amber-500': 'border-amber-500',
+            'text-lime-500': 'border-lime-500', 'text-pink-500': 'border-pink-500',
+            'text-rose-500': 'border-rose-500', 'text-fuchsia-500': 'border-fuchsia-500',
+            'text-slate-400': 'border-slate-400', 'text-gray-400': 'border-gray-400',
+            'text-zinc-400': 'border-zinc-400', 'text-stone-400': 'border-stone-400',
+            'text-red-600': 'border-red-600', 'text-orange-600': 'border-orange-600',
+            'text-lime-600': 'border-lime-600', 'text-emerald-600': 'border-emerald-600',
+            'text-indigo-500': 'border-indigo-500', 'text-violet-500': 'border-violet-500',
+          };
+          const hoverColorMap: { [key: string]: string } = {
+            'text-red-500': 'hover:border-red-400', 'text-orange-500': 'hover:border-orange-400',
+            'text-yellow-500': 'hover:border-yellow-400', 'text-green-500': 'hover:border-green-400',
+            'text-blue-500': 'hover:border-blue-400', 'text-cyan-500': 'hover:border-cyan-400',
+            'text-emerald-500': 'hover:border-emerald-400', 'text-teal-500': 'hover:border-teal-400',
+            'text-sky-500': 'hover:border-sky-400', 'text-amber-500': 'hover:border-amber-400',
+            'text-lime-500': 'hover:border-lime-400', 'text-pink-500': 'hover:border-pink-400',
+            'text-rose-500': 'hover:border-rose-400', 'text-fuchsia-500': 'hover:border-fuchsia-400',
+            'text-slate-400': 'hover:border-slate-300', 'text-gray-400': 'hover:border-gray-300',
+            'text-zinc-400': 'hover:border-zinc-300', 'text-stone-400': 'hover:border-stone-300',
+            'text-red-600': 'hover:border-red-500', 'text-orange-600': 'hover:border-orange-500',
+            'text-lime-600': 'hover:border-lime-500', 'text-emerald-600': 'hover:border-emerald-500',
+            'text-indigo-500': 'hover:border-indigo-400', 'text-violet-500': 'hover:border-violet-400',
+          };
+          classString = colorMap[colorTextClass] || 'border-gray-400';
+          if (!selectMode) {
+            classString += ` ${hoverColorMap[colorTextClass] || 'hover:border-gray-300'}`;
+          }
+          return classString;
+        }
       }
     }
+    
     const colorClassFromStyle = priorityStyle.text;
     const colorMap: { [key: string]: string } = {
-      'text-red-500': 'border-red-500 hover:border-red-400',
-      'text-orange-500': 'border-orange-500 hover:border-orange-400',
-      'text-yellow-500': 'border-yellow-500 hover:border-yellow-400',
-      'text-green-500': 'border-green-500 hover:border-green-400',
-      'text-blue-500': 'border-blue-500 hover:border-blue-400',
-      'text-cyan-500': 'border-cyan-500 hover:border-cyan-400',
-      'text-emerald-500': 'border-emerald-500 hover:border-emerald-400',
-      'text-teal-500': 'border-teal-500 hover:border-teal-400',
-      'text-sky-500': 'border-sky-500 hover:border-sky-400',
-      'text-amber-500': 'border-amber-500 hover:border-amber-400',
-      'text-lime-500': 'border-lime-500 hover:border-lime-400',
-      'text-pink-500': 'border-pink-500 hover:border-pink-400',
-      'text-rose-500': 'border-rose-500 hover:border-rose-400',
-      'text-fuchsia-500': 'border-fuchsia-500 hover:border-fuchsia-400',
-      'text-slate-400': 'border-slate-400 hover:border-slate-300',
-      'text-gray-400': 'border-gray-400 hover:border-gray-300',
-      'text-zinc-400': 'border-zinc-400 hover:border-zinc-300',
-      'text-stone-400': 'border-stone-400 hover:border-stone-300',
+      'text-red-500': 'border-red-500', 'text-orange-500': 'border-orange-500',
+      'text-yellow-500': 'border-yellow-500', 'text-green-500': 'border-green-500',
+      'text-blue-500': 'border-blue-500', 'text-cyan-500': 'border-cyan-500',
+      'text-emerald-500': 'border-emerald-500', 'text-teal-500': 'border-teal-500',
+      'text-sky-500': 'border-sky-500', 'text-amber-500': 'border-amber-500',
+      'text-lime-500': 'border-lime-500', 'text-pink-500': 'border-pink-500',
+      'text-rose-500': 'border-rose-500', 'text-fuchsia-500': 'border-fuchsia-500',
+      'text-slate-400': 'border-slate-400', 'text-gray-400': 'border-gray-400',
+      'text-zinc-400': 'border-zinc-400', 'text-stone-400': 'border-stone-400',
     };
-    return colorMap[colorClassFromStyle] || 'border-gray-400 hover:border-gray-300';
+    const hoverColorMap: { [key: string]: string } = {
+        'text-red-500': 'hover:border-red-400', 'text-orange-500': 'hover:border-orange-400',
+        'text-yellow-500': 'hover:border-yellow-400', 'text-green-500': 'hover:border-green-400',
+        'text-blue-500': 'hover:border-blue-400', 'text-cyan-500': 'hover:border-cyan-400',
+        'text-emerald-500': 'hover:border-emerald-400', 'text-teal-500': 'hover:border-teal-400',
+        'text-sky-500': 'hover:border-sky-400', 'text-amber-500': 'hover:border-amber-400',
+        'text-lime-500': 'hover:border-lime-400', 'text-pink-500': 'hover:border-pink-400',
+        'text-rose-500': 'hover:border-rose-400', 'text-fuchsia-500': 'hover:border-fuchsia-400',
+        'text-slate-400': 'hover:border-slate-300', 'text-gray-400': 'hover:border-gray-300',
+        'text-zinc-400': 'hover:border-zinc-300', 'text-stone-400': 'hover:border-stone-300',
+    };
+    classString = colorMap[colorClassFromStyle] || 'border-gray-400';
+    if (!selectMode) {
+      classString += ` ${hoverColorMap[colorClassFromStyle] || 'hover:border-gray-300'}`;
+    }
+
+    return classString;
   };
 
   const getPriorityFlagColor = (priority: string) => {
@@ -214,19 +242,23 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
     return (
       <div
-        key={task.id}
-        className={`rounded-[12px] p-4 transition-all relative bg-transparent hover:bg-[#1f1f1f] ${
-          selectMode 
-            ? 'cursor-pointer'
-            : `${draggedTaskId === task.id ? 'opacity-50' : ''} ${dragOverTaskId === task.id ? 'border border-white' : ''}`
-        }`}
-        onClick={() => {
+            key={task.id}
+            data-task-id={task.id}
+            className={`rounded-[12px] p-4 transition-all relative bg-transparent ${!selectMode ? 'hover:bg-[#1f1f1f]' : ''} ${
+              selectMode 
+                ? 'cursor-pointer select-none'
+                : `${draggedTaskId === task.id ? 'opacity-50' : ''} ${dragOverTaskId === task.id ? 'border border-white' : ''}`
+            }`}        onClick={() => {
           if (selectMode && onSelect) {
             onSelect(task.id);
           }
         }}
         onContextMenu={(e) => !selectMode && onContextMenu(e, task.id, false)}
-        onMouseEnter={() => setIsHovered(true)}
+        onMouseEnter={() => {
+          if (!selectMode) {
+            setIsHovered(true);
+          }
+        }}
         onMouseLeave={() => {
           setIsHovered(false);
           setIsDeleteConfirming(false);
@@ -265,7 +297,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
                       e.stopPropagation();
                       onToggleExpand?.(task.id);
                     }}
-                    className="p-0 text-gray-400 hover:text-white transition-all flex-shrink-0"
+                    className={`p-0 text-gray-400 ${!selectMode ? 'hover:text-white' : ''} transition-all flex-shrink-0`}
                   >
                     <ChevronRight
                       className={`h-4 w-4 transition-transform ${
@@ -811,7 +843,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
                       }}
 
-                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full hover:border-[#525252] transition-all duration-200 cursor-pointer w-fit"
+                      className={`flex items-center gap-1.5 px-3 py-1.5 bg-[#252527] border border-[#414141] rounded-full ${!selectMode ? 'hover:border-[#525252]' : ''} transition-all duration-200 cursor-pointer w-fit`}
 
                     >
 
@@ -829,7 +861,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
                           }}
 
-                          className="hover:opacity-80 transition-opacity"
+                          className={`${!selectMode ? 'hover:opacity-80' : ''} transition-opacity`}
 
                         >
 
@@ -859,7 +891,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
                           onClick={() => onLabelClick?.(label)}
 
-                          className="flex items-center gap-2 hover:opacity-70 transition-opacity text-left"
+                          className={`flex items-center gap-2 ${!selectMode ? 'hover:opacity-70' : ''} transition-opacity text-left`}
 
                         >
 
@@ -895,7 +927,7 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
                         onClick={() => onLabelClick?.(label)}
 
-                        className="flex items-center gap-2 text-white hover:opacity-70 transition-opacity text-left"
+                        className={`flex items-center gap-2 text-white ${!selectMode ? 'hover:opacity-70' : ''} transition-opacity text-left`}
 
                       >
 
@@ -929,45 +961,47 @@ const TaskItem: React.FC<TaskItemProps> = ({
 
               <SubtaskItem
 
-                key={subtask.id}
+                              key={subtask.id}
 
-                subtask={subtask}
+                              subtask={subtask}
 
-                parentId={task.id}
+                              parentId={task.id}
 
-                onToggle={onToggle}
+                              onToggle={onToggle}
 
-                onEdit={onEditTask}
+                              onEdit={onEditTask}
 
-                onDelete={onDeleteTask}
+                              onDelete={onDeleteTask}
 
-                onContextMenu={(e, subtaskId) => onContextMenu(e, subtaskId, true)}
+                              onContextMenu={(e, subtaskId) => onContextMenu(e, subtaskId, true)}
 
-                getLabelColor={getLabelColor}
+                              getLabelColor={getLabelColor}
 
-                getPriorityStyle={getPriorityStyle}
+                              getPriorityStyle={getPriorityStyle}
 
-                expandedLabelsSubtaskId={expandedLabelsTaskId}
+                              expandedLabelsSubtaskId={expandedLabelsTaskId}
 
-                onToggleLabels={onToggleLabels}
+                              onToggleLabels={onToggleLabels}
 
-                onOpen={(subtaskId) => onOpenTask(subtaskId, task.id)}
+                              onOpen={(subtaskId) => onOpenTask(subtaskId, task.id)}
 
-                onDragStart={onDragStart}
+                              onDragStart={onDragStart}
 
-                onDragOver={onDragOver}
+                              onDragOver={onDragOver}
 
-                onDragLeave={onDragLeave}
+                              onDragLeave={onDragLeave}
 
-                onDrop={onDrop}
+                              onDrop={onDrop}
 
-                onDragEnd={onDragEnd}
+                              onDragEnd={onDragEnd}
 
-                draggedTaskId={draggedTaskId}
+                              draggedTaskId={draggedTaskId}
 
-                dragOverTaskId={dragOverTaskId}
+                              dragOverTaskId={dragOverTaskId}
 
-              />
+                              selectMode={selectMode}
+
+                            />
 
             ))}
 

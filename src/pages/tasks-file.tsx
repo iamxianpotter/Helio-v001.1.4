@@ -8,7 +8,20 @@ import LabelSelector from '@/components/tasks/LabelSelector';
 import TaskItem from '@/components/tasks/TaskItem';
 import TaskWindowModal from '@/components/tasks/TaskWindowModal';
 import LabelDrawer from '@/components/tasks/LabelDrawer';
-import { Plus, ChevronRight, MoveVertical as MoreVertical, Calendar, Flag, Bell, Tag, Link, Edit, Trash2, Repeat } from 'lucide-react';
+import MarqueeSelection from '@/components/ui/MarqueeSelection';
+import {
+  Plus,
+  ChevronRight,
+  MoveVertical as MoreVertical,
+  Calendar,
+  Flag,
+  Bell,
+  Tag,
+  Link,
+  Edit,
+  Trash2,
+  Repeat,
+} from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,24 +43,24 @@ interface Task {
 }
 
 const updateTaskRecursively = (
-  tasks: Task[], 
-  taskId: string, 
+  tasks: Task[],
+  taskId: string,
   updateFn: (task: Task) => Task
 ): { updatedTasks: Task[]; success: boolean } => {
   let success = false;
-  const updatedTasks = tasks.map(task => {
-      if (task.id === taskId) {
-          success = true;
-          return updateFn(task);
+  const updatedTasks = tasks.map((task) => {
+    if (task.id === taskId) {
+      success = true;
+      return updateFn(task);
+    }
+    if (task.subtasks) {
+      const result = updateTaskRecursively(task.subtasks, taskId, updateFn);
+      if (result.success) {
+        success = true;
+        return { ...task, subtasks: result.updatedTasks };
       }
-      if (task.subtasks) {
-          const result = updateTaskRecursively(task.subtasks, taskId, updateFn);
-          if (result.success) {
-              success = true;
-              return { ...task, subtasks: result.updatedTasks };
-          }
-      }
-      return task;
+    }
+    return task;
   });
   return { updatedTasks, success };
 };
@@ -75,7 +88,9 @@ const Tasks = () => {
   const [selectedPriority, setSelectedPriority] = useState<string>('');
   const [selectedReminder, setSelectedReminder] = useState<string | undefined>();
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string; isSubtaskInList?: boolean } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; taskId: string; isSubtaskInList?: boolean } | null>(
+    null
+  );
   const [pageContextMenu, setPageContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const [dragOverTaskId, setDragOverTaskId] = useState<string | null>(null);
@@ -107,7 +122,10 @@ const Tasks = () => {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
   const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
-  const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number, y: number } | null>(null);
+  const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
+  const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
 
   const handleToggleSelectMode = () => {
     setSelectMode(!selectMode);
@@ -180,6 +198,38 @@ const Tasks = () => {
     localStorage.setItem('kario-tasks', JSON.stringify(remainingTasks));
     
     setDeletedTasks(prev => [...prev, ...tasksToDelete.map(t => ({...t, deletedAt: new Date().toISOString() } as any))]);
+    
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+  };
+
+  const handleBulkRestore = () => {
+    const tasksToRestore = deletedTasks.filter(task => selectedTaskIds.includes(task.id));
+    const remainingDeletedTasks = deletedTasks.filter(task => !selectedTaskIds.includes(task.id));
+
+    const restoredTasks = tasksToRestore.map(t => {
+      const { deletedAt, ...restored } = t as any;
+      return restored;
+    });
+
+    setTasks(prev => [...prev, ...restoredTasks]);
+    setDeletedTasks(remainingDeletedTasks);
+    
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+  };
+
+  const handleBulkMoveToDraftsFromDeleted = () => {
+    const tasksToMove = deletedTasks.filter(task => selectedTaskIds.includes(task.id));
+    const remainingDeletedTasks = deletedTasks.filter(task => !selectedTaskIds.includes(task.id));
+
+    const movedTasks = tasksToMove.map(t => {
+      const { deletedAt, ...restored } = t as any;
+      return { ...restored, isDraft: true };
+    });
+
+    setTasks(prev => [...prev, ...movedTasks]);
+    setDeletedTasks(remainingDeletedTasks);
     
     setSelectMode(false);
     setSelectedTaskIds([]);
@@ -505,6 +555,16 @@ const Tasks = () => {
       setTasks(prev => [...prev, restoredTask]);
       setDeletedTasks(prev => prev.filter(task => task.id !== taskId));
       localStorage.setItem('kario-tasks', JSON.stringify([...tasks, restoredTask]));
+    }
+  };
+
+  const handleMoveToDraftsFromDeleted = (taskId: string) => {
+    const taskToMove = deletedTasks.find(task => task.id === taskId);
+    if (taskToMove) {
+      const { deletedAt, ...restoredTask } = taskToMove as any;
+      setTasks(prev => [...prev, { ...restoredTask, isDraft: true }]);
+      setDeletedTasks(prev => prev.filter(task => task.id !== taskId));
+      localStorage.setItem('kario-tasks', JSON.stringify([...tasks, { ...restoredTask, isDraft: true }]));
     }
   };
 
@@ -906,6 +966,7 @@ const Tasks = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#161618] flex flex-col">
+      {marquee && <MarqueeSelection x={marquee.x} y={marquee.y} width={marquee.width} height={marquee.height} />}
       <TasksHeader
         totalTasks={totalTasks}
         completedTasks={completedTasks}
@@ -944,7 +1005,24 @@ const Tasks = () => {
             transform: 'translateY(-50%)',
           }}
         >
-          {currentTaskView === 'drafts' ? (
+          {currentTaskView === 'deleted' ? (
+            <>
+              <button
+                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-green-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                onClick={handleBulkRestore}
+              >
+                <span>Restore in Tasks</span>
+                <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+              </button>
+              <button
+                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-purple-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                onClick={handleBulkMoveToDraftsFromDeleted}
+              >
+                <span>Move to Drafts</span>
+                <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+              </button>
+            </>
+          ) : currentTaskView === 'drafts' ? (
             <button
               className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
               onClick={handleBulkMoveToTasks}
@@ -961,20 +1039,79 @@ const Tasks = () => {
               <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
             </button>
           )}
+          {currentTaskView !== 'deleted' && (
+            <button
+              className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+              onClick={handleBulkDelete}
+            >
+              <span>Delete Selected</span>
+              <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+            </button>
+          )}
           <button
-            className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-            onClick={handleBulkDelete}
+            className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+            onClick={handleToggleSelectMode}
           >
-            <span>Delete Selected</span>
-            <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+            <span>Exit Select Mode</span>
+          </button>
+          <button
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+          >
+            <span className="font-orbitron">Kairo</span>
           </button>
         </div>
       )}
       
       {/* LIST View Content */}
       {currentView === 'list' && (
-        <div onContextMenu={handlePageContextMenu} className="px-4 mt-4 flex-grow">
-          <div className="ml-20">
+        <div
+          className={`px-4 mt-4 flex-grow ${selectMode ? 'user-select-none' : ''}`}
+          onMouseDown={(e) => {
+            if (selectMode) {
+              e.preventDefault();
+              e.stopPropagation();
+              setMarqueeStart({ x: e.clientX, y: e.clientY });
+            }
+          }}
+          onMouseMove={(e) => {
+            if (selectMode && marqueeStart) {
+              e.preventDefault();
+              const x = Math.min(e.clientX, marqueeStart.x);
+              const y = Math.min(e.clientY, marqueeStart.y);
+              const width = Math.abs(e.clientX - marqueeStart.x);
+              const height = Math.abs(e.clientY - marqueeStart.y);
+              marqueeRef.current = { x, y, width, height };
+              requestAnimationFrame(() => {
+                if (marqueeRef.current) {
+                  setMarquee(marqueeRef.current);
+                }
+              });
+            }
+          }}
+          onMouseUp={() => {
+            if (selectMode && marqueeRef.current) {
+              const marquee = marqueeRef.current;
+              const taskElements = document.querySelectorAll('[data-task-id]');
+              const selectedIds = Array.from(taskElements)
+                .filter((el) => {
+                  const rect = el.getBoundingClientRect();
+                  return (
+                    rect.left < marquee.x + marquee.width &&
+                    rect.right > marquee.x &&
+                    rect.top < marquee.y + marquee.height &&
+                    rect.bottom > marquee.y
+                  );
+                })
+                .map((el) => el.getAttribute('data-task-id'))
+                .filter((id) => id !== null) as string[];
+              setSelectedTaskIds((prev) => [...new Set([...prev, ...selectedIds])]);
+            }
+            setMarqueeStart(null);
+            setMarquee(null);
+            marqueeRef.current = null;
+          }}
+        >
+          <div onContextMenu={handlePageContextMenu} className="ml-20">
             
             {/* Information text for deleted section */}
             {currentTaskView === 'deleted' && (
@@ -1437,77 +1574,63 @@ const Tasks = () => {
             {/* Context Menu */}
 
             {contextMenu && (
-
               <div
-
                 className="fixed shadow-xl py-2 px-2 z-50"
-
                 style={{
-
                   left: `${contextMenu.x}px`,
-
                   top: `${contextMenu.y}px`,
-
                   borderRadius: '16px',
-
                   background: '#1f1f1f',
-
                   width: '180px',
-
                   border: 'none'
-
                 }}
-
                 onClick={(e) => e.stopPropagation()}
-
               >
-
-                <button
-
-                                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
-                                    onClick={() => handleOpenTask(contextMenu.taskId, null)}
-
-                >
-
-                  <ChevronRight className="w-4 h-4" />
-
-                  <span>Open</span>
-
-                </button>
-                {!contextMenu.isSubtaskInList &&
-                (<>
-                <button
-
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
-                  onClick={() => handleEditTask(contextMenu.taskId)}
-
-                >
-
-                  <Edit className="w-4 h-4" />
-
-                  <span>Edit</span>
-
-                </button>
-
-                <button
-
-                  className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
-                  onClick={() => handleDeleteTask(contextMenu.taskId)}
-
-                >
-
-                  <Trash2 className="w-4 h-4" />
-
-                  <span>Delete</span>
-
-                </button>
-                </>)}
-
+                {currentTaskView === 'deleted' ? (
+                  <>
+                    <button
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                      onClick={() => handleRestoreTask(contextMenu.taskId)}
+                    >
+                      <span>Restore in Tasks</span>
+                    </button>
+                    <button
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                      onClick={() => handleMoveToDraftsFromDeleted(contextMenu.taskId)}
+                    >
+                      <span>Move to Drafts</span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                      onClick={() => handleOpenTask(contextMenu.taskId, null)}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                      <span>Open</span>
+                    </button>
+                    {!contextMenu.isSubtaskInList && (
+                      <>
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                          onClick={() => handleEditTask(contextMenu.taskId)}
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                        <button
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                          onClick={() => handleDeleteTask(contextMenu.taskId)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
               </div>
-
             )}
 
       

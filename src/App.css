@@ -5,6 +5,12 @@
   background-color: #000000;
 }
 
+.no-select {
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Standard syntax */
+}
+
 .logo {
   height: 6em;
   padding: 1.5em;
