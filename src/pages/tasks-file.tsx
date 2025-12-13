@@ -21,6 +21,9 @@ import {
   Edit,
   Trash2,
   Repeat,
+  Bot,
+  SquareStack,
+  XSquare,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -1165,6 +1168,7 @@ const Tasks = () => {
                   <button
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
+                    <Plus className="w-4 h-4" />
                     <span>Add Section</span>
                   </button>
                   <TooltipProvider>
@@ -1188,6 +1192,7 @@ const Tasks = () => {
                       onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                     >
+                      <XSquare className="w-4 h-4" />
                       <span>Exit Select Mode</span>
                     </button>
                   ) : (
@@ -1195,12 +1200,14 @@ const Tasks = () => {
                       onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                     >
+                      <SquareStack className="w-4 h-4" />
                       <span>Select</span>
                     </button>
                   )}
                   <button
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
+                    <Bot className="w-4 h-4" />
                     <span className="font-orbitron">Kairo</span>
                   </button>
                 </div>
@@ -1670,46 +1677,46 @@ const Tasks = () => {
             {/* Page Context Menu */}
 
             {pageContextMenu && (
-
               <div
-
                 className="fixed shadow-xl py-2 px-2 z-50"
-
                 style={{
-
                   left: `${pageContextMenu.x}px`,
-
                   top: `${pageContextMenu.y}px`,
-
                   borderRadius: '16px',
-
                   background: '#1f1f1f',
-
                   width: '180px',
-
                   border: 'none'
-
                 }}
-
                 onClick={(e) => e.stopPropagation()}
-
               >
-
                 <button
-
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
                 >
-
+                  <Plus className="w-4 h-4" />
                   <span>Add Section</span>
-
                 </button>
-
+                <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          disabled
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Can't edit this section :)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 {selectMode ? (
                   <button
                     onClick={handleToggleSelectMode}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
+                    <XSquare className="w-4 h-4" />
                     <span>Exit Select Mode</span>
                   </button>
                 ) : (
@@ -1717,22 +1724,17 @@ const Tasks = () => {
                     onClick={handleToggleSelectMode}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
+                    <SquareStack className="w-4 h-4" />
                     <span>Select</span>
                   </button>
                 )}
-
                 <button
-
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-
                 >
-
+                  <Bot className="w-4 h-4" />
                   <span className="font-orbitron">Kairo</span>
-
                 </button>
-
               </div>
-
             )}
 
       
