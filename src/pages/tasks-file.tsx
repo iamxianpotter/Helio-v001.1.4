@@ -24,6 +24,9 @@ import {
   Bot,
   SquareStack,
   XSquare,
+  Archive,
+  ArchiveRestore,
+  SendToBack,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -1014,14 +1017,20 @@ const Tasks = () => {
                 className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-green-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                 onClick={handleBulkRestore}
               >
-                <span>Restore in Tasks</span>
+                <div className="flex items-center gap-3">
+                  <ArchiveRestore className="w-4 h-4" />
+                  <span>Restore in Tasks</span>
+                </div>
                 <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
               </button>
               <button
                 className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-purple-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                 onClick={handleBulkMoveToDraftsFromDeleted}
               >
-                <span>Move to Drafts</span>
+                <div className="flex items-center gap-3">
+                  <Archive className="w-4 h-4" />
+                  <span>Move to Drafts</span>
+                </div>
                 <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
               </button>
             </>
@@ -1030,7 +1039,10 @@ const Tasks = () => {
               className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
               onClick={handleBulkMoveToTasks}
             >
-              <span>Move to Tasks</span>
+              <div className="flex items-center gap-3">
+                <ArchiveRestore className="w-4 h-4" />
+                <span>Move to Tasks</span>
+              </div>
               <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
             </button>
           ) : (
@@ -1038,7 +1050,10 @@ const Tasks = () => {
               className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
               onClick={handleBulkMoveToDrafts}
             >
-              <span>Move to Drafts</span>
+              <div className="flex items-center gap-3">
+                <Archive className="w-4 h-4" />
+                <span>Move to Drafts</span>
+              </div>
               <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
             </button>
           )}
@@ -1047,19 +1062,24 @@ const Tasks = () => {
               className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
               onClick={handleBulkDelete}
             >
-              <span>Delete Selected</span>
+              <div className="flex items-center gap-3">
+                <Trash2 className="w-4 h-4" />
+                <span>Delete Selected</span>
+              </div>
               <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
             </button>
           )}
           <button
-            className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
             onClick={handleToggleSelectMode}
           >
+            <XSquare className="w-4 h-4" />
             <span>Exit Select Mode</span>
           </button>
           <button
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
           >
+            <Bot className="w-4 h-4" />
             <span className="font-orbitron">Kairo</span>
           </button>
         </div>
@@ -1182,7 +1202,7 @@ const Tasks = () => {
                           <span>Edit</span>
                         </button>
                       </TooltipTrigger>
-                      <TooltipContent side="right">
+                      <TooltipContent side="right" className="bg-[#1f1f1f] text-white border-[#414141]">
                         <p>Can't edit this section :)</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1695,22 +1715,6 @@ const Tasks = () => {
                   <Plus className="w-4 h-4" />
                   <span>Add Section</span>
                 </button>
-                <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          disabled
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span>Edit</span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right">
-                        <p>Can't edit this section :)</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 {selectMode ? (
                   <button
                     onClick={handleToggleSelectMode}
