@@ -10,7 +10,7 @@ interface MarqueeSelectionProps {
 const MarqueeSelection: React.FC<MarqueeSelectionProps> = ({ x, y, width, height }) => {
   return (
     <div
-      className="fixed bg-blue-500 bg-opacity-20 border border-blue-500 pointer-events-none z-[9999]"
+      className="fixed bg-white bg-opacity-40 border border-white/50 pointer-events-none z-[9999]"
       style={{
         left: x,
         top: y,
