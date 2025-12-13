@@ -12,7 +12,7 @@ import MarqueeSelection from '@/components/ui/MarqueeSelection';
 import {
   Plus,
   ChevronRight,
-  MoveVertical as MoreVertical,
+  MoreVertical,
   Calendar,
   Flag,
   Bell,
@@ -1149,27 +1149,59 @@ const Tasks = () => {
 
                 {/* Three-dot menu icon (visible on hover) */}
                 <MoreVertical
-                  onClick={handleSectionMenu}
-                  className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSectionMenu(e);
+                  }}
+                  className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto cursor-pointer"
                 />
               </div>
               {sectionMenuOpen && sectionMenuPosition && (
-                <div 
+                <div
                   className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[180px] border-none"
                   style={{ left: sectionMenuPosition.x, top: sectionMenuPosition.y }}
                   onMouseLeave={() => setSectionMenuOpen(false)}
                 >
                   <button
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-                    onClick={handleMoveToDrafts}
                   >
-                    <span>Move all to Drafts</span>
+                    <span>Add Section</span>
                   </button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          disabled
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right">
+                        <p>Can't edit this section :)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  {selectMode ? (
+                    <button
+                      onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                    >
+                      <span>Exit Select Mode</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                    >
+                      <span>Select</span>
+                    </button>
+                  )}
                   <button
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-                    onClick={handleDeleteAll}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
-                    <span>Delete all tasks</span>
+                    <span className="font-orbitron">Kairo</span>
                   </button>
                 </div>
               )}
