@@ -1107,28 +1107,26 @@ const Tasks = () => {
               requestAnimationFrame(() => {
                 if (marqueeRef.current) {
                   setMarquee(marqueeRef.current);
+                  const marquee = marqueeRef.current;
+                  const taskElements = document.querySelectorAll('[data-task-id]');
+                  const selectedIds = Array.from(taskElements)
+                    .filter((el) => {
+                      const rect = el.getBoundingClientRect();
+                      return (
+                        rect.left < marquee.x + marquee.width &&
+                        rect.right > marquee.x &&
+                        rect.top < marquee.y + marquee.height &&
+                        rect.bottom > marquee.y
+                      );
+                    })
+                    .map((el) => el.getAttribute('data-task-id'))
+                    .filter((id) => id !== null) as string[];
+                  setSelectedTaskIds(selectedIds);
                 }
               });
             }
           }}
           onMouseUp={() => {
-            if (selectMode && marqueeRef.current) {
-              const marquee = marqueeRef.current;
-              const taskElements = document.querySelectorAll('[data-task-id]');
-              const selectedIds = Array.from(taskElements)
-                .filter((el) => {
-                  const rect = el.getBoundingClientRect();
-                  return (
-                    rect.left < marquee.x + marquee.width &&
-                    rect.right > marquee.x &&
-                    rect.top < marquee.y + marquee.height &&
-                    rect.bottom > marquee.y
-                  );
-                })
-                .map((el) => el.getAttribute('data-task-id'))
-                .filter((id) => id !== null) as string[];
-              setSelectedTaskIds((prev) => [...new Set([...prev, ...selectedIds])]);
-            }
             setMarqueeStart(null);
             setMarquee(null);
             marqueeRef.current = null;
