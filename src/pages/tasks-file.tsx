@@ -1089,6 +1089,7 @@ const Tasks = () => {
       {currentView === 'list' && (
         <div
           className={`px-4 mt-4 flex-grow ${selectMode ? 'user-select-none' : ''}`}
+          onContextMenu={handlePageContextMenu}
           onMouseDown={(e) => {
             if (selectMode) {
               e.preventDefault();
@@ -1132,7 +1133,7 @@ const Tasks = () => {
             marqueeRef.current = null;
           }}
         >
-          <div onContextMenu={handlePageContextMenu} className="ml-20">
+          <div className="ml-20">
             
             {/* Information text for deleted section */}
             {currentTaskView === 'deleted' && (
