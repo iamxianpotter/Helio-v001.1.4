@@ -96,7 +96,7 @@ const Tasks = () => {
     return savedDeletedTasks ? JSON.parse(savedDeletedTasks) : [];
   });
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [isAddingTask, setIsAddingTask] = useState(false);
+  const [addingSectionId, setAddingSectionId] = useState<string | null>(null);
   const [isSectionExpanded, setIsSectionExpanded] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [selectedTime, setSelectedTime] = useState<string>('');
@@ -378,7 +378,7 @@ const Tasks = () => {
 
   const handleCreateTask = () => {
     setIsRotated(!isRotated);
-    setIsAddingTask(true);
+    setAddingSectionId('default-section');
   };
 
   const handleAddTask = () => {
@@ -397,7 +397,7 @@ const Tasks = () => {
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
         isDraft: false,
-        sectionId: currentSectionId
+        sectionId: addingSectionId || currentSectionId
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -410,7 +410,7 @@ const Tasks = () => {
       setSelectedReminder(undefined);
       setSelectedLabels([]);
       setSelectedRepeat('');
-      setIsAddingTask(false);
+      setAddingSectionId(null);
     }
   };
 
@@ -430,7 +430,7 @@ const Tasks = () => {
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
         isDraft: true,
-        sectionId: currentSectionId
+        sectionId: addingSectionId || currentSectionId
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -443,7 +443,7 @@ const Tasks = () => {
       setSelectedReminder(undefined);
       setSelectedLabels([]);
       setSelectedRepeat('');
-      setIsAddingTask(false);
+      setAddingSectionId(null);
     }
   };
 
@@ -514,7 +514,7 @@ const Tasks = () => {
     if (e.key === 'Enter') {
       handleAddTask();
     } else if (e.key === 'Escape') {
-      setIsAddingTask(false);
+      setAddingSectionId(null);
       setNewTaskTitle('');
       setNewTaskDescription('');
     }
@@ -1595,7 +1595,7 @@ const Tasks = () => {
                 </div>
               
                 {/* Add New Task Input */}
-                {isAddingTask && (
+                {addingSectionId === section.id && (
                   <div className="p-4 bg-transparent border border-[#525252] rounded-[20px] min-h-[160px] relative z-10 overflow-visible mt-4">
                     {/* Section 1: Title */}
                     <div className="mb-2">
@@ -1657,7 +1657,7 @@ const Tasks = () => {
                       <div className="flex gap-2 flex-shrink-0">
                         <Button
                           onClick={() => {
-                            setIsAddingTask(false);
+                            setAddingSectionId(null);
                             setNewTaskTitle('');
                             setNewTaskDescription('');
                           }}
@@ -1698,12 +1698,12 @@ const Tasks = () => {
                 )}
                 
                 {/* Add Task Button */}
-                {!isAddingTask && (
+                {addingSectionId !== section.id && (
                   <div className="flex justify-center mt-6">
                     <Button
                       onClick={() => {
                         setCurrentSectionId(section.id);
-                        setIsAddingTask(true);
+                        setAddingSectionId(section.id);
                       }}
                       className="flex items-center gap-2 px-6 py-3 rounded-[20px] bg-[#f5f5f3] text-black hover:bg-white transition-colors duration-200"
                     >
