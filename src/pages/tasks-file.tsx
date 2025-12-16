@@ -46,15 +46,6 @@ interface Task {
   repeat?: string;
   isDraft?: boolean;
   subtasks?: Task[];
-  sectionId?: string;
-}
-
-interface Section {
-  id: string;
-  name: string;
-  isExpanded: boolean;
-  createdAt: string;
-  isDefault: boolean;
 }
 
 const updateTaskRecursively = (
@@ -94,20 +85,6 @@ const Tasks = () => {
   const [deletedTasks, setDeletedTasks] = useState<Task[]>(() => {
     const savedDeletedTasks = localStorage.getItem('kario-deleted-tasks');
     return savedDeletedTasks ? JSON.parse(savedDeletedTasks) : [];
-  });
-  const [sections, setSections] = useState<Section[]>(() => {
-    const savedSections = localStorage.getItem('kario-sections');
-    if (savedSections) {
-      return JSON.parse(savedSections);
-    }
-    const defaultSection: Section = {
-      id: 'default-section',
-      name: 'Tasks Made By Kairo',
-      isExpanded: true,
-      createdAt: new Date().toISOString(),
-      isDefault: true,
-    };
-    return [defaultSection];
   });
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -155,14 +132,6 @@ const Tasks = () => {
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
-  const [isAddingSectionOpen, setIsAddingSectionOpen] = useState(false);
-  const [newSectionName, setNewSectionName] = useState('');
-  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
-  const [editingSectionName, setEditingSectionName] = useState('');
-
-  React.useEffect(() => {
-    localStorage.setItem('kario-sections', JSON.stringify(sections));
-  }, [sections]);
 
   const handleToggleSelectMode = () => {
     setSelectMode(!selectMode);
@@ -375,7 +344,6 @@ const Tasks = () => {
   const handleAddTask = () => {
     if (newTaskTitle.trim()) {
       const currentDate = new Date();
-      const defaultSectionId = sections.find(s => s.isDefault)?.id || 'default-section';
       const newTask: Task = {
         id: Date.now().toString(),
         title: newTaskTitle.trim(),
@@ -388,8 +356,7 @@ const Tasks = () => {
         reminder: selectedReminder,
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
-        isDraft: false,
-        sectionId: defaultSectionId
+        isDraft: false
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -409,7 +376,6 @@ const Tasks = () => {
   const handleSaveDraft = () => {
     if (newTaskTitle.trim()) {
       const currentDate = new Date();
-      const defaultSectionId = sections.find(s => s.isDefault)?.id || 'default-section';
       const newTask: Task = {
         id: Date.now().toString(),
         title: newTaskTitle.trim(),
@@ -422,8 +388,7 @@ const Tasks = () => {
         reminder: selectedReminder,
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
-        isDraft: true,
-        sectionId: defaultSectionId
+        isDraft: true
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -703,59 +668,6 @@ const Tasks = () => {
     setSelectedReminder(undefined);
     setSelectedLabels([]);
     setSelectedRepeat('');
-  };
-
-  const handleAddSection = () => {
-    if (newSectionName.trim()) {
-      const newSection: Section = {
-        id: Date.now().toString(),
-        name: newSectionName.trim(),
-        isExpanded: true,
-        createdAt: new Date().toISOString(),
-        isDefault: false,
-      };
-      setSections([...sections, newSection]);
-      setNewSectionName('');
-      setIsAddingSectionOpen(false);
-      setPageContextMenu(null);
-      setSectionMenuOpen(false);
-    }
-  };
-
-  const handleEditSection = (sectionId: string) => {
-    if (editingSectionName.trim()) {
-      setSections(sections.map(section =>
-        section.id === sectionId ? { ...section, name: editingSectionName.trim() } : section
-      ));
-      setEditingSectionId(null);
-      setEditingSectionName('');
-      setSectionMenuOpen(false);
-    }
-  };
-
-  const handleDeleteSection = (sectionId: string) => {
-    const tasksInSection = tasks.filter(t => t.sectionId === sectionId);
-    const defaultSectionId = sections.find(s => s.isDefault)?.id || 'default-section';
-
-    const updatedTasks = tasksInSection.map(task => ({
-      ...task,
-      sectionId: defaultSectionId
-    }));
-
-    const finalTasks = tasks.map(task =>
-      updatedTasks.some(ut => ut.id === task.id) ? updatedTasks.find(ut => ut.id === task.id)! : task
-    );
-
-    setTasks(finalTasks);
-    localStorage.setItem('kario-tasks', JSON.stringify(finalTasks));
-    setSections(sections.filter(s => s.id !== sectionId));
-    setSectionMenuOpen(false);
-  };
-
-  const handleToggleSection = (sectionId: string) => {
-    setSections(sections.map(section =>
-      section.id === sectionId ? { ...section, isExpanded: !section.isExpanded } : section
-    ));
   };
 
   const handleOpenTask = (taskId: string, parentId: string | null = null) => {
@@ -1222,7 +1134,7 @@ const Tasks = () => {
           }}
         >
           <div className="ml-20">
-
+            
             {/* Information text for deleted section */}
             {currentTaskView === 'deleted' && (
               <div className="max-w-[980px] mb-4 p-4 bg-red-900/20 border border-red-800/30 rounded-lg">
@@ -1231,114 +1143,41 @@ const Tasks = () => {
                 </p>
               </div>
             )}
+            
+            {/* Case b & e: Tasks-By-Kairo Section */}
+            <div className="max-w-[980px]">
+              {/* Case f: Section heading with K icon that transforms to chevron on hover */}
+              <div
+                className="flex items-center gap-2 mb-4 cursor-pointer group relative bg-[#1b1b1b] border border-[#525252] rounded-[20px]"
+                style={{ padding: '0.80rem' }}
+                onClick={() => setIsSectionExpanded(!isSectionExpanded)}
+              >
+                {/* K icon (visible by default) */}
+                <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
+                  K
+                </span>
+                {/* Chevron icon (visible on hover) */}
+                <ChevronRight
+                  className={`h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 absolute ${
+                    isSectionExpanded ? 'rotate-90' : 'rotate-0'
+                  }`}
+                />
+                <h2 className="text-white text-xl font-semibold">Tasks Made By Kairo</h2>
 
-            {isAddingSectionOpen && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100]" onClick={() => setIsAddingSectionOpen(false)}>
-                <div className="bg-[#1f1f1f] border border-[#414141] rounded-[16px] p-6 w-96" onClick={(e) => e.stopPropagation()}>
-                  <h2 className="text-white text-lg font-semibold mb-4">Create New Section</h2>
-                  <Input
-                    value={newSectionName}
-                    onChange={(e) => setNewSectionName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleAddSection();
-                      if (e.key === 'Escape') setIsAddingSectionOpen(false);
-                    }}
-                    placeholder="Section name"
-                    className="w-full bg-[#252527] border border-[#414141] text-white placeholder-gray-400 focus:outline-none focus:ring-0 px-4 py-2 rounded-[8px] mb-4"
-                    autoFocus
-                  />
-                  <div className="flex gap-2 justify-end">
-                    <Button
-                      onClick={() => setIsAddingSectionOpen(false)}
-                      variant="ghost"
-                      className="border border-[#414141] text-gray-300 hover:bg-[#252527]"
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleAddSection}
-                      disabled={!newSectionName.trim()}
-                      className="bg-white text-black hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      Create
-                    </Button>
-                  </div>
+                {/* Task count indicator - positioned right next to heading */}
+                <div className="bg-[#242628] border border-[#414141] text-white font-orbitron font-bold px-3 py-1 rounded-[5px]">
+                  {displayedTasks.length}
                 </div>
+
+                {/* Three-dot menu icon (visible on hover) */}
+                <MoreVertical
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSectionMenu(e);
+                  }}
+                  className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto cursor-pointer"
+                />
               </div>
-            )}
-
-            {sections.map((section) => (
-            <div className="max-w-[980px] mb-8" key={section.id}>
-              {editingSectionId === section.id ? (
-                <div className="flex items-center gap-2 mb-4 bg-[#1b1b1b] border border-[#525252] rounded-[20px] px-4 py-3">
-                  <Input
-                    value={editingSectionName}
-                    onChange={(e) => setEditingSectionName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleEditSection(section.id);
-                      if (e.key === 'Escape') {
-                        setEditingSectionId(null);
-                        setEditingSectionName('');
-                      }
-                    }}
-                    className="flex-1 bg-transparent border-none text-white placeholder-gray-400 focus:outline-none focus:ring-0 px-0 py-1 text-xl font-semibold"
-                    autoFocus
-                  />
-                  <Button
-                    onClick={() => handleEditSection(section.id)}
-                    disabled={!editingSectionName.trim()}
-                    className="bg-white text-black hover:bg-gray-200 disabled:opacity-50"
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      setEditingSectionId(null);
-                      setEditingSectionName('');
-                    }}
-                    variant="ghost"
-                    className="border border-[#414141] text-gray-300"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              ) : (
-                <div
-                  className="flex items-center gap-2 mb-4 cursor-pointer group relative bg-[#1b1b1b] border border-[#525252] rounded-[20px]"
-                  style={{ padding: '0.80rem' }}
-                  onClick={() => handleToggleSection(section.id)}
-                >
-                  {/* K icon (visible by default for default section) */}
-                  {section.isDefault && (
-                    <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
-                      K
-                    </span>
-                  )}
-                  {/* Chevron icon (visible on hover) */}
-                  <ChevronRight
-                    className={`h-5 w-5 text-gray-400 ${section.isDefault ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'} transition-all duration-200 ${
-                      section.isExpanded ? 'rotate-90' : 'rotate-0'
-                    }`}
-                  />
-                  <h2 className="text-white text-xl font-semibold">{section.name}</h2>
-
-                  {/* Task count indicator - positioned right next to heading */}
-                  <div className="bg-[#242628] border border-[#414141] text-white font-orbitron font-bold px-3 py-1 rounded-[5px]">
-                    {currentTaskView === 'deleted' ? deletedTasks.length : applyFiltersAndSort(tasks.filter(t => t.sectionId === section.id || (!t.sectionId && section.isDefault))).length}
-                  </div>
-
-                  {/* Three-dot menu icon (visible on hover) */}
-                  <MoreVertical
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setSectionMenuPosition({ x: rect.left, y: rect.bottom + 5 });
-                      setSectionMenuOpen(true);
-                    }}
-                    className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto cursor-pointer"
-                  />
-                </div>
-              )}
               {sectionMenuOpen && sectionMenuPosition && (
                 <div
                   className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[180px] border-none"
@@ -1346,57 +1185,27 @@ const Tasks = () => {
                   onMouseLeave={() => setSectionMenuOpen(false)}
                 >
                   <button
-                    onClick={() => {
-                      setSectionMenuOpen(false);
-                      setIsAddingSectionOpen(true);
-                    }}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Section</span>
                   </button>
-                  {!section.isDefault && (
-                    <>
-                      <button
-                        onClick={() => {
-                          setEditingSectionId(section.id);
-                          setEditingSectionName(section.name);
-                          setSectionMenuOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-                      >
-                        <Edit className="w-4 h-4" />
-                        <span>Edit</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          handleDeleteSection(section.id);
-                        }}
-                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Delete</span>
-                      </button>
-                    </>
-                  )}
-                  {section.isDefault && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            disabled
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
-                          >
-                            <Edit className="w-4 h-4" />
-                            <span>Edit</span>
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="bg-[#1f1f1f] text-white border-[#414141]">
-                          <p>Can't edit this section :)</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button
+                          disabled
+                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Edit</span>
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="bg-[#1f1f1f] text-white border-[#414141]">
+                        <p>Can't edit this section :)</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                   {selectMode ? (
                     <button
                       onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
@@ -1422,20 +1231,15 @@ const Tasks = () => {
                   </button>
                 </div>
               )}
-
+            </div>
+            
             {/* Expandable content - positioned below the main section */}
-            {section.isExpanded && (
+            {isSectionExpanded && (
               <div className="bg-transparent max-w-[980px]" style={{ marginBottom: '45px' }}>
-                {(() => {
-                  const sectionTasks = currentTaskView === 'deleted'
-                    ? deletedTasks
-                    : applyFiltersAndSort(tasks.filter(t => t.sectionId === section.id || (!t.sectionId && section.isDefault)));
-                  return (
-                    <>
                 {/* Card-based task list */}
                 <div className="space-y-3">
                   {sortSettings.creationDate ? (
-                    getTasksByDateGroup(sectionTasks).map((group) => (
+                    getTasksByDateGroup(displayedTasks).map((group) => (
                       <div key={group.date}>
                         <div className="px-4 py-2 mt-4 mb-2">
                           <h3 className="text-gray-400 text-sm font-semibold">{group.date}</h3>
@@ -1572,7 +1376,7 @@ const Tasks = () => {
                       </div>
                     ))
                   ) : (
-                    sectionTasks.map((task) => (
+                    displayedTasks.map((task) => (
                       editingTaskId === task.id ? (
                         <div key={task.id} className="p-4 bg-transparent border border-[#525252] rounded-[20px] min-h-[160px] relative z-10 overflow-visible mt-4">
                           {/* Section 1: Title */}
@@ -1819,13 +1623,8 @@ const Tasks = () => {
                     </Button>
                   </div>
                 )}
-                    </>
-                  );
-                })()}
               </div>
             )}
-            </div>
-            ))}
           </div>
         </div>
       )}
@@ -1910,10 +1709,6 @@ const Tasks = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
-                  onClick={() => {
-                    setPageContextMenu(null);
-                    setIsAddingSectionOpen(true);
-                  }}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                 >
                   <Plus className="w-4 h-4" />
