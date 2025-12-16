@@ -889,7 +889,6 @@ const Tasks = () => {
       isDefault: false,
     };
     setSections([...sections, newSection]);
-    setCurrentSectionId(newSection.id);
     setPageContextMenu(null);
   };
 
@@ -1702,7 +1701,10 @@ const Tasks = () => {
                 {!isAddingTask && (
                   <div className="flex justify-center mt-6">
                     <Button
-                      onClick={() => setIsAddingTask(true)}
+                      onClick={() => {
+                        setCurrentSectionId(section.id);
+                        setIsAddingTask(true);
+                      }}
                       className="flex items-center gap-2 px-6 py-3 rounded-[20px] bg-[#f5f5f3] text-black hover:bg-white transition-colors duration-200"
                     >
                       <Plus className="h-5 w-5" />
