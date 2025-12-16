@@ -46,6 +46,15 @@ interface Task {
   repeat?: string;
   isDraft?: boolean;
   subtasks?: Task[];
+  sectionId: string;
+}
+
+interface Section {
+  id: string;
+  name: string;
+  isExpanded: boolean;
+  createdAt: string;
+  isDefault: boolean;
 }
 
 const updateTaskRecursively = (
@@ -132,6 +141,21 @@ const Tasks = () => {
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
+  const [sections, setSections] = useState<Section[]>(() => {
+    const saved = localStorage.getItem('kario-sections');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    const defaultSection: Section = {
+      id: 'default-section',
+      name: 'Tasks Made By Kairo',
+      isExpanded: true,
+      createdAt: new Date().toISOString(),
+      isDefault: true,
+    };
+    return [defaultSection];
+  });
+  const [currentSectionId, setCurrentSectionId] = useState<string>('default-section');
 
   const handleToggleSelectMode = () => {
     setSelectMode(!selectMode);
@@ -246,6 +270,22 @@ const Tasks = () => {
     localStorage.setItem('kario-deleted-tasks', JSON.stringify(deletedTasks));
   }, [deletedTasks]);
 
+  // Save sections to localStorage
+  React.useEffect(() => {
+    localStorage.setItem('kario-sections', JSON.stringify(sections));
+  }, [sections]);
+
+  // Migrate existing tasks to have sectionId if they don't
+  React.useEffect(() => {
+    const migratedTasks = tasks.map(task =>
+      !task.sectionId ? { ...task, sectionId: 'default-section' } : task
+    );
+    if (JSON.stringify(migratedTasks) !== JSON.stringify(tasks)) {
+      setTasks(migratedTasks);
+      localStorage.setItem('kario-tasks', JSON.stringify(migratedTasks));
+    }
+  }, []);
+
   // Calculate task statistics
   const totalTasks = tasks.filter(task => !task.isDraft).length;
   const completedTasks = tasks.filter(task => task.completed && !task.isDraft).length;
@@ -356,7 +396,8 @@ const Tasks = () => {
         reminder: selectedReminder,
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
-        isDraft: false
+        isDraft: false,
+        sectionId: currentSectionId
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -388,7 +429,8 @@ const Tasks = () => {
         reminder: selectedReminder,
         labels: selectedLabels,
         repeat: selectedRepeat || undefined,
-        isDraft: true
+        isDraft: true,
+        sectionId: currentSectionId
       };
       const updatedTasks = [...tasks, newTask];
       setTasks(updatedTasks);
@@ -838,6 +880,48 @@ const Tasks = () => {
     setDraggedTaskParentId(null);
   };
 
+  const handleAddSection = () => {
+    const newSection: Section = {
+      id: `section-${Date.now()}`,
+      name: `Section ${sections.filter(s => !s.isDefault).length + 1}`,
+      isExpanded: true,
+      createdAt: new Date().toISOString(),
+      isDefault: false,
+    };
+    setSections([...sections, newSection]);
+    setCurrentSectionId(newSection.id);
+    setPageContextMenu(null);
+  };
+
+  const handleDeleteSection = (sectionId: string) => {
+    if (sections.find(s => s.id === sectionId)?.isDefault) return;
+
+    const tasksInSection = tasks.filter(t => t.sectionId === sectionId);
+    const remainingTasks = tasks.filter(t => t.sectionId !== sectionId);
+
+    setTasks(remainingTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(remainingTasks));
+
+    const remainingDeleted = deletedTasks.filter(t => t.sectionId !== sectionId);
+    setDeletedTasks(remainingDeleted);
+    localStorage.setItem('kario-deleted-tasks', JSON.stringify(remainingDeleted));
+
+    setSections(sections.filter(s => s.id !== sectionId));
+    if (currentSectionId === sectionId) {
+      setCurrentSectionId('default-section');
+    }
+  };
+
+  const handleToggleSection = (sectionId: string) => {
+    setSections(sections.map(s =>
+      s.id === sectionId ? { ...s, isExpanded: !s.isExpanded } : s
+    ));
+  };
+
+  const getTasksForSection = (sectionId: string): Task[] => {
+    return tasks.filter(t => t.sectionId === sectionId);
+  };
+
   const applyFiltersAndSort = (tasksToFilter: Task[]): Task[] => {
     let filtered = [...tasksToFilter];
 
@@ -1134,7 +1218,7 @@ const Tasks = () => {
           }}
         >
           <div className="ml-20">
-            
+
             {/* Information text for deleted section */}
             {currentTaskView === 'deleted' && (
               <div className="max-w-[980px] mb-4 p-4 bg-red-900/20 border border-red-800/30 rounded-lg">
@@ -1143,30 +1227,37 @@ const Tasks = () => {
                 </p>
               </div>
             )}
-            
-            {/* Case b & e: Tasks-By-Kairo Section */}
-            <div className="max-w-[980px]">
+
+            {/* Multiple Sections */}
+            {sections.map((section) => {
+              const sectionTasks = getTasksForSection(section.id);
+              const filteredSectionTasks = currentTaskView === 'deleted' ? deletedTasks.filter(t => t.sectionId === section.id) : applyFiltersAndSort(sectionTasks);
+
+              return (
+            <div key={section.id} className="max-w-[980px]">
               {/* Case f: Section heading with K icon that transforms to chevron on hover */}
               <div
                 className="flex items-center gap-2 mb-4 cursor-pointer group relative bg-[#1b1b1b] border border-[#525252] rounded-[20px]"
                 style={{ padding: '0.80rem' }}
-                onClick={() => setIsSectionExpanded(!isSectionExpanded)}
+                onClick={() => handleToggleSection(section.id)}
               >
-                {/* K icon (visible by default) */}
-                <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
-                  K
-                </span>
+                {/* K icon (visible by default for default section) */}
+                {section.isDefault && (
+                  <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
+                    K
+                  </span>
+                )}
                 {/* Chevron icon (visible on hover) */}
                 <ChevronRight
                   className={`h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 absolute ${
-                    isSectionExpanded ? 'rotate-90' : 'rotate-0'
+                    section.isExpanded ? 'rotate-90' : 'rotate-0'
                   }`}
                 />
-                <h2 className="text-white text-xl font-semibold">Tasks Made By Kairo</h2>
+                <h2 className="text-white text-xl font-semibold">{section.name}</h2>
 
                 {/* Task count indicator - positioned right next to heading */}
                 <div className="bg-[#242628] border border-[#414141] text-white font-orbitron font-bold px-3 py-1 rounded-[5px]">
-                  {displayedTasks.length}
+                  {filteredSectionTasks.length}
                 </div>
 
                 {/* Three-dot menu icon (visible on hover) */}
@@ -1185,27 +1276,24 @@ const Tasks = () => {
                   onMouseLeave={() => setSectionMenuOpen(false)}
                 >
                   <button
+                    onClick={handleAddSection}
                     className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Section</span>
                   </button>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          disabled
-                          className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl opacity-50 cursor-not-allowed"
-                        >
-                          <Edit className="w-4 h-4" />
-                          <span>Edit</span>
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="bg-[#1f1f1f] text-white border-[#414141]">
-                        <p>Can't edit this section :)</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {!section.isDefault && (
+                    <button
+                      onClick={() => {
+                        handleDeleteSection(section.id);
+                        setSectionMenuOpen(false);
+                      }}
+                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Delete Section</span>
+                    </button>
+                  )}
                   {selectMode ? (
                     <button
                       onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
@@ -1231,15 +1319,14 @@ const Tasks = () => {
                   </button>
                 </div>
               )}
-            </div>
-            
+
             {/* Expandable content - positioned below the main section */}
-            {isSectionExpanded && (
+            {section.isExpanded && (
               <div className="bg-transparent max-w-[980px]" style={{ marginBottom: '45px' }}>
                 {/* Card-based task list */}
                 <div className="space-y-3">
                   {sortSettings.creationDate ? (
-                    getTasksByDateGroup(displayedTasks).map((group) => (
+                    getTasksByDateGroup(filteredSectionTasks).map((group) => (
                       <div key={group.date}>
                         <div className="px-4 py-2 mt-4 mb-2">
                           <h3 className="text-gray-400 text-sm font-semibold">{group.date}</h3>
@@ -1376,7 +1463,7 @@ const Tasks = () => {
                       </div>
                     ))
                   ) : (
-                    displayedTasks.map((task) => (
+                    filteredSectionTasks.map((task) => (
                       editingTaskId === task.id ? (
                         <div key={task.id} className="p-4 bg-transparent border border-[#525252] rounded-[20px] min-h-[160px] relative z-10 overflow-visible mt-4">
                           {/* Section 1: Title */}
@@ -1625,6 +1712,9 @@ const Tasks = () => {
                 )}
               </div>
             )}
+            </div>
+            );
+            })}
           </div>
         </div>
       )}
@@ -1709,6 +1799,7 @@ const Tasks = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <button
+                  onClick={handleAddSection}
                   className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                 >
                   <Plus className="w-4 h-4" />
@@ -1774,7 +1865,7 @@ const Tasks = () => {
 
                             currentTaskIndex={selectedTaskForModal ? (currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)).findIndex(t => t.id === selectedTaskForModal.id) : -1}
 
-                            sectionName="Tasks Made By Kairo"
+                            sectionName={sections.find(s => selectedTaskForModal?.sectionId === s.id)?.name || "Unknown Section"}
 
                             onOpenSubtaskAsTask={(subtask) => handleOpenSubtaskAsTask(subtask, selectedTaskForModal?.id)}
 
