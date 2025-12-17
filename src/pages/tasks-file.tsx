@@ -136,8 +136,10 @@ const Tasks = () => {
   const [parentTaskId, setParentTaskId] = useState('');
   const [selectMode, setSelectMode] = useState(false);
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
-  const [sectionMenuOpen, setSectionMenuOpen] = useState(false);
+  const [openSectionMenuId, setOpenSectionMenuId] = useState<string | null>(null);
   const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingSectionName, setEditingSectionName] = useState<string>('');
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
@@ -171,11 +173,11 @@ const Tasks = () => {
     );
   };
 
-  const handleSectionMenu = (e: React.MouseEvent) => {
+  const handleSectionMenu = (e: React.MouseEvent, sectionId: string) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
     setSectionMenuPosition({ x: rect.left, y: rect.bottom + 5 });
-    setSectionMenuOpen(true);
+    setOpenSectionMenuId(sectionId);
   };
   
   const handleMoveToDrafts = () => {
@@ -911,6 +913,18 @@ const Tasks = () => {
     }
   };
 
+  const handleSaveSectionName = (sectionId: string) => {
+    if (editingSectionName.trim() === '') {
+      setEditingSectionId(null);
+      return;
+    }
+    const updatedSections = sections.map((s) =>
+      s.id === sectionId ? { ...s, name: editingSectionName.trim() } : s
+    );
+    setSections(updatedSections);
+    setEditingSectionId(null);
+  };
+
   const handleToggleSection = (sectionId: string) => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, isExpanded: !s.isExpanded } : s
@@ -1241,10 +1255,12 @@ const Tasks = () => {
                 onClick={() => handleToggleSection(section.id)}
               >
                 {/* K icon (visible by default for default section) */}
-                {section.isDefault && (
+                {section.isDefault ? (
                   <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
                     K
                   </span>
+                ) : (
+                  <span className="h-5 w-5" />
                 )}
                 {/* Chevron icon (visible on hover) */}
                 <ChevronRight
@@ -1252,7 +1268,24 @@ const Tasks = () => {
                     section.isExpanded ? 'rotate-90' : 'rotate-0'
                   }`}
                 />
-                <h2 className="text-white text-xl font-semibold">{section.name}</h2>
+                {editingSectionId === section.id ? (
+                  <Input
+                    value={editingSectionName}
+                    onChange={(e) => setEditingSectionName(e.target.value)}
+                    onBlur={() => handleSaveSectionName(section.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        handleSaveSectionName(section.id);
+                      } else if (e.key === 'Escape') {
+                        setEditingSectionId(null);
+                      }
+                    }}
+                    className="text-white text-xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none w-auto"
+                    autoFocus
+                  />
+                ) : (
+                  <h2 className="text-white text-xl font-semibold">{section.name}</h2>
+                )}
 
                 {/* Task count indicator - positioned right next to heading */}
                 <div className="bg-[#242628] border border-[#414141] text-white font-orbitron font-bold px-3 py-1 rounded-[5px]">
@@ -1263,16 +1296,16 @@ const Tasks = () => {
                 <MoreVertical
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleSectionMenu(e);
+                    handleSectionMenu(e, section.id);
                   }}
                   className="h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 ml-auto cursor-pointer"
                 />
               </div>
-              {sectionMenuOpen && sectionMenuPosition && (
+              {openSectionMenuId === section.id && sectionMenuPosition && (
                 <div
                   className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[180px] border-none"
                   style={{ left: sectionMenuPosition.x, top: sectionMenuPosition.y }}
-                  onMouseLeave={() => setSectionMenuOpen(false)}
+                  onMouseLeave={() => setOpenSectionMenuId(null)}
                 >
                   <button
                     onClick={handleAddSection}
@@ -1282,20 +1315,33 @@ const Tasks = () => {
                     <span>Add Section</span>
                   </button>
                   {!section.isDefault && (
-                    <button
-                      onClick={() => {
-                        handleDeleteSection(section.id);
-                        setSectionMenuOpen(false);
-                      }}
-                      className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Delete Section</span>
-                    </button>
+                    <>
+                      <button
+                        onClick={() => {
+                          setEditingSectionId(section.id);
+                          setEditingSectionName(section.name);
+                          setOpenSectionMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                      >
+                        <Edit className="w-4 h-4" />
+                        <span>Edit</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleDeleteSection(section.id);
+                          setOpenSectionMenuId(null);
+                        }}
+                        className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-red-500 transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Delete Section</span>
+                      </button>
+                    </>
                   )}
                   {selectMode ? (
                     <button
-                      onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
+                      onClick={() => { handleToggleSelectMode(); setOpenSectionMenuId(null); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                     >
                       <XSquare className="w-4 h-4" />
@@ -1303,7 +1349,7 @@ const Tasks = () => {
                     </button>
                   ) : (
                     <button
-                      onClick={() => { handleToggleSelectMode(); setSectionMenuOpen(false); }}
+                      onClick={() => { handleToggleSelectMode(); setOpenSectionMenuId(null); }}
                       className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
                     >
                       <SquareStack className="w-4 h-4" />
