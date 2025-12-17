@@ -1398,7 +1398,8 @@ const Tasks = () => {
                         setEditingSectionId(null);
                       }
                     }}
-                    className="text-white text-xl font-semibold bg-transparent border-none focus:ring-0 focus:outline-none w-auto"
+                    maxLength={40}
+                    className="p-0 h-auto bg-transparent border-0 w-auto text-xl font-semibold text-white focus-visible:ring-0 focus-visible:ring-offset-0"
                     autoFocus
                   />
                 ) : (

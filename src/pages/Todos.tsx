@@ -718,7 +718,7 @@ const Todos = () => {
                 onContextMenu={(e) => handleButtonRightClick(e, section.id)}
               >
                 {section.isEditing ? (
-                  <Input
+                  <input
                     ref={(el) => (inputRefs.current[section.id] = el)}
                     value={section.name}
                     onChange={(e) => {
@@ -729,8 +729,9 @@ const Todos = () => {
                     }}
                     onBlur={() => saveSectionEdit(section.id, section.name)}
                     onKeyDown={(e) => handleSectionKeyPress(e, section.id, section.name)}
-                    className="text-xl font-semibold bg-[#1b1b1b] border border-[#414141] text-white w-[300px]"
+                    className="text-xl font-semibold bg-transparent text-white focus:outline-none w-[300px]"
                     placeholder="Enter section name..."
+                    autoFocus
                   />
                 ) : (
                   <h2
