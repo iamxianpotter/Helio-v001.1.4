@@ -43,6 +43,26 @@ import {
   Camera,
   Music,
   Video,
+  Palette,
+  Shapes,
+  Sparkles,
+  Gift,
+  Truck,
+  Plane,
+  Ship,
+  Gamepad2,
+  Cpu,
+  Server,
+  Database,
+  Cloud,
+  Umbrella,
+  Sun,
+  Moon,
+  Apple,
+  Carrot,
+  Pizza,
+  ShoppingBag,
+  Wallet,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
@@ -65,9 +85,30 @@ const iconComponents: { [key: string]: React.ElementType } = {
   Camera,
   Music,
   Video,
+  Palette,
+  Shapes,
+  Sparkles,
+  Gift,
+  Truck,
+  Plane,
+  Ship,
+  Gamepad2,
+  Cpu,
+  Server,
+  Database,
+  Cloud,
+  Umbrella,
+  Sun,
+  Moon,
+  Apple,
+  Carrot,
+  Pizza,
+  ShoppingBag,
+  Wallet,
 };
 
 const availableIconNames = Object.keys(iconComponents);
+const availableColors = ['text-sky-500', 'text-emerald-500', 'text-amber-500', 'text-rose-500', 'text-violet-500'];
 
 interface Task {
   id: string;
@@ -90,6 +131,7 @@ interface Section {
   id: string;
   name: string;
   icon?: string;
+  iconColor?: string;
   isExpanded: boolean;
   createdAt: string;
   isDefault: boolean;
@@ -178,6 +220,8 @@ const Tasks = () => {
   const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const [iconPickerOpenForSection, setIconPickerOpenForSection] = useState<string | null>(null);
   const [iconPickerPosition, setIconPickerPosition] = useState<{ x: number; y: number } | null>(null);
+  const [colorPickerOpenFor, setColorPickerOpenFor] = useState<{iconName: string; sectionId: string} | null>(null);
+  const [colorPickerPosition, setColorPickerPosition] = useState<{ x: number; y: number } | null>(null);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editingSectionName, setEditingSectionName] = useState<string>('');
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
@@ -972,12 +1016,20 @@ const Tasks = () => {
     setIconPickerOpenForSection(sectionId);
   };
 
-  const handleSelectIcon = (sectionId: string, iconName: string) => {
+  const handleSelectIconAndColor = (sectionId: string, iconName: string, colorName: string) => {
     const updatedSections = sections.map((s) =>
-      s.id === sectionId ? { ...s, icon: iconName } : s
+      s.id === sectionId ? { ...s, icon: iconName, iconColor: colorName } : s
     );
     setSections(updatedSections);
     setIconPickerOpenForSection(null);
+    setColorPickerOpenFor(null);
+  };
+
+  const handleOpenColorPicker = (e: React.MouseEvent, iconName: string, sectionId: string) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setColorPickerPosition({ x: rect.left - 60, y: rect.top - 50 }); // Position it above the icon
+    setColorPickerOpenFor({ iconName, sectionId });
   };
 
   const handleToggleSection = (sectionId: string) => {
@@ -1321,7 +1373,7 @@ const Tasks = () => {
                   <span className={`text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200 flex items-center justify-center`}>
                     {section.isDefault ? 'K' : (
                       section.icon && iconComponents[section.icon] ? (
-                        React.createElement(iconComponents[section.icon], { className: 'h-5 w-5' })
+                        React.createElement(iconComponents[section.icon], { className: `h-5 w-5 ${section.iconColor || 'text-white'}` })
                       ) : (
                         <div className="h-4 w-4 rounded-full bg-gray-600" />
                       )
@@ -1950,7 +2002,11 @@ const Tasks = () => {
               <div
                 className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-auto border-none"
                 style={{ left: iconPickerPosition.x, top: iconPickerPosition.y }}
-                onMouseLeave={() => setIconPickerOpenForSection(null)}
+                onMouseLeave={() => {
+                  if (!colorPickerOpenFor) {
+                    setIconPickerOpenForSection(null);
+                  }
+                }}
               >
                 <div className="grid grid-cols-5 gap-1 p-1">
                   {availableIconNames.map((iconName) => {
@@ -1958,7 +2014,7 @@ const Tasks = () => {
                     return (
                       <button
                         key={iconName}
-                        onClick={() => handleSelectIcon(iconPickerOpenForSection, iconName)}
+                        onClick={(e) => handleOpenColorPicker(e, iconName, iconPickerOpenForSection)}
                         className="p-2 rounded-lg hover:bg-[#3b3a3a] transition-all flex items-center justify-center"
                       >
                         <IconComponent className="w-5 h-5 text-white" />
@@ -1966,6 +2022,28 @@ const Tasks = () => {
                     );
                   })}
                 </div>
+              </div>
+            )}
+
+            {/* Color Picker Menu */}
+            {colorPickerOpenFor && colorPickerPosition && (
+              <div
+                className="fixed shadow-xl p-1 z-50 rounded-[16px] bg-[#2a2a2a] border border-[#3b3a3a] flex gap-1"
+                style={{ left: colorPickerPosition.x, top: colorPickerPosition.y }}
+                onMouseLeave={() => setColorPickerOpenFor(null)}
+              >
+                {availableColors.map((color) => {
+                  const IconComponent = iconComponents[colorPickerOpenFor.iconName];
+                  return (
+                    <button
+                      key={color}
+                      onClick={() => handleSelectIconAndColor(colorPickerOpenFor.sectionId, colorPickerOpenFor.iconName, color)}
+                      className="p-2 rounded-lg hover:bg-[#3b3a3a] transition-all flex items-center justify-center"
+                    >
+                      <IconComponent className={`w-5 h-5 ${color}`} />
+                    </button>
+                  );
+                })}
               </div>
             )}
       
