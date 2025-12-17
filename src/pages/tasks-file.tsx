@@ -27,10 +27,47 @@ import {
   Archive,
   ArchiveRestore,
   SendToBack,
+  Briefcase,
+  Home,
+  Star,
+  FileText,
+  Code,
+  MessageSquare,
+  Folder,
+  File,
+  Settings,
+  Zap,
+  Bookmark,
+  Heart,
+  Globe,
+  Camera,
+  Music,
+  Video,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+
+const iconComponents: { [key: string]: React.ElementType } = {
+  Briefcase,
+  Home,
+  Star,
+  FileText,
+  Code,
+  MessageSquare,
+  Folder,
+  File,
+  Settings,
+  Zap,
+  Bookmark,
+  Heart,
+  Globe,
+  Camera,
+  Music,
+  Video,
+};
+
+const availableIconNames = Object.keys(iconComponents);
 
 interface Task {
   id: string;
@@ -52,6 +89,7 @@ interface Task {
 interface Section {
   id: string;
   name: string;
+  icon?: string;
   isExpanded: boolean;
   createdAt: string;
   isDefault: boolean;
@@ -138,6 +176,8 @@ const Tasks = () => {
   const [selectedTaskIds, setSelectedTaskIds] = useState<string[]>([]);
   const [openSectionMenuId, setOpenSectionMenuId] = useState<string | null>(null);
   const [sectionMenuPosition, setSectionMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [iconPickerOpenForSection, setIconPickerOpenForSection] = useState<string | null>(null);
+  const [iconPickerPosition, setIconPickerPosition] = useState<{ x: number; y: number } | null>(null);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editingSectionName, setEditingSectionName] = useState<string>('');
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
@@ -925,6 +965,21 @@ const Tasks = () => {
     setEditingSectionId(null);
   };
 
+  const handleOpenIconPicker = (e: React.MouseEvent, sectionId: string) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setIconPickerPosition({ x: rect.left, y: rect.bottom + 5 });
+    setIconPickerOpenForSection(sectionId);
+  };
+
+  const handleSelectIcon = (sectionId: string, iconName: string) => {
+    const updatedSections = sections.map((s) =>
+      s.id === sectionId ? { ...s, icon: iconName } : s
+    );
+    setSections(updatedSections);
+    setIconPickerOpenForSection(null);
+  };
+
   const handleToggleSection = (sectionId: string) => {
     setSections(sections.map(s =>
       s.id === sectionId ? { ...s, isExpanded: !s.isExpanded } : s
@@ -1254,14 +1309,25 @@ const Tasks = () => {
                 style={{ padding: '0.80rem' }}
                 onClick={() => handleToggleSection(section.id)}
               >
-                {/* K icon (visible by default for default section) */}
-                {section.isDefault ? (
-                  <span className={`h-5 w-5 flex items-center justify-center text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200`}>
-                    K
+                <div
+                  className="h-5 w-5 flex items-center justify-center relative z-10"
+                  onClick={(e) => {
+                    if (!section.isDefault) {
+                      e.stopPropagation(); // Prevent section from toggling
+                      handleOpenIconPicker(e, section.id);
+                    }
+                  }}
+                >
+                  <span className={`text-gray-400 font-orbitron font-bold text-xl group-hover:opacity-0 transition-all duration-200 flex items-center justify-center`}>
+                    {section.isDefault ? 'K' : (
+                      section.icon && iconComponents[section.icon] ? (
+                        React.createElement(iconComponents[section.icon], { className: 'h-5 w-5' })
+                      ) : (
+                        <div className="h-4 w-4 rounded-full bg-gray-600" />
+                      )
+                    )}
                   </span>
-                ) : (
-                  <span className="h-5 w-5" />
-                )}
+                </div>
                 {/* Chevron icon (visible on hover) */}
                 <ChevronRight
                   className={`h-5 w-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-all duration-200 absolute ${
@@ -1879,6 +1945,29 @@ const Tasks = () => {
               </div>
             )}
 
+            {/* Icon Picker Menu */}
+            {iconPickerOpenForSection && iconPickerPosition && (
+              <div
+                className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-auto border-none"
+                style={{ left: iconPickerPosition.x, top: iconPickerPosition.y }}
+                onMouseLeave={() => setIconPickerOpenForSection(null)}
+              >
+                <div className="grid grid-cols-5 gap-1 p-1">
+                  {availableIconNames.map((iconName) => {
+                    const IconComponent = iconComponents[iconName];
+                    return (
+                      <button
+                        key={iconName}
+                        onClick={() => handleSelectIcon(iconPickerOpenForSection, iconName)}
+                        className="p-2 rounded-lg hover:bg-[#3b3a3a] transition-all flex items-center justify-center"
+                      >
+                        <IconComponent className="w-5 h-5 text-white" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
       
 
       
