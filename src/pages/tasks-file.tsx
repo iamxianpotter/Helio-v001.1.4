@@ -226,6 +226,8 @@ const Tasks = () => {
   const [editingSectionName, setEditingSectionName] = useState<string>('');
   const [isMoveToSectionOpen, setIsMoveToSectionOpen] = useState(false);
   const [moveToSectionPopoverPosition, setMoveToSectionPopoverPosition] = useState<{ x: number; y: number } | null>(null);
+  const [draggedSectionId, setDraggedSectionId] = useState<string | null>(null);
+  const [dragOverSectionId, setDragOverSectionId] = useState<string | null>(null);
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
@@ -1032,6 +1034,62 @@ const Tasks = () => {
     setDraggedTaskParentId(null);
   };
 
+  const handleSectionDragStart = (e: React.DragEvent, sectionId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    if (section && !section.isDefault) {
+      setDraggedSectionId(sectionId);
+      e.dataTransfer.effectAllowed = 'move';
+    } else {
+      e.preventDefault();
+    }
+  };
+
+  const handleSectionDragOver = (e: React.DragEvent, sectionId: string) => {
+    e.preventDefault();
+    const section = sections.find(s => s.id === sectionId);
+    if (section && !section.isDefault) {
+      setDragOverSectionId(sectionId);
+      e.dataTransfer.dropEffect = 'move';
+    } else {
+      e.dataTransfer.dropEffect = 'none';
+    }
+  };
+
+  const handleSectionDragLeave = () => {
+    setDragOverSectionId(null);
+  };
+
+  const handleSectionDrop = (e: React.DragEvent, dropSectionId: string) => {
+    e.preventDefault();
+    if (!draggedSectionId || draggedSectionId === dropSectionId) {
+      return;
+    }
+
+    const draggedIndex = sections.findIndex(s => s.id === draggedSectionId);
+    const dropIndex = sections.findIndex(s => s.id === dropSectionId);
+
+    if (draggedIndex === -1 || dropIndex === -1) {
+      return;
+    }
+    
+    // Prevent dropping on the default section
+    if (sections[dropIndex].isDefault) {
+        return;
+    }
+
+    const newSections = [...sections];
+    const [draggedSection] = newSections.splice(draggedIndex, 1);
+    newSections.splice(dropIndex, 0, draggedSection);
+
+    setSections(newSections);
+    localStorage.setItem('kario-sections', JSON.stringify(newSections));
+  };
+  
+  const handleSectionDragEnd = () => {
+    setDraggedSectionId(null);
+    setDragOverSectionId(null);
+  };
+
   const handleAddSection = () => {
     const newSection: Section = {
       id: `section-${Date.now()}`,
@@ -1528,7 +1586,20 @@ const Tasks = () => {
               const filteredSectionTasks = currentTaskView === 'deleted' ? deletedTasks.filter(t => t.sectionId === section.id) : applyFiltersAndSort(sectionTasks);
 
               return (
-            <div key={section.id} className="max-w-[980px]">
+            <div
+              key={section.id}
+              className={`max-w-[980px] rounded-[20px] transition-all duration-200 ${
+                draggedSectionId === section.id ? 'opacity-50' : ''
+              } ${
+                dragOverSectionId === section.id ? 'bg-[#2a2a2a]' : ''
+              }`}
+              draggable={!section.isDefault}
+              onDragStart={(e) => handleSectionDragStart(e, section.id)}
+              onDragOver={(e) => handleSectionDragOver(e, section.id)}
+              onDragLeave={handleSectionDragLeave}
+              onDrop={(e) => handleSectionDrop(e, section.id)}
+              onDragEnd={handleSectionDragEnd}
+            >
               {/* Case f: Section heading with K icon that transforms to chevron on hover */}
               <div
                 className="flex items-center gap-2 mb-4 cursor-pointer group relative bg-[#1b1b1b] border border-[#525252] rounded-[20px]"

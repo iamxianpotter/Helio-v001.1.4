@@ -48,7 +48,7 @@ const Todos = () => {
     pages: false,
     chats: false
   });
-  const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [draggedTodoId, setDraggedTodoId] = useState<string | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; sectionId?: string } | null>(null);
   const inputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({});
   const [marquee, setMarquee] = useState({ startX: 0, startY: 0, endX: 0, endY: 0, isDragging: false });
