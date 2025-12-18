@@ -1029,7 +1029,31 @@ const Tasks = () => {
   const handleOpenIconPicker = (e: React.MouseEvent, sectionId: string) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    setIconPickerPosition({ x: rect.left, y: rect.bottom + 5 });
+
+    const POPUP_WIDTH = 240;
+    const POPUP_HEIGHT = 280;
+    const PADDING = 8;
+
+    let x = rect.left;
+    let y = rect.bottom + 5;
+
+    // Adjust horizontal position if it would overflow
+    if (x + POPUP_WIDTH > window.innerWidth - PADDING) {
+      x = window.innerWidth - POPUP_WIDTH - PADDING;
+    }
+    if (x < PADDING) {
+      x = PADDING;
+    }
+
+    // Adjust vertical position if it would overflow
+    if (y + POPUP_HEIGHT > window.innerHeight - PADDING) {
+      y = rect.top - POPUP_HEIGHT - 5;
+    }
+    if (y < PADDING) {
+      y = PADDING;
+    }
+
+    setIconPickerPosition({ x, y });
     setIconPickerOpenForSection(sectionId);
   };
 
@@ -1045,7 +1069,31 @@ const Tasks = () => {
   const handleOpenColorPicker = (e: React.MouseEvent, iconName: string, sectionId: string) => {
     e.stopPropagation();
     const rect = e.currentTarget.getBoundingClientRect();
-    setColorPickerPosition({ x: rect.left - 60, y: rect.top - 50 }); // Position it above the icon
+
+    const COLOR_PICKER_WIDTH = 180;
+    const COLOR_PICKER_HEIGHT = 50;
+    const PADDING = 8;
+
+    let x = rect.left - 60;
+    let y = rect.top - 50;
+
+    // Adjust horizontal position if it would overflow
+    if (x + COLOR_PICKER_WIDTH > window.innerWidth - PADDING) {
+      x = window.innerWidth - COLOR_PICKER_WIDTH - PADDING;
+    }
+    if (x < PADDING) {
+      x = PADDING;
+    }
+
+    // Adjust vertical position if it would overflow
+    if (y < PADDING) {
+      y = rect.bottom + 5;
+    }
+    if (y + COLOR_PICKER_HEIGHT > window.innerHeight - PADDING) {
+      y = window.innerHeight - COLOR_PICKER_HEIGHT - PADDING;
+    }
+
+    setColorPickerPosition({ x, y });
     setColorPickerOpenFor({ iconName, sectionId });
   };
 
