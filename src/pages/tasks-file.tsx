@@ -969,12 +969,15 @@ const Tasks = () => {
   const handleAddSection = () => {
     const newSection: Section = {
       id: `section-${Date.now()}`,
-      name: `Section ${sections.filter(s => !s.isDefault).length + 1}`,
+      name: '',
       isExpanded: true,
       createdAt: new Date().toISOString(),
       isDefault: false,
+      icon: 'Apple',
     };
     setSections([...sections, newSection]);
+    setEditingSectionId(newSection.id);
+    setEditingSectionName('');
     setPageContextMenu(null);
   };
 
@@ -997,8 +1000,22 @@ const Tasks = () => {
     }
   };
 
+  const handleCancelEditSection = (sectionId: string) => {
+    const section = sections.find(s => s.id === sectionId);
+    // If it's a new section (it has an empty name), remove it on cancel.
+    if (section && section.name === '') {
+        setSections(sections.filter(s => s.id !== sectionId));
+    }
+    setEditingSectionId(null);
+  };
+
   const handleSaveSectionName = (sectionId: string) => {
     if (editingSectionName.trim() === '') {
+      // If name is empty on save, it's like a cancel, so remove the new section.
+      const section = sections.find(s => s.id === sectionId);
+      if (section && section.name === '') {
+          setSections(sections.filter(s => s.id !== sectionId));
+      }
       setEditingSectionId(null);
       return;
     }
@@ -1395,9 +1412,10 @@ const Tasks = () => {
                       if (e.key === 'Enter') {
                         handleSaveSectionName(section.id);
                       } else if (e.key === 'Escape') {
-                        setEditingSectionId(null);
+                        handleCancelEditSection(section.id);
                       }
                     }}
+                    placeholder="Section name?"
                     maxLength={40}
                     className="p-0 h-auto bg-transparent border-0 w-auto text-xl font-semibold text-white focus-visible:ring-0 focus-visible:ring-offset-0"
                     autoFocus
