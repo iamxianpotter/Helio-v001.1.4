@@ -224,6 +224,8 @@ const Tasks = () => {
   const [colorPickerPosition, setColorPickerPosition] = useState<{ x: number; y: number } | null>(null);
   const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
   const [editingSectionName, setEditingSectionName] = useState<string>('');
+  const [isMoveToSectionOpen, setIsMoveToSectionOpen] = useState(false);
+  const [moveToSectionPopoverPosition, setMoveToSectionPopoverPosition] = useState<{ x: number; y: number } | null>(null);
   const marqueeRef = React.useRef<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marquee, setMarquee] = useState<{ x: number; y: number; width: number; height: number } | null>(null);
   const [marqueeStart, setMarqueeStart] = useState<{ x: number; y: number } | null>(null);
@@ -317,6 +319,53 @@ const Tasks = () => {
     
     setSelectMode(false);
     setSelectedTaskIds([]);
+  };
+
+  const handleOpenMoveToSectionPopover = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isMoveToSectionOpen) {
+      setIsMoveToSectionOpen(false);
+      return;
+    }
+
+    const rect = e.currentTarget.getBoundingClientRect();
+
+    const POPOVER_WIDTH = 200; // width of the popover
+    const POPOVER_HEIGHT = 240; // max-height of popover
+    const PADDING = 8;
+
+    let x = rect.right + 8; // to the right of the button
+    let y = rect.top;
+
+    // Adjust horizontal position
+    if (x + POPOVER_WIDTH > window.innerWidth - PADDING) {
+      x = rect.left - POPOVER_WIDTH - 8; // move to the left
+    }
+    if (x < PADDING) {
+      x = PADDING;
+    }
+
+    // Adjust vertical position
+    if (y + POPOVER_HEIGHT > window.innerHeight - PADDING) {
+      y = window.innerHeight - POPOVER_HEIGHT - PADDING;
+    }
+    if (y < PADDING) {
+      y = PADDING;
+    }
+
+    setMoveToSectionPopoverPosition({ x, y });
+    setIsMoveToSectionOpen(true);
+  };
+
+  const handleBulkMoveToSection = (sectionId: string) => {
+    const updatedTasks = tasks.map(task =>
+      selectedTaskIds.includes(task.id) ? { ...task, sectionId: sectionId } : task
+    );
+    setTasks(updatedTasks);
+    localStorage.setItem('kario-tasks', JSON.stringify(updatedTasks));
+    setSelectMode(false);
+    setSelectedTaskIds([]);
+    setIsMoveToSectionOpen(false);
   };
 
   const handleBulkRestore = () => {
@@ -881,6 +930,7 @@ const Tasks = () => {
       setContextMenu(null);
       setPageContextMenu(null);
       setExpandedLabelsTaskId(null);
+      setIsMoveToSectionOpen(false);
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
@@ -1241,6 +1291,33 @@ const Tasks = () => {
 
   return (
     <div className="min-h-screen w-full bg-[#161618] flex flex-col">
+      {isMoveToSectionOpen && moveToSectionPopoverPosition && (
+        <div
+          className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#2a2a2a] w-[200px] border border-[#3b3a3a]"
+          style={{
+            left: moveToSectionPopoverPosition.x,
+            top: moveToSectionPopoverPosition.y,
+          }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="max-h-60 overflow-y-auto">
+            {sections.map(section => (
+              <button
+                key={section.id}
+                onClick={() => handleBulkMoveToSection(section.id)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+              >
+                {section.icon && iconComponents[section.icon] ? (
+                  React.createElement(iconComponents[section.icon], { className: `h-4 w-4 ${section.iconColor || 'text-white'}` })
+                ) : (
+                  section.isDefault ? <div className="font-orbitron font-bold">K</div> : <Folder className="w-4 h-4" />
+                )}
+                <span className="truncate flex-1">{section.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {marquee && <MarqueeSelection x={marquee.x} y={marquee.y} width={marquee.width} height={marquee.height} />}
       <TasksHeader
         totalTasks={totalTasks}
@@ -1338,6 +1415,18 @@ const Tasks = () => {
               <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
             </button>
           )}
+          <div className="relative">
+            <button
+                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                onClick={handleOpenMoveToSectionPopover}
+            >
+                <div className="flex items-center gap-3">
+                    <SendToBack className="w-4 h-4" />
+                    <span>Move to...</span>
+                </div>
+                <span className="text-xs text-gray-400">{selectedTaskIds.length}</span>
+            </button>
+          </div>
           <button
             className="w-full flex items-center gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
             onClick={handleToggleSelectMode}
