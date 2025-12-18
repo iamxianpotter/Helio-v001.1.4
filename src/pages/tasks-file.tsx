@@ -245,6 +245,22 @@ const Tasks = () => {
   });
   const [currentSectionId, setCurrentSectionId] = useState<string>('default-section');
 
+  const defaultSectionId = sections.find(s => s.isDefault)?.id;
+  const tasksAreInDefaultSection = selectedTaskIds.some(taskId => {
+      const findTask = (tasks: Task[], id: string): Task | null => {
+          for (const task of tasks) {
+              if (task.id === id) return task;
+              if (task.subtasks) {
+                  const found = findTask(task.subtasks, id);
+                  if (found) return found;
+              }
+          }
+          return null;
+      }
+      const task = findTask(tasks, taskId);
+      return task?.sectionId === defaultSectionId;
+  });
+
   const handleToggleSelectMode = () => {
     setSelectMode(!selectMode);
     setSelectedTaskIds([]);
@@ -1293,15 +1309,16 @@ const Tasks = () => {
     <div className="min-h-screen w-full bg-[#161618] flex flex-col">
       {isMoveToSectionOpen && moveToSectionPopoverPosition && (
         <div
-          className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#2a2a2a] w-[200px] border border-[#3b3a3a]"
+          className="fixed shadow-xl py-2 px-2 z-50 rounded-[16px] bg-[#1f1f1f] w-[200px] border-none"
           style={{
             left: moveToSectionPopoverPosition.x,
             top: moveToSectionPopoverPosition.y,
           }}
           onClick={(e) => e.stopPropagation()}
         >
+          <h3 className="px-3 py-1 text-sm font-semibold text-gray-400">Move to</h3>
           <div className="max-h-60 overflow-y-auto">
-            {sections.map(section => (
+            {sections.filter(section => !section.isDefault).map(section => (
               <button
                 key={section.id}
                 onClick={() => handleBulkMoveToSection(section.id)}
@@ -1417,8 +1434,11 @@ const Tasks = () => {
           )}
           <div className="relative">
             <button
-                className="w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]"
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 text-left text-white transition-all text-sm my-1 rounded-xl ${
+                    tasksAreInDefaultSection ? 'opacity-50 cursor-not-allowed' : 'hover:border hover:border-[#3b3a3a] hover:bg-[#1f1f1f]'
+                }`}
                 onClick={handleOpenMoveToSectionPopover}
+                disabled={tasksAreInDefaultSection}
             >
                 <div className="flex items-center gap-3">
                     <SendToBack className="w-4 h-4" />
