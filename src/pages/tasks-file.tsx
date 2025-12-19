@@ -8,6 +8,7 @@ import LabelSelector from '@/components/tasks/LabelSelector';
 import TaskItem from '@/components/tasks/TaskItem';
 import TaskWindowModal from '@/components/tasks/TaskWindowModal';
 import LabelDrawer from '@/components/tasks/LabelDrawer';
+import KanbanBoard from '@/components/tasks/KanbanBoard';
 import MarqueeSelection from '@/components/ui/MarqueeSelection';
 import {
   Plus,
@@ -161,7 +162,15 @@ const updateTaskRecursively = (
 };
 
 const Tasks = () => {
-  const [currentView, setCurrentView] = useState('list');
+  const [currentView, setCurrentViewState] = useState(() => {
+    const saved = localStorage.getItem('kario-current-view');
+    return saved || 'list';
+  });
+
+  const setCurrentView = (view: string) => {
+    setCurrentViewState(view);
+    localStorage.setItem('kario-current-view', view);
+  };
   const [currentTaskView, setCurrentTaskView] = useState<'drafts' | 'total' | 'completed' | 'pending' | 'deleted'>('total');
   const [isRotated, setIsRotated] = useState(false);
   const [tasks, setTasks] = useState<Task[]>(() => {
@@ -2128,6 +2137,46 @@ const Tasks = () => {
             </div>
             );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* BOARD View Content */}
+      {currentView === 'board' && (
+        <div className="flex-grow overflow-hidden px-4 mt-4">
+          <div className="ml-20 h-full">
+            {currentTaskView === 'deleted' && (
+              <div className="max-w-full mb-4 p-4 bg-red-900/20 border border-red-800/30 rounded-lg">
+                <p className="text-red-300 text-sm leading-relaxed">
+                  Deleted tasks will be retained for a period of 7 days. After this time, they will be permanently deleted and cannot be recovered.
+                </p>
+              </div>
+            )}
+            <KanbanBoard
+              tasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
+              draggedTaskId={draggedTaskId}
+              dragOverTaskId={dragOverTaskId}
+              expandedLabelsTaskId={expandedLabelsTaskId}
+              expandedTaskId={expandedTaskId}
+              selectMode={selectMode}
+              selectedTaskIds={selectedTaskIds}
+              onContextMenu={handleContextMenu}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onDragEnd={handleDragEnd}
+              onToggle={handleToggleTask}
+              onToggleLabels={(taskId) => setExpandedLabelsTaskId(expandedLabelsTaskId === taskId ? null : taskId)}
+              onOpenTask={handleOpenTask}
+              onEditTask={handleEditTask}
+              onDeleteTask={currentTaskView === 'deleted' ? handleRestoreTask : handleDeleteTask}
+              getLabelColor={getLabelColor}
+              getPriorityStyle={getPriorityStyle}
+              onLabelClick={(label) => setSelectedLabelForDrawer(label)}
+              onToggleExpand={(taskId) => setExpandedTaskId(expandedTaskId === taskId ? null : taskId)}
+              onSelect={handleTaskSelect}
+            />
           </div>
         </div>
       )}
