@@ -371,7 +371,7 @@ const Todos = () => {
   return (
     <div className="min-h-screen w-full bg-[#161618]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 gap-4">
+      <div className="flex items-center justify-between p-4 gap-4 overflow-hidden">
         <div className="flex items-center gap-4">
           {/* Display Selector Button */}
           <div className="relative mt-7">
@@ -544,30 +544,32 @@ const Todos = () => {
         </div>
         
         {/* Todo Indicators */}
-        <div className="flex items-center gap-6 mt-7">
-          <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
-            <span className="font-orbitron text-2xl font-bold text-white border-b-2 border-white">
-              {totalTodos}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Total Todos
-            </span>
-          </div>
-          <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
-            <span className="font-orbitron text-2xl font-bold text-green-400">
-              {completedTodos}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Completed
-            </span>
-          </div>
-          <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
-            <span className="font-orbitron text-2xl font-bold text-red-400">
-              {pendingTodos}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Pending
-            </span>
+        <div className="overflow-x-auto custom-scrollbar">
+          <div className="flex items-center gap-6 mt-7">
+            <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
+              <span className="font-orbitron text-2xl font-bold text-white border-b-2 border-white">
+                {totalTodos}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Total Todos
+              </span>
+            </div>
+            <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
+              <span className="font-orbitron text-2xl font-bold text-green-400">
+                {completedTodos}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Completed
+              </span>
+            </div>
+            <div className="flex flex-col items-center group cursor-pointer transition-all duration-300">
+              <span className="font-orbitron text-2xl font-bold text-red-400">
+                {pendingTodos}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Pending
+              </span>
+            </div>
           </div>
         </div>
       </div>

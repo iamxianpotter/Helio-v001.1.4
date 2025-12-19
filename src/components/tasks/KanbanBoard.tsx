@@ -19,8 +19,14 @@ interface Task {
   sectionId: string;
 }
 
+interface Section {
+  id: string;
+  name: string;
+}
+
 interface KanbanBoardProps {
   tasks: Task[];
+  sections: Section[];
   draggedTaskId: string | null;
   dragOverTaskId: string | null;
   expandedLabelsTaskId: string | null;
@@ -47,6 +53,7 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
   tasks,
+  sections,
   draggedTaskId,
   dragOverTaskId,
   expandedLabelsTaskId,
@@ -70,9 +77,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onToggleExpand,
   onSelect,
 }) => {
-  const draftTasks = tasks.filter(task => task.isDraft);
-  const pendingTasks = tasks.filter(task => !task.completed && !task.isDraft);
-  const completedTasks = tasks.filter(task => task.completed && !task.isDraft);
+  const getTasksForSection = (sectionId: string) => {
+    return tasks.filter(task => task.sectionId === sectionId && !task.isDraft);
+  };
 
   const Column = ({
     title,
@@ -143,9 +150,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   return (
     <div className="flex gap-4 h-full pb-4 overflow-x-auto px-4">
-      <Column title="Drafts" tasks={draftTasks} columnId="drafts" />
-      <Column title="Pending" tasks={pendingTasks} columnId="pending" />
-      <Column title="Completed" tasks={completedTasks} columnId="completed" />
+      {sections.map(section => (
+        <Column
+          key={section.id}
+          title={section.name}
+          tasks={getTasksForSection(section.id)}
+          columnId={section.id}
+        />
+      ))}
     </div>
   );
 };

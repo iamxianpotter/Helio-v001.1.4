@@ -270,7 +270,7 @@ const Notes = () => {
   return (
     <div className="min-h-screen w-full bg-[#161618]">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 gap-4">
+      <div className="flex items-center justify-between p-4 gap-4 overflow-hidden">
         <div className="flex items-center gap-4">
           <div className="relative mt-7">
             <Button
@@ -338,45 +338,47 @@ const Notes = () => {
         </div>
         
         {/* Note Indicators */}
-        <div className="flex items-center gap-6 mt-7">
-          <div 
-            onClick={() => setCurrentView('all')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
-          >
-            <span className={`font-orbitron text-2xl font-bold text-white ${
-              currentView === 'all' ? 'border-b-2 border-white' : ''
-            }`}>
-              {notes.length}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Total Notes
-            </span>
-          </div>
-          <div 
-            onClick={() => setCurrentView('important')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
-          >
-            <span className={`font-orbitron text-2xl font-bold text-yellow-400 ${
-              currentView === 'important' ? 'border-b-2 border-yellow-400' : ''
-            }`}>
-              {notes.filter(note => note.important).length}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Important
-            </span>
-          </div>
-          <div 
-            onClick={() => setCurrentView('deleted')}
-            className="flex flex-col items-center group cursor-pointer transition-all duration-300"
-          >
-            <span className={`font-orbitron text-2xl font-bold text-red-400 ${
-              currentView === 'deleted' ? 'border-b-2 border-red-400' : ''
-            }`}>
-              {deletedNotes.length}
-            </span>
-            <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Deleted
-            </span>
+        <div className="overflow-x-auto custom-scrollbar">
+          <div className="flex items-center gap-6 mt-7">
+            <div 
+              onClick={() => setCurrentView('all')}
+              className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            >
+              <span className={`font-orbitron text-2xl font-bold text-white ${
+                currentView === 'all' ? 'border-b-2 border-white' : ''
+              }`}>
+                {notes.length}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Total Notes
+              </span>
+            </div>
+            <div 
+              onClick={() => setCurrentView('important')}
+              className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            >
+              <span className={`font-orbitron text-2xl font-bold text-yellow-400 ${
+                currentView === 'important' ? 'border-b-2 border-yellow-400' : ''
+              }`}>
+                {notes.filter(note => note.important).length}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Important
+              </span>
+            </div>
+            <div 
+              onClick={() => setCurrentView('deleted')}
+              className="flex flex-col items-center group cursor-pointer transition-all duration-300"
+            >
+              <span className={`font-orbitron text-2xl font-bold text-red-400 ${
+                currentView === 'deleted' ? 'border-b-2 border-red-400' : ''
+              }`}>
+                {deletedNotes.length}
+              </span>
+              <span className="text-xs text-gray-400 font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                Deleted
+              </span>
+            </div>
           </div>
         </div>
       </div>

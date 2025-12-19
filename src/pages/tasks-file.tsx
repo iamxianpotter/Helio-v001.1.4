@@ -2154,6 +2154,7 @@ const Tasks = () => {
             )}
             <KanbanBoard
               tasks={currentTaskView === 'deleted' ? deletedTasks : applyFiltersAndSort(tasks)}
+              sections={sections}
               draggedTaskId={draggedTaskId}
               dragOverTaskId={dragOverTaskId}
               expandedLabelsTaskId={expandedLabelsTaskId}
